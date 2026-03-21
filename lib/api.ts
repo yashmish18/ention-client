@@ -1,5 +1,5 @@
 // API Configuration for connecting frontend to backend
-const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || 'https://ention-backend.onrender.com';
+const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || 'https://ention.in';
 
 // Helper function to get auth token
 const getAuthToken = (): string | null => {
