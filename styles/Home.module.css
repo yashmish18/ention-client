@@ -1,0 +1,19 @@
+
+
+/* #section1 {
+  background-image: url("/assets/0N1A1389.png");
+} */
+
+.dots {
+  z-index: 1;
+}
+
+.dots > span {
+  border-radius: 50%;
+  display: inline-block;
+  margin-left: 4px;
+  margin-right: 4px;
+  width: 13px;
+  height: 13px;
+  margin-bottom: 25px;
+}
