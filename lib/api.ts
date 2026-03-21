@@ -1,5 +1,5 @@
 // API Configuration for connecting frontend to backend
-const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || 'https://ention.in';
+const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || (process.env.NODE_ENV === 'development' ? 'http://localhost:4000' : 'https://ention.in');
 
 // Helper function to get auth token
 const getAuthToken = (): string | null => {
