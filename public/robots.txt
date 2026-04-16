@@ -1,0 +1,44 @@
+User-agent: *
+Allow: /
+
+# Disallow old image directories that might contain outdated images
+Disallow: /assets/old/
+Disallow: /assets/temp/
+Disallow: /assets/deprecated/
+
+# Allow all current assets
+Allow: /assets/
+Allow: /_next/static/
+Allow: /_next/image/
+
+# Sitemap location
+Sitemap: https://ention.in/sitemap.xml
+
+# Crawl delay to prevent server overload
+Crawl-delay: 1
+
+# Specific rules for major search engines
+User-agent: Googlebot
+Allow: /
+Crawl-delay: 1
+
+User-agent: Bingbot
+Allow: /
+Crawl-delay: 1
+
+User-agent: Slurp
+Allow: /
+Crawl-delay: 1
+
+# Block image crawlers from old directories
+User-agent: Googlebot-Image
+Allow: /assets/
+Disallow: /assets/old/
+Disallow: /assets/temp/
+Disallow: /assets/deprecated/
+
+User-agent: Bingbot-Image
+Allow: /assets/
+Disallow: /assets/old/
+Disallow: /assets/temp/
+Disallow: /assets/deprecated/
