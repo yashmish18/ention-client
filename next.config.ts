@@ -6,6 +6,9 @@ const nextConfig: NextConfig = {
         workerThreads: false,
         cpus: 1,
     },
+    turbopack: {
+        root: path.join(__dirname),
+    },
     images: {
         unoptimized: true,
         qualities: [75, 100],
@@ -16,7 +19,6 @@ const nextConfig: NextConfig = {
             },
         ],
     },
-    outputFileTracingRoot: path.join(__dirname, "../../"),
 };
 
 export default nextConfig;
