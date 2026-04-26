@@ -1,7 +1,12 @@
 "use client";
 
+import { Suspense } from "react";
 import { AuthForm } from "@/components/auth/AuthForm";
 
 export default function SignupPage() {
-    return <AuthForm initialMode="signup" />;
+    return (
+        <Suspense>
+            <AuthForm initialMode="signup" />
+        </Suspense>
+    );
 }
