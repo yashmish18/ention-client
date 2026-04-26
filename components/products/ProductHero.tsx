@@ -112,6 +112,7 @@ export default function ProductHero() {
                                 className="object-contain filter drop-shadow-[0_50px_100px_rgba(242,125,38,0.1)]"
                                 priority
                                 quality={100}
+                                sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 500px"
                             />
                         </motion.div>
                     </AnimatePresence>

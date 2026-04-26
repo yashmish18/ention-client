@@ -3,90 +3,155 @@
 import React from "react";
 import Link from "next/link";
 import Image from "next/image";
-import { Mail, MessageCircle, Info } from "lucide-react";
-
-const Instagram = ({ size = 24, className = "" }: { size?: number; className?: string }) => (
-    <svg
-        xmlns="http://www.w3.org/2000/svg"
-        width={size}
-        height={size}
-        viewBox="0 0 24 24"
-        fill="none"
-        stroke="currentColor"
-        strokeWidth="2"
-        strokeLinecap="round"
-        strokeLinejoin="round"
-        className={className}
-    >
-        <rect width="20" height="20" x="2" y="2" rx="5" ry="5" />
-        <path d="M16 11.37A4 4 0 1 1 12.63 8 4 4 0 0 1 16 11.37z" />
-        <line x1="17.5" x2="17.51" y1="6.5" y2="6.5" />
-    </svg>
-);
+import { Mail, MapPin, Phone } from "lucide-react";
+import FormModal from "./FormModal";
+import SmartSupportForm from "./forms/SmartSupportForm";
 
 export default function Footer() {
+    const [isSupportOpen, setIsSupportOpen] = React.useState(false);
+
     return (
-        <footer className="relative bg-[#141414] text-white pt-32 pb-12 px-12 overflow-hidden">
-            <div className="max-w-[1400px] mx-auto grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-16">
-                {/* Brand Column */}
-                <div className="space-y-8">
-                    <Link href="/" className="inline-block group">
-                        <div className="relative w-64 h-32 hover:scale-105 transition-all duration-300">
-                            <Image
-                                src="/assets/ention-logo.png"
-                                alt="Ention Logo"
-                                fill
-                                className="object-contain"
-                                priority
-                            />
-                        </div>
-                    </Link>
-                    <p className="font-mono text-[10px] tracking-widest leading-relaxed opacity-70 uppercase max-w-xs">
-                        High-performance machines engineered in Bharat. Designed for the professionals and students of the future.
-                    </p>
-                </div>
+        <footer className="relative bg-[#0A0A0A] text-white pt-32 pb-12 px-8 lg:px-16 overflow-hidden border-t border-white/5">
+            <FormModal isOpen={isSupportOpen} onClose={() => setIsSupportOpen(false)}>
+                <SmartSupportForm initialCategory="General Inquiry" onSuccess={() => setIsSupportOpen(false)} />
+            </FormModal>
 
-                {/* Navigation Column */}
-                <div className="space-y-8">
-                    <h4 className="font-mono text-[10px] uppercase tracking-[0.5em] text-accent font-bold">Navigation</h4>
-                    <ul className="space-y-4 font-mono text-[10px] uppercase tracking-widest">
-                        <li><Link href="/" className="opacity-70 hover:opacity-100 hover:text-accent transition-all">Home</Link></li>
-                        <li><Link href="/products" className="opacity-70 hover:opacity-100 hover:text-accent transition-all">Products</Link></li>
-                        <li><Link href="/about" className="opacity-70 hover:opacity-100 hover:text-accent transition-all">About Us</Link></li>
-                        <li><Link href="/orders" className="opacity-70 hover:opacity-100 hover:text-accent transition-all">Track Order</Link></li>
-                        <li><Link href="/support" className="opacity-70 hover:opacity-100 hover:text-accent transition-all">Support</Link></li>
-                    </ul>
-                </div>
-
-                {/* Company Column */}
-                <div className="space-y-8">
-                    <h4 className="font-mono text-[10px] uppercase tracking-[0.5em] text-accent font-bold">Collective</h4>
-                    <ul className="space-y-4 font-mono text-[10px] uppercase tracking-widest">
-                        <li><Link href="/manifesto" className="opacity-70 hover:opacity-100 hover:text-accent transition-all">Manifesto</Link></li>
-                        <li><Link href="/careers" className="opacity-70 hover:opacity-100 hover:text-accent transition-all">Careers</Link></li>
-                        <li><Link href="/locations" className="opacity-70 hover:opacity-100 hover:text-accent transition-all">Locations</Link></li>
-                        <li><Link href="/press" className="opacity-70 hover:opacity-100 hover:text-accent transition-all">Press</Link></li>
-                    </ul>
-                </div>
-
-                {/* Contact Column */}
-                <div className="space-y-8">
-                    <h4 className="font-mono text-[10px] uppercase tracking-[0.5em] text-accent font-bold">Connect</h4>
-                    <div className="flex gap-4 opacity-70">
-                        <Link href="#" className="hover:text-accent transition-colors"><Instagram size={18} /></Link>
-                        <Link href="#" className="hover:text-accent transition-colors"><MessageCircle size={18} /></Link>
-                        <Link href="#" className="hover:text-accent transition-colors"><Mail size={18} /></Link>
-                    </div>
-                </div>
+            {/* Background Grain/Texture */}
+            <div className="absolute inset-0 opacity-[0.02] pointer-events-none z-0">
+                <div className="w-full h-full bg-[linear-gradient(to_right,#ffffff_1px,transparent_1px),linear-gradient(to_bottom,#ffffff_1px,transparent_1px)] bg-[size:40px_40px]" />
             </div>
 
-            <div className="max-w-[1400px] mx-auto mt-24 pt-8 border-t border-white/5 flex flex-col md:flex-row justify-between items-center gap-8">
-                <span className="font-mono text-[8px] tracking-[0.8em] uppercase opacity-70">
-                    © 2026 ENTI·ON Industrial Division // All Rights Reserved
-                </span>
-                <span className="font-mono text-[8px] tracking-[0.8em] uppercase opacity-70">
-                    Made with Pride in Bharat
-                </span>
+            <div className="relative z-10 max-w-[1500px] mx-auto">
+                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-12 gap-16 lg:gap-8">
+                    
+                    {/* 1. Brand Section - Wider Span */}
+                    <div className="lg:col-span-3 space-y-12 pr-8">
+                        <div className="space-y-6">
+                            
+                            <Link href="/" className="inline-block group">
+                                <div className="relative w-64 h-16 transition-transform duration-300 group-hover:scale-105">
+                                    <Image
+                                        src="/assets/ention-logo.png"
+                                        alt="Ention Logo"
+                                        fill
+                                        className="object-contain object-left scale-150 origin-left"
+                                        priority
+                                    />
+                                </div>
+                            </Link>
+                        </div>
+                        
+                        <p className="font-serif italic text-white/50 leading-relaxed text-sm max-w-xs">
+                            Building India's computing future—delivering reliable devices today while enabling innovation ecosystems for tomorrow.
+                        </p>
+                        
+                        <div className="space-y-4 font-mono text-[10px] uppercase tracking-[0.3em] text-white/40 pt-4">
+                            <div className="flex items-center gap-4 group cursor-default">
+                                <MapPin size={14} className="text-[#F27D26] group-hover:scale-110 transition-transform" />
+                                <span>India</span>
+                            </div>
+                            <a href="mailto:support@ention.in" className="flex items-center gap-4 group hover:text-white transition-colors">
+                                <Mail size={14} className="text-[#F27D26] group-hover:translate-x-1 transition-transform" />
+                                <span>support@ention.in</span>
+                            </a>
+                            <a href="mailto:contact@ention.in" className="flex items-center gap-4 group hover:text-white transition-colors">
+                                <Mail size={14} className="text-[#F27D26] group-hover:translate-x-1 transition-transform" />
+                                <span>contact@ention.in</span>
+                            </a>
+                            <div className="flex items-center gap-4 group cursor-default">
+                                <Phone size={14} className="text-[#F27D26] group-hover:scale-110 transition-transform" />
+                                <span>+91-XXXXXXXXXX</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    {/* 2. Quick Links */}
+                    <div className="lg:col-span-2 space-y-8">
+                        <h4 className="font-mono text-[10px] uppercase tracking-[0.5em] text-[#F27D26] font-black underline underline-offset-8 decoration-[#F27D26]/30">Quick Links</h4>
+                        <ul className="space-y-4 font-mono text-[10px] uppercase tracking-[0.2em] text-white/60">
+                            <li><Link href="/" className="hover:text-white transition-colors block">Home</Link></li>
+                            <li><Link href="/products" className="hover:text-white transition-colors block">Products</Link></li>
+                            <li><Link href="/solutions" className="hover:text-white transition-colors block">Solutions</Link></li>
+                            <li><Link href="/collaborate" className="hover:text-white transition-colors block">Programs & Ecosystem</Link></li>
+                            <li><Link href="/about" className="hover:text-white transition-colors block">About Us</Link></li>
+                            <li><button onClick={() => setIsSupportOpen(true)} className="hover:text-[#F27D26] transition-colors block text-left uppercase">Contact Support</button></li>
+                        </ul>
+                    </div>
+
+                    {/* 3. Products */}
+                    <div className="lg:col-span-2 space-y-8">
+                        <h4 className="font-mono text-[10px] uppercase tracking-[0.5em] text-[#F27D26] font-black underline underline-offset-8 decoration-[#F27D26]/30">Products</h4>
+                        <ul className="space-y-4 font-mono text-[10px] uppercase tracking-[0.2em] text-white/60">
+                            <li><Link href="/products" className="hover:text-white transition-colors block">Workbook Series</Link></li>
+                            <li><Link href="/products" className="hover:text-white transition-colors block">Swapbook Series</Link></li>
+                            <li><Link href="/solutions" className="hover:text-white transition-colors block">Developer Laptops</Link></li>
+                            <li><Link href="/solutions" className="hover:text-white transition-colors block">Enterprise Solutions</Link></li>
+                            <li><Link href="/solutions" className="hover:text-white transition-colors block">Education Models</Link></li>
+                        </ul>
+                    </div>
+
+                    {/* 4. Solutions */}
+                    <div className="lg:col-span-2 space-y-8">
+                        <h4 className="font-mono text-[10px] uppercase tracking-[0.5em] text-[#F27D26] font-black underline underline-offset-8 decoration-[#F27D26]/30">Solutions</h4>
+                        <ul className="space-y-4 font-mono text-[10px] uppercase tracking-[0.2em] text-white/60">
+                            <li><Link href="/solutions" className="hover:text-white transition-colors block">For Developers</Link></li>
+                            <li><Link href="/solutions" className="hover:text-white transition-colors block">For Students</Link></li>
+                            <li><Link href="/solutions" className="hover:text-white transition-colors block">For Startups</Link></li>
+                            <li><Link href="/solutions" className="hover:text-white transition-colors block">For Enterprises</Link></li>
+                        </ul>
+                    </div>
+
+                    {/* 5. Programs */}
+                    <div className="lg:col-span-2 space-y-8">
+                        <h4 className="font-mono text-[10px] uppercase tracking-[0.5em] text-[#F27D26] font-black underline underline-offset-8 decoration-[#F27D26]/30">Programs</h4>
+                        <ul className="space-y-4 font-mono text-[10px] uppercase tracking-[0.2em] text-white/60">
+                            <li><Link href="/collaborate" className="hover:text-white transition-colors block">Innovation Labs</Link></li>
+                            <li><Link href="/collaborate" className="hover:text-white transition-colors block">Startup Ecosystem</Link></li>
+                            <li><Link href="/collaborate" className="hover:text-white transition-colors block">Campus Program</Link></li>
+                            <li><Link href="/collaborate" className="hover:text-white transition-colors block">Co-Creation</Link></li>
+                        </ul>
+                    </div>
+
+                    {/* 6. Support / Legal */}
+                    <div className="lg:col-span-1 space-y-12">
+                        <div className="space-y-6">
+                            <h4 className="font-mono text-[10px] uppercase tracking-[0.5em] text-[#F27D26] font-black">Support</h4>
+                            <ul className="space-y-3 font-mono text-[9px] uppercase tracking-widest text-white/50">
+                                <li><Link href="/support" className="hover:text-white">FAQs</Link></li>
+                                <li><Link href="/support" className="hover:text-white">Contact</Link></li>
+                                <li><Link href="/support" className="hover:text-white">Service</Link></li>
+                            </ul>
+                        </div>
+                        <div className="space-y-6">
+                            <h4 className="font-mono text-[10px] uppercase tracking-[0.5em] text-[#F27D26] font-black">Legal</h4>
+                            <ul className="space-y-3 font-mono text-[9px] uppercase tracking-widest text-white/50">
+                                <li><Link href="#" className="hover:text-white">Privacy</Link></li>
+                                <li><Link href="#" className="hover:text-white">Terms</Link></li>
+                                <li><Link href="#" className="hover:text-white">Refund</Link></li>
+                            </ul>
+                        </div>
+                    </div>
+
+                </div>
+
+                {/* Social & Bottom Bar */}
+                <div className="mt-32 pt-12 border-t border-white/5">
+                    <div className="flex flex-col md:flex-row justify-between items-center gap-12">
+                        <div className="flex items-center gap-12 font-mono text-[9px] uppercase tracking-[0.5em] text-white/30">
+                            <span className="text-[#F27D26]">Follow Us:</span>
+                            <div className="flex gap-8">
+                                <Link href="#" className="hover:text-white transition-colors">LinkedIn</Link>
+                                <Link href="#" className="hover:text-white transition-colors">Instagram</Link>
+                                <Link href="#" className="hover:text-white transition-colors">Twitter</Link>
+                            </div>
+                        </div>
+                        
+                        <div className="text-right space-y-2 opacity-50">
+                            <p className="font-mono text-[8px] uppercase tracking-[0.4em]">© 2026 Ention Technology. Made with precision for Bharat.</p>
+                            <p className="font-sans font-black text-[10px] uppercase tracking-[0.8em]">ENTION • एंटियन • என்ஷன் • এনশন • ఎన్షన్</p>
+                        </div>
+                    </div>
+                </div>
             </div>
         </footer>
     );

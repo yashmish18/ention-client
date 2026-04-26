@@ -7,19 +7,24 @@ import { ChevronLeft, ChevronRight } from "lucide-react";
 
 const slides = [
     {
-        title: "Innovation in Every Layer",
-        description: "Our engineering process focuses on thermal efficiency and structural integrity.",
+        title: "Building India’s Computing Future",
+        description: "From system integration today to indigenous innovation tomorrow.",
         image: "/assets/about-manufacturing.png",
     },
     {
-        title: "Bharat's Professional Choice",
-        description: "Designed for the modern Indian professional who demands reliability.",
+        title: "More Than Devices",
+        description: "From laptops to operating systems to core components—Ention is building end-to-end capability.",
         image: "/assets/about-studio.png",
     },
     {
-        title: "Future of Bharat Computing",
-        description: "Join us in redefining what a domestic tech brand can achieve for the world.",
+        title: "Indigenous Hardware & Control",
+        description: "Our journey towards a fully indigenous computing ecosystem, from optimization to OS & AI stack.",
         image: "/assets/workbook-laptop.png",
+    },
+    {
+        title: "Building an Ecosystem",
+        description: "Because the future of computing will not be built alone—it will be co-created with partners and institutions.",
+        image: "/assets/about-manufacturing.png", // Reused image as placeholder
     }
 ];
 
@@ -30,7 +35,7 @@ export default function VisionCarousel() {
     const prev = () => setIndex((prev) => (prev - 1 + slides.length) % slides.length);
 
     return (
-        <section className="bg-[#E4E3E0] py-32 px-12 overflow-hidden relative">
+        <section className="bg-[#E4E3E0] pt-32 pb-12 px-12 overflow-hidden relative">
             <div className="max-w-7xl mx-auto space-y-12 mb-24">
                 <div className="flex items-end justify-between border-b border-black/5 pb-12">
                     <div className="space-y-4">
@@ -73,17 +78,17 @@ export default function VisionCarousel() {
                             return (
                                 <motion.div
                                     key={slide.title}
-                                    initial={{ opacity: 0, scale: 0.8, x: position * 100 }}
+                                    initial={{ opacity: 0, scale: 0.8, x: position * 600 }}
                                     animate={{
-                                        opacity: isActive ? 1 : 0.3,
-                                        scale: isActive ? 1.1 : 0.8,
-                                        x: position * 350,
+                                        opacity: isActive ? 1 : 0.4,
+                                        scale: isActive ? 1.05 : 0.85,
+                                        x: position * 400,
                                         zIndex: isActive ? 10 : 0,
                                         filter: isActive ? "blur(0px)" : "blur(4px)"
                                     }}
-                                    exit={{ opacity: 0, scale: 0.5 }}
-                                    transition={{ type: "spring", stiffness: 200, damping: 25 }}
-                                    className="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 w-full max-w-2xl h-[500px] cursor-pointer"
+                                    exit={{ opacity: 0, scale: 0.8, x: position * 600 }}
+                                    transition={{ type: "spring", stiffness: 250, damping: 30 }}
+                                    className="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 w-full max-w-3xl h-[500px] cursor-pointer"
                                     onClick={() => setIndex(i)}
                                 >
                                     <div className="relative w-full h-full rounded-sm overflow-hidden shadow-2xl border border-black/5">
@@ -92,22 +97,24 @@ export default function VisionCarousel() {
                                             alt={slide.title}
                                             fill
                                             className="object-cover"
+                                            sizes="(max-width: 768px) 100vw, 800px"
                                         />
 
                                         {isActive && (
                                             <motion.div
                                                 initial={{ opacity: 0, y: 30 }}
                                                 animate={{ opacity: 1, y: 0 }}
-                                                className="absolute inset-0 bg-gradient-to-t from-[#141414] via-transparent to-transparent flex flex-col justify-end p-16 text-[#E4E3E0]"
+                                                transition={{ delay: 0.1 }}
+                                                className="absolute inset-0 bg-gradient-to-t from-[#141414] via-[#141414]/40 to-transparent flex flex-col justify-end p-8 md:p-14 text-[#E4E3E0]"
                                             >
-                                                <h3 className="text-4xl md:text-5xl font-serif font-bold italic mb-4">{slide.title}</h3>
-                                                <p className="text-sm md:text-lg opacity-70 font-serif max-w-md">{slide.description}</p>
+                                                <h3 className="text-3xl md:text-5xl font-serif font-bold italic mb-4">{slide.title}</h3>
+                                                <p className="text-sm md:text-xl opacity-80 font-serif max-w-lg leading-relaxed">{slide.description}</p>
                                             </motion.div>
                                         )}
                                     </div>
 
                                     {!isActive && (
-                                        <div className="absolute inset-0 bg-black/20" />
+                                        <div className="absolute inset-0 bg-black/30 rounded-sm" />
                                     )}
                                 </motion.div>
                             );

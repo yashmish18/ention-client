@@ -4,6 +4,10 @@ import "./globals.css";
 import { cn } from "@/lib/utils";
 import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
+import CookieConsent from "@/components/CookieConsent";
+import CartDrawer from "@/components/products/CartDrawer";
+import ScrollToTop from "@/components/ScrollToTop";
+import FloatingTalkToUs from "@/components/FloatingTalkToUs";
 
 const inter = Inter({
   subsets: ["latin"],
@@ -22,8 +26,15 @@ const jetbrainsMono = JetBrains_Mono({
 });
 
 export const metadata: Metadata = {
-  title: "ENTI·ON | Built in Bharat",
-  description: "High-performance machines engineered in Bharat.",
+  metadataBase: new URL(process.env.NEXT_PUBLIC_APP_URL || 'http://localhost:3000'),
+  title: "ENTION | Built in Bharat",
+  description: "High-performance laptops engineered in India. Affordable. Customizable. Reliable. Shop the Workbook and Swapbook Series.",
+  keywords: ["laptop", "india", "ention", "workbook", "swapbook", "gaming laptop", "student laptop", "affordable laptop"],
+  openGraph: {
+    siteName: "Ention",
+    type: "website",
+    locale: "en_IN",
+  }
 };
 
 export default function RootLayout({
@@ -32,16 +43,20 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="en" className={cn(
-      "h-full scroll-smooth",
+    <html lang="en" suppressHydrationWarning className={cn(
+      "h-full",
       inter.variable,
       libreBaskerville.variable,
       jetbrainsMono.variable
     )}>
-      <body className="antialiased font-sans">
+      <body className="antialiased font-sans h-full relative">
+        <ScrollToTop />
         <Navbar />
+        <CartDrawer />
+        <FloatingTalkToUs />
         {children}
         <Footer />
+        <CookieConsent />
       </body>
     </html>
   );

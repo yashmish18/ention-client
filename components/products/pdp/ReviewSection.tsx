@@ -1,44 +1,27 @@
 "use client";
 
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { Star, ShieldCheck, User, Quote, Send, Loader2, Plus } from "lucide-react";
+import { Star, ShieldCheck, User, Send, Loader2, Plus } from "lucide-react";
+import { fetchProductReviews, submitReview } from "@/lib/api";
 
 interface Review {
-    id: string;
+    id?: string;
+    _id?: string;
     user: string;
     role: string;
     content: string;
     recommendation: string;
     rating: number;
-    date: string;
+    date?: string;
+    createdAt?: string;
 }
 
-const INITIAL_REVIEWS: Review[] = [
-    {
-        id: "REV-001",
-        user: "Arjun M.",
-        role: "Software Engineer",
-        content: "The cooling on this laptop is incredible. I can run heavy builds for hours and it stays remarkably quiet and cool. Best investment for my workflow.",
-        recommendation: "Highly Recommended",
-        rating: 5,
-        date: "MAR 2026"
-    },
-    {
-        id: "REV-002",
-        user: "Sana K.",
-        role: "Graphic Designer",
-        content: "The build quality is solid. It feels premium and the aluminum chassis is very sturdy. Perfect for my daily travel.",
-        recommendation: "Verified Purchase",
-        rating: 4,
-        date: "FEB 2026"
-    }
-];
-
 export default function ReviewSection({ product }: { product: any }) {
-    const [reviews, setReviews] = useState<Review[]>(INITIAL_REVIEWS);
+    const [reviews, setReviews] = useState<Review[]>([]);
     const [isFormOpen, setIsFormOpen] = useState(false);
     const [isSubmitting, setIsSubmitting] = useState(false);
+    const [loading, setLoading] = useState(true);
     const [formData, setFormData] = useState({
         user: "",
         role: "",
@@ -46,26 +29,36 @@ export default function ReviewSection({ product }: { product: any }) {
         rating: 5
     });
 
+    useEffect(() => {
+        if (!product?.id) return;
+        fetchProductReviews(product.id)
+            .then(data => {
+                if (Array.isArray(data)) setReviews(data);
+            })
+            .catch(() => setReviews([]))
+            .finally(() => setLoading(false));
+    }, [product?.id]);
+
+    const averageRating = reviews.length > 0 
+        ? (reviews.reduce((acc, r) => acc + r.rating, 0) / reviews.length).toFixed(1)
+        : "5.0";
+
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
         setIsSubmitting(true);
 
-        await new Promise(resolve => setTimeout(resolve, 1500));
-
-        const newReview: Review = {
-            id: `REV-00${reviews.length + 1}`,
-            user: formData.user,
-            role: formData.role,
-            content: formData.content,
-            recommendation: formData.rating >= 4 ? "Highly Recommended" : "Verified Buy",
-            rating: formData.rating,
-            date: new Date().toLocaleDateString('en-US', { month: 'short', year: 'numeric' }).toUpperCase()
-        };
-
-        setReviews([newReview, ...reviews]);
-        setIsSubmitting(false);
-        setIsFormOpen(false);
-        setFormData({ user: "", role: "", content: "", rating: 5 });
+        try {
+            const newReviewResponse = await submitReview(product.id, formData);
+            if (newReviewResponse) {
+                setReviews([newReviewResponse, ...reviews]);
+                setIsFormOpen(false);
+                setFormData({ user: "", role: "", content: "", rating: 5 });
+            }
+        } catch (error) {
+            alert("Failed to submit review. Ensure you are logged in.");
+        } finally {
+            setIsSubmitting(false);
+        }
     };
 
     return (
@@ -87,7 +80,7 @@ export default function ReviewSection({ product }: { product: any }) {
                                 <div className="flex gap-1 text-[#F27D26]">
                                     {[...Array(5)].map((_, i) => <Star key={i} size={14} fill="currentColor" />)}
                                 </div>
-                                <span className="text-[12px] font-mono font-bold">4.9 AVERAGE RATING</span>
+                                <span className="text-[12px] font-mono font-bold">{averageRating} AVERAGE RATING</span>
                             </div>
                             <button
                                 onClick={() => setIsFormOpen(!isFormOpen)}

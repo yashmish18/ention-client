@@ -1,31 +1,46 @@
 "use client";
 
-import React, { useState, useEffect } from "react";
-import { UserCircle, LayoutDashboard, LogOut } from "lucide-react";
+import React, { useEffect } from "react";
+import { UserCircle, LayoutDashboard, LogOut, Shield, ShoppingBag } from "lucide-react";
 import Image from "next/image";
 import Link from "next/link";
+import { useAuth, getUserDisplayName, isAdmin, getUserRoleName } from "@/store/useAuth";
+import { clearAuthCookies } from "@/components/auth/AuthForm";
+import { useCart } from "@/store/useCart";
 
 export default function Navbar() {
-    const [user, setUser] = useState<any>(null);
+    const { user, isAuthenticated, initialize, logout } = useAuth();
+    const { toggleCart, items } = useCart();
 
     useEffect(() => {
-        const storedUser = localStorage.getItem("ention_user");
-        if (storedUser) {
-            setUser(JSON.parse(storedUser));
-        }
-    }, []);
+        initialize();
+    }, [initialize]);
 
     const handleLogout = () => {
-        localStorage.removeItem("ention_user");
-        localStorage.removeItem("ention_token");
-        setUser(null);
+        logout();
+        clearAuthCookies();
         window.location.href = "/";
     };
 
+    const displayName = getUserDisplayName(user);
+    const userIsAdmin = isAdmin(user);
+
+    // Session Healer: Ensure the role cookie matches the actual user role
+    // This fixes issues where previous sessions had malformed [object Object] cookies
+    useEffect(() => {
+        if (isAuthenticated && user) {
+            const currentRole = getUserRoleName(user);
+            if (currentRole) {
+                const maxAge = 60 * 60 * 24 * 30; // 30 days
+                document.cookie = `ention_role=${currentRole}; path=/; max-age=${maxAge}; SameSite=Lax; Secure`;
+            }
+        }
+    }, [isAuthenticated, user]);
+
     return (
-        <nav className="flex items-center justify-between px-8 py-5 bg-[#141414] text-white sticky top-0 z-[100] border-b border-white/5">
-            {/* Left side: User icon and Hindi Logo Asset */}
-            <div className="flex items-center gap-6">
+        <nav className="flex items-center justify-between px-8 lg:px-16 py-5 bg-[#141414] text-white sticky top-0 z-[100] border-b border-white/5 backdrop-blur-md bg-opacity-95">
+            {/* Left side Cluster */}
+            <div className="flex-1 flex items-center justify-start gap-6">
 
                 <Link href="/" className="relative w-28 h-10 select-none cursor-pointer">
                     <Image
@@ -33,27 +48,28 @@ export default function Navbar() {
                         alt="Ention Hindi"
                         fill
                         className="object-contain"
+                        sizes="(max-width: 768px) 112px, 112px"
                         priority
                     />
                 </Link>
-                {user && (
-                    <Link
-                        href="/dashboard"
-                        className="p-2 rounded-full border border-white/5 hover:border-accent/30 hover:bg-white/5 text-bg hover:text-accent transition-all group relative"
-                        title="User Dashboard"
-                    >
+                {isAuthenticated && (
+                    <Link href="/dashboard" className="p-2 rounded-full border border-white/5 hover:border-accent/30 hover:bg-white/5 text-bg hover:text-accent transition-all group" title="Dashboard">
                         <LayoutDashboard className="w-5 h-5 opacity-70 group-hover:opacity-100" />
-                        <span className="absolute -bottom-10 left-1/2 -translate-x-1/2 bg-ink border border-white/10 px-2 py-1 text-[8px] font-mono opacity-0 group-hover:opacity-100 transition-opacity whitespace-nowrap">DASHBOARD</span>
+                    </Link>
+                )}
+                {isAuthenticated && userIsAdmin && (
+                    <Link href="/admin" className="p-2 rounded-full border border-accent/20 hover:border-accent/50 hover:bg-accent/10 text-accent transition-all group" title="Admin Panel">
+                        <Shield className="w-5 h-5 opacity-70 group-hover:opacity-100" />
                     </Link>
                 )}
             </div>
 
-            {/* Center: Nav links and Logo Asset */}
-            <div className="flex items-center gap-2 justify-center" >
+            {/* Center Cluster */}
+            <div className="flex-none flex items-center justify-center gap-2" >
                 <div className="flex items-center gap-8 text-[12px] font-mono font-bold uppercase tracking-[0.2em] opacity-70">
                     <Link href="/" className="hover:text-accent transition-colors">Home</Link>
                     <Link href="/products" className="hover:text-accent transition-colors">Products</Link>
-                    <Link href="/about" className="hover:text-accent transition-colors">About Us</Link>
+                    <Link href="/solutions" className="hover:text-accent transition-colors">Solutions</Link>
                 </div>
 
                 {/* Central Logo Asset */}
@@ -63,25 +79,46 @@ export default function Navbar() {
                         alt="Ention Logo"
                         fill
                         className="object-contain"
+                        sizes="(max-width: 768px) 80px, 80px"
                         priority
                     />
                 </Link>
 
                 <div className="flex items-center gap-6 text-[12px] font-mono font-bold uppercase tracking-[0.2em] opacity-70">
-                    <Link href="/collaborate" className="hover:text-accent transition-colors">Collaborate</Link>
-                    <Link href="/support" className="hover:text-accent transition-colors">Support</Link>
-                    <Link href="/orders" className="hover:text-accent transition-colors">Orders</Link>
+                    <Link href="/collaborate" className="hover:text-accent transition-colors">Programs</Link>
+                    <Link href="/about" className="hover:text-accent transition-colors">About</Link>
+                    <Link href="/support" className="hover:text-accent transition-colors">Contact</Link>
                 </div>
             </div>
 
-            {/* Right side: Login, Signup / User Profile */}
-            <div className="flex items-center gap-8">
-                {user ? (
+            {/* Right side Cluster */}
+            <div className="flex-1 flex items-center justify-end gap-8">
+                {isAuthenticated && user ? (
                     <div className="flex items-center gap-6">
-                        <div className="flex items-center gap-3 border-r border-white/10 pr-6">
+                        <div className="flex items-center gap-3 border-r border-white/10 pr-6 text-right">
+                            <div className="flex flex-col">
+                                <span className="text-[10px] font-mono font-bold uppercase tracking-widest leading-tight">
+                                    {displayName}
+                                </span>
+                                {isAdmin(user) && (
+                                    <span className="text-[7px] font-mono font-black text-accent uppercase tracking-tighter">
+                                        Role: {getUserRoleName(user)}
+                                    </span>
+                                )}
+                            </div>
                             <UserCircle className="w-5 h-5 text-accent" />
-                            <span className="text-[10px] font-mono font-bold uppercase tracking-widest">{user.name.split(' ')[0]}</span>
                         </div>
+                        <button
+                            onClick={() => toggleCart(true)}
+                            className="bg-white/5 p-2 rounded-full hover:bg-white/10 transition-all relative group"
+                        >
+                            <ShoppingBag size={15} />
+                            {items.length > 0 && (
+                                <span className="absolute -top-1 -right-1 bg-accent text-white text-[8px] w-4 h-4 rounded-full flex items-center justify-center font-bold">
+                                    {items.length}
+                                </span>
+                            )}
+                        </button>
                         <button
                             onClick={handleLogout}
                             className="text-[10px] font-mono font-bold uppercase tracking-widest hover:text-accent transition-colors opacity-70 hover:opacity-100 flex items-center gap-2"
@@ -91,6 +128,17 @@ export default function Navbar() {
                     </div>
                 ) : (
                     <div className="flex items-center gap-6">
+                        <button
+                            onClick={() => toggleCart(true)}
+                            className="bg-white/5 p-2 rounded-full hover:bg-white/10 transition-all relative group mr-4"
+                        >
+                            <ShoppingBag size={15} />
+                            {items.length > 0 && (
+                                <span className="absolute -top-1 -right-1 bg-accent text-white text-[8px] w-4 h-4 rounded-full flex items-center justify-center font-bold">
+                                    {items.length}
+                                </span>
+                            )}
+                        </button>
                         <Link href="/login">
                             <button className="text-[12px] font-mono font-bold uppercase tracking-widest hover:text-accent transition-colors px-4 py-2 opacity-70 hover:opacity-100">
                                 Login

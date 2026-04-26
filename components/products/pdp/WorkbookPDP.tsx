@@ -3,9 +3,15 @@
 import React, { useState } from "react";
 import Image from "next/image";
 import { motion, AnimatePresence } from "framer-motion";
-import { Cpu, HardDrive, Zap, ShoppingBag, ArrowRight, CheckCircle2, Star } from "lucide-react";
+import { Cpu, HardDrive, Zap, ShoppingBag, ArrowRight, CheckCircle2, Star, ChevronLeft, ChevronRight } from "lucide-react";
 import Link from "next/link";
 import { useCart } from "@/store/useCart";
+import { useRouter } from "next/navigation";
+import FormModal from "@/components/FormModal";
+import LeadSalesForm from "@/components/forms/LeadSalesForm";
+import ProgramApplicationForm from "@/components/forms/ProgramApplicationForm";
+import SmartSupportForm from "@/components/forms/SmartSupportForm";
+import { LifeBuoy, HelpCircle } from "lucide-react";
 
 
 
@@ -30,6 +36,13 @@ export default function WorkbookPDP({ product, images }: WorkbookPDPProps) {
 
     const [activeImage, setActiveImage] = useState(0);
     const { addItem } = useCart();
+    const router = useRouter();
+
+    const [activeForm, setActiveForm] = useState<"LEAD" | "PROGRAM" | "SUPPORT" | null>(null);
+
+    const handleBuyNow = () => {
+        setActiveForm("LEAD");
+    };
 
     const getExtraPrice = () => {
         const proc = variants.processors.find((p: any) => p.name === selections.processor);
@@ -57,6 +70,14 @@ export default function WorkbookPDP({ product, images }: WorkbookPDPProps) {
         });
     };
 
+    const handleNextImage = () => {
+        setActiveImage((prev) => (prev + 1) % images.length);
+    };
+
+    const handlePrevImage = () => {
+        setActiveImage((prev) => (prev - 1 + images.length) % images.length);
+    };
+
     return (
         <div className="bg-white relative overflow-hidden">
             {/* Blueprint Overlay Background */}
@@ -79,21 +100,30 @@ export default function WorkbookPDP({ product, images }: WorkbookPDPProps) {
                             <span className="h-2 w-2 rounded-full bg-[#F27D26] animate-pulse" />
                         </div>
                     </div>
-                    <div className="text-right space-y-1">
-                        <p className="text-[10px] font-mono font-black uppercase tracking-[0.3em] text-black/20">Serial // {product.id?.slice(-8).toUpperCase()}</p>
-                        <div className="flex gap-0.5 text-[#F27D26] justify-end">
-                            {[...Array(5)].map((_, i) => <Star key={i} size={10} fill="currentColor" />)}
-                        </div>
-                    </div>
+
                 </div>
-                <p className="text-lg font-serif italic text-black/60 leading-relaxed max-w-3xl pt-4">
-                    {product.description || "A masterclass in domestic engineering, built for the most demanding professional workflows."}
-                </p>
+                <div className="flex flex-col md:flex-row md:items-center justify-between gap-6 border-b border-black/5 pb-10">
+                    <p className="text-lg font-serif italic text-black/60 leading-relaxed max-w-3xl">
+                        {product.description || "A professional-grade computing solution built for performance and reliability in demanding environments."}
+                    </p>
+                    <button 
+                        onClick={() => setActiveForm("SUPPORT")}
+                        className="flex items-center gap-3 text-accent font-mono text-[10px] uppercase tracking-[0.4em] font-black border border-accent/20 px-6 py-3 hover:bg-accent hover:text-white transition-all w-max whitespace-nowrap"
+                    >
+                        <HelpCircle size={14} /> Need Help?
+                    </button>
+                </div>
             </div>
+
+            <FormModal isOpen={activeForm !== null} onClose={() => setActiveForm(null)}>
+                {activeForm === "LEAD" && <LeadSalesForm source={`PDP: ${product.name}`} onSuccess={() => setActiveForm(null)} />}
+                {activeForm === "PROGRAM" && <ProgramApplicationForm programName="Experience Program" onSuccess={() => setActiveForm(null)} />}
+                {activeForm === "SUPPORT" && <SmartSupportForm initialCategory="Product Support" productModel={product.name} onSuccess={() => setActiveForm(null)} />}
+            </FormModal>
 
             <div className="grid grid-cols-1 lg:grid-cols-12 border-b border-black/5 min-h-[60vh]">
                 {/* Left: Gallery (Hyper-Compact) */}
-                <div className="lg:col-span-7 bg-[#FAF9F6] relative p-6 lg:p-10 flex flex-col items-center justify-center border-r border-black/[0.03]">
+                <div className="lg:col-span-7 bg-white relative p-6 lg:p-10 flex flex-col items-center justify-center border-r border-black/[0.03]">
                     <AnimatePresence mode="wait">
                         <motion.div
                             key={activeImage}
@@ -101,27 +131,47 @@ export default function WorkbookPDP({ product, images }: WorkbookPDPProps) {
                             animate={{ opacity: 1, scale: 1 }}
                             exit={{ opacity: 0, scale: 0.98 }}
                             transition={{ duration: 0.5 }}
-                            className="relative w-full aspect-[16/10] max-w-[450px] z-10"
+                            className="relative w-full aspect-[4/3] max-w-[850px] z-10 mx-auto"
                         >
                             <Image
                                 src={images[activeImage]}
                                 alt={product.name}
                                 fill
-                                className="object-contain filter drop-shadow-[0_20px_40px_rgba(0,0,0,0.05)]"
+                                className="object-contain"
                                 priority
                             />
                         </motion.div>
                     </AnimatePresence>
 
-                    <div className="mt-8 flex gap-3 z-20">
+                    {/* Carousel Arrows */}
+                    {images.length > 1 && (
+                        <>
+                            <button
+                                onClick={handlePrevImage}
+                                className="absolute left-4 top-1/2 -translate-y-1/2 z-20 w-10 h-10 flex items-center justify-center bg-white/80 hover:bg-white border border-black/10 rounded-full shadow-md text-black/60 hover:text-black hover:scale-105 transition-all"
+                            >
+                                <ChevronLeft size={20} />
+                            </button>
+                            <button
+                                onClick={handleNextImage}
+                                className="absolute right-4 top-1/2 -translate-y-1/2 z-20 w-10 h-10 flex items-center justify-center bg-white/80 hover:bg-white border border-black/10 rounded-full shadow-md text-black/60 hover:text-black hover:scale-105 transition-all"
+                            >
+                                <ChevronRight size={20} />
+                            </button>
+                        </>
+                    )}
+
+                    <div className="mt-8 flex flex-wrap justify-center gap-3 z-20 w-full max-w-[500px]">
                         {images.map((img, idx) => (
                             <button
                                 key={idx}
                                 onClick={() => setActiveImage(idx)}
-                                className={`w-12 h-12 border transition-all overflow-hidden p-1 ${activeImage === idx ? "border-[#F27D26] bg-white shadow-md scale-110" : "border-black/5 bg-white/40 hover:border-black/20"
+                                className={`w-12 h-12 flex-shrink-0 border transition-all overflow-hidden p-0.5 ${activeImage === idx ? "border-[#F27D26] bg-white scale-110 shadow-[0_0_15px_rgba(242,125,38,0.2)]" : "border-black/10 bg-transparent hover:border-black/30 opacity-70 hover:opacity-100"
                                     }`}
                             >
-                                <Image src={img} alt="thumb" width={48} height={48} className="object-contain" />
+                                <div className="relative w-full h-full">
+                                    <Image src={img} alt="thumb" fill className="object-cover" />
+                                </div>
                             </button>
                         ))}
                     </div>
@@ -198,16 +248,16 @@ export default function WorkbookPDP({ product, images }: WorkbookPDPProps) {
                         </div>
                         <div className="grid grid-cols-2 gap-3">
                             <button
-                                onClick={handleAddToCart}
+                                onClick={handleBuyNow}
                                 className="bg-[#141414] text-white py-4 text-[10px] font-black uppercase tracking-[0.4em] rounded-sm hover:bg-[#F27D26] transition-all flex items-center justify-center gap-3"
                             >
-                                Buy Now <ArrowRight size={14} />
+                                Buy / Enquire <ArrowRight size={14} />
                             </button>
                             <button
-                                onClick={handleAddToCart}
+                                onClick={() => setActiveForm("PROGRAM")}
                                 className="border-2 border-black text-black py-4 text-[10px] font-black uppercase tracking-[0.4em] rounded-sm hover:bg-black hover:text-white transition-all flex items-center justify-center gap-3"
                             >
-                                + Cart <ShoppingBag size={14} />
+                                Try Experience <LifeBuoy size={14} />
                             </button>
                         </div>
                     </div>
@@ -216,56 +266,123 @@ export default function WorkbookPDP({ product, images }: WorkbookPDPProps) {
 
             {/* ENGINEERING NARRATIVE SECTIONS */}
             <div className="bg-[#141414] text-white py-40 px-12 space-y-40">
+
+                {/* DYNAMIC NARRATIVE 1 */}
                 <div className="max-w-7xl mx-auto grid grid-cols-1 lg:grid-cols-2 gap-24 items-center">
                     <div className="space-y-12">
                         <div className="space-y-6">
-                            <span className="text-[#F27D26] uppercase tracking-[0.6em] font-black text-[10px]">Architecture // Thermal</span>
-                            <h2 className="text-6xl md:text-7xl font-serif font-bold italic tracking-tighter leading-none">Dual-Vapor <br />Chamber Strategy.</h2>
+                            <span className="text-[#F27D26] uppercase tracking-[0.6em] font-black text-[10px]">
+                                {product.slug === 's1' ? 'Thermal Architecture' :
+                                    product.slug === 'e4' ? 'Thermal Architecture' :
+                                        product.slug === 'e5' ? 'Smart Controls' :
+                                            product.slug === 'e1' ? 'Portability Index' : 'Architecture'}
+                            </span>
+                            <h2 className="text-6xl md:text-7xl font-serif font-bold italic tracking-tighter leading-none">
+                                {product.slug === 's1' ? 'Advanced Cooling System.' :
+                                    product.slug === 'e4' ? 'Dual-Cooling Architecture.' :
+                                        product.slug === 'e5' ? 'Intuitive Swipe Gestures.' :
+                                            product.slug === 'e1' ? 'Uncompromising Mobility.' : 'Engineered Precision.'}
+                            </h2>
                         </div>
                         <p className="text-lg font-serif italic text-white/50 leading-relaxed max-w-xl">
-                            Our proprietary cooling solution utilizes dual-vapor chambers and liquid-metal interface, achieving a -15°C operational delta compared to industry standards. Pure thermal silence.
+                            {product.slug === 's1' ? 'Engineered for advanced computing and 3D rendering. Dissipates thermal loads rapidly, maintaining stable clock speeds during intense use.' :
+                                product.slug === 'e4' ? 'Dual heat pipes and high-velocity dual fans rapidly exhaust heavy workloads—designed specifically around the 10-core i7 processor.' :
+                                    product.slug === 'e5' ? 'Volume and brightness adjust seamlessly directly via intuitive touch swipe gestures right on the device.' :
+                                        product.slug === 'e1' ? 'Lightweight design at 1.3kg, engineered for portability—perfect for daily productive use.' :
+                                            'Custom-calibrated hardware architecture ensuring thermal and structural absolute.'}
                         </p>
-                        <div className="grid grid-cols-2 gap-8 pt-8 border-t border-white/5">
-                            <div>
-                                <p className="text-[8px] uppercase tracking-widest font-black text-white/20 mb-2">Max Delta</p>
-                                <p className="text-3xl font-serif font-bold italic text-[#F27D26]">-15°C</p>
+
+                        {(product.slug === 's1' || product.slug === 'e4') && (
+                            <div className="grid grid-cols-2 gap-8 pt-8 border-t border-white/5">
+                                <div>
+                                    <p className="text-[8px] uppercase tracking-widest font-black text-white/20 mb-2">Cooling Output</p>
+                                    <p className="text-3xl font-serif font-bold italic text-[#F27D26]">Max Delta</p>
+                                </div>
+                                <div>
+                                    <p className="text-[8px] uppercase tracking-widest font-black text-white/20 mb-2">Thermal Array</p>
+                                    <p className="text-3xl font-serif font-bold italic">Dual Fans</p>
+                                </div>
                             </div>
-                            <div>
-                                <p className="text-[8px] uppercase tracking-widest font-black text-white/20 mb-2">Blade Config</p>
-                                <p className="text-3xl font-serif font-bold italic">S-Blades</p>
+                        )}
+                        {(product.slug === 'e1') && (
+                            <div className="grid grid-cols-2 gap-8 pt-8 border-t border-white/5">
+                                <div>
+                                    <p className="text-[8px] uppercase tracking-widest font-black text-white/20 mb-2">Total Weight</p>
+                                    <p className="text-3xl font-serif font-bold italic text-[#F27D26]">1.3 KG</p>
+                                </div>
+                                <div>
+                                    <p className="text-[8px] uppercase tracking-widest font-black text-white/20 mb-2">Form Factor</p>
+                                    <p className="text-3xl font-serif font-bold italic">Ultra Slim</p>
+                                </div>
                             </div>
-                        </div>
+                        )}
                     </div>
-                    <div className="relative aspect-video bg-white/5 rounded-sm overflow-hidden flex items-center justify-center p-12 border border-white/10 group">
-                        <div className="absolute inset-0 opacity-10 group-hover:opacity-20 transition-opacity">
-                            <div className="absolute inset-0 grid grid-cols-6 h-full w-full border-l border-white/20">
-                                {[...Array(6)].map((_, i) => <div key={i} className="border-r border-white/20" />)}
-                            </div>
-                        </div>
-                        <Cpu className="w-32 h-32 text-white/10 animate-pulse" strokeWidth={0.5} />
+                    <div className="relative aspect-video bg-[#141414] rounded-sm overflow-hidden flex items-center justify-center border border-white/10 group">
+                        {product.slug === 's1' ? (
+                            <Image
+                                src="/assets/all_product_page/s1-p-2.png"
+                                alt="Advanced Cooling System"
+                                fill
+                                className="object-contain lg:object-cover p-2 lg:p-0 opacity-90 group-hover:opacity-100 transition-opacity duration-700"
+                                unoptimized
+                            />
+                        ) : (
+                            <>
+                                <div className="absolute inset-0 opacity-10 group-hover:opacity-20 transition-opacity">
+                                    <div className="absolute inset-0 grid grid-cols-6 h-full w-full border-l border-white/20">
+                                        {[...Array(6)].map((_, i) => <div key={i} className="border-r border-white/20" />)}
+                                    </div>
+                                </div>
+                                {product.slug === 'e1' || product.slug === 'e5' ? <Zap className="w-32 h-32 text-[#F27D26]/20 animate-pulse" strokeWidth={0.5} /> : <Cpu className="w-32 h-32 text-white/10 animate-pulse" strokeWidth={0.5} />}
+                            </>
+                        )}
                     </div>
                 </div>
 
+                {/* DYNAMIC NARRATIVE 2 */}
                 <div className="max-w-7xl mx-auto grid grid-cols-1 lg:grid-cols-2 gap-24 items-center">
-                    <div className="order-2 lg:order-1 relative aspect-video bg-white/5 rounded-sm overflow-hidden flex items-center justify-center p-12 border border-white/10 group">
-                        <div className="absolute inset-0 opacity-10 group-hover:opacity-20 transition-opacity">
-                            <div className="absolute inset-0 grid grid-rows-6 h-full w-full border-t border-white/20">
-                                {[...Array(6)].map((_, i) => <div key={i} className="border-b border-white/20" />)}
-                            </div>
-                        </div>
-                        <Zap className="w-32 h-32 text-[#F27D26]/20" strokeWidth={0.5} />
+                    <div className="order-2 lg:order-1 relative aspect-video bg-[#141414] rounded-sm overflow-hidden flex items-center justify-center border border-white/10 group">
+                        {product.slug === 's1' ? (
+                            <Image
+                                src="/assets/all_product_page/s1-p.png"
+                                alt="RGB Fingerprint Security"
+                                fill
+                                className="object-contain lg:object-cover p-2 lg:p-0 opacity-90 group-hover:opacity-100 transition-opacity duration-700"
+                                unoptimized
+                            />
+                        ) : (
+                            <>
+                                <div className="absolute inset-0 opacity-10 group-hover:opacity-20 transition-opacity">
+                                    <div className="absolute inset-0 grid grid-rows-6 h-full w-full border-t border-white/20">
+                                        {[...Array(6)].map((_, i) => <div key={i} className="border-b border-white/20" />)}
+                                    </div>
+                                </div>
+                                <HardDrive className="w-32 h-32 text-[#F27D26]/20" strokeWidth={0.5} />
+                            </>
+                        )}
                     </div>
                     <div className="order-1 lg:order-2 space-y-12 lg:pl-12">
                         <div className="space-y-6">
-                            <span className="text-[#F27D26] uppercase tracking-[0.6em] font-black text-[10px]">Material Science</span>
-                            <h2 className="text-6xl md:text-7xl font-serif font-bold italic tracking-tighter leading-none">Aeronautical <br />Grade T6.</h2>
+                            <span className="text-[#F27D26] uppercase tracking-[0.6em] font-black text-[10px]">
+                                {product.slug === 's1' ? 'Input & Security' :
+                                    product.slug === 'e4' ? 'Memory & Storage' :
+                                        product.slug === 'e1' ? 'Input Interface' : 'Input & Security'}
+                            </span>
+                            <h2 className="text-6xl md:text-7xl font-serif font-bold italic tracking-tighter leading-none">
+                                {product.slug === 's1' ? 'RGB Fingerprint Security.' :
+                                    product.slug === 'e4' ? 'Dual Slot Dominance.' :
+                                        product.slug === 'e1' ? 'Full Size Numeric.' : 'Secured Processing.'}
+                            </h2>
                         </div>
                         <p className="text-lg font-serif italic text-white/50 leading-relaxed max-w-xl">
-                            Each chassis is precision CNC-milled from a single block of T6 Aeronautical-grade aluminum. Strategic weight reduction meets structural absolute.
+                            {product.slug === 's1' ? 'Featuring an RGB illuminated keyboard with an integrated Numeric Pad. Instant access granted via Windows Fingerprint Lock and a 2MP HD webcam with manual privacy shutter.' :
+                                product.slug === 'e4' ? 'Scale effortlessly. The E4 boasts dual memory and storage expansion slots, flanked by RGB keyboard illumination and a fingerprint lock.' :
+                                    product.slug === 'e1' ? 'Despite its 14-inch form, it features an independent numeric keypad and Type-C connectivity, perfectly tuned for rapid data entry.' :
+                                        'Features structural biometric sensors including fingerprint lock and secure manual webcam privacy shutters.'}
                         </p>
                         <Link href="/about">
                             <button className="flex items-center gap-4 text-[#F27D26] uppercase tracking-[0.4em] font-black text-[10px] hover:text-white transition-colors group">
-                                Explore Metallurgy <ArrowRight size={14} className="group-hover:translate-x-2 transition-transform" />
+                                Learn More <ArrowRight size={14} className="group-hover:translate-x-2 transition-transform" />
                             </button>
                         </Link>
                     </div>
@@ -283,7 +400,7 @@ export default function WorkbookPDP({ product, images }: WorkbookPDPProps) {
                         <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
                             {[
                                 { item: "Workbook Device", desc: "The industrial machine unit, calibrated and authenticated.", serial: "ENT-SYS-01" },
-                                { item: "96W Sovereign Auth", desc: "High-speed charging cell with braided composite cable.", serial: "ENT-PWR-96" },
+                                { item: "96W Sovereign Auth", desc: "Rapid charging cell with braided composite cable.", serial: "ENT-PWR-96" },
                                 { item: "Blueprint Manual", desc: "Technical documentation and ownership certificate.", serial: "ENT-DOC-BRT" }
                             ].map((box, i) => (
                                 <div key={i} className="bg-white p-10 border border-black/5 rounded-sm space-y-6 group hover:shadow-xl transition-all h-full">

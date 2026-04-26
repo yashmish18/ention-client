@@ -1,152 +1,190 @@
 "use client";
 
-import React from "react";
-import Link from "next/link";
+import React, { useEffect, useState } from "react";
 import {
-    TrendingUp,
+    ShoppingBag,
     ShieldCheck,
-    Clock,
+    MapPin,
+    CreditCard,
+    User as UserIcon,
+    Headset,
     Package,
-    Cpu,
-    ArrowRight,
-    Monitor
+    ChevronRight,
 } from "lucide-react";
-import { BlurFadeIn } from "@/components/BlurFadeIn";
+import AuthGuard from "@/components/auth/AuthGuard";
+import { useAuth } from "@/store/useAuth";
+import { fetchUserOrders, fetchAddresses } from "@/lib/api";
+import Link from "next/link";
 
-const StatsCard = ({ title, value, detail, icon: Icon }: any) => (
-    <div className="bg-white border border-ink/5 p-8 rounded-sm group hover:border-accent/20 transition-all duration-500 shadow-sm">
-        <div className="flex justify-between items-start mb-6">
-            <div className="w-10 h-10 rounded-sm bg-ink/5 flex items-center justify-center group-hover:bg-accent transition-colors">
-                <Icon size={18} strokeWidth={1.5} className="group-hover:text-bg transition-colors" />
-            </div>
+const AccountCard = ({ title, description, icon: Icon, href }: { title: string, description: string, icon: any, href: string }) => (
+    <Link href={href} className="flex items-start gap-4 p-6 bg-white border border-gray-200 rounded-lg shadow-sm hover:bg-gray-50 transition-all group">
+        <div className="p-3 bg-blue-50 rounded-lg group-hover:bg-blue-100 transition-colors">
+            <Icon size={24} className="text-blue-600" />
         </div>
-        <div>
-            <span className="block font-mono text-[9px] uppercase tracking-[0.4em] text-ink/40 mb-2 font-bold">{title}</span>
-            <h3 className="text-3xl font-serif font-black text-ink tracking-tighter uppercase">{value}</h3>
-            <p className="mt-4 font-mono text-[8px] uppercase tracking-widest text-ink/30 group-hover:text-ink/60 transition-colors">
-                {detail}
-            </p>
+        <div className="flex-1">
+            <h3 className="font-semibold text-gray-900 mb-1">{title}</h3>
+            <p className="text-sm text-gray-500 leading-snug">{description}</p>
         </div>
-    </div>
+        <ChevronRight size={16} className="text-gray-300 group-hover:text-gray-600 transition-colors self-center" />
+    </Link>
 );
 
-export default function DashboardPage() {
-    const [user, setUser] = React.useState<any>(null);
-    const [orders, setOrders] = React.useState<any[]>([]);
+function DashboardContent() {
+    const { user } = useAuth();
+    const [recentOrders, setRecentOrders] = useState<any[]>([]);
+    const [defaultAddress, setDefaultAddress] = useState<any>(null);
+    const [loading, setLoading] = useState(true);
 
-    React.useEffect(() => {
-        const storedUser = localStorage.getItem("ention_user");
-        if (storedUser) {
-            const parsed = JSON.parse(storedUser);
-            setUser(parsed);
+    useEffect(() => {
+        if (!user) return;
 
-            // Fetch real orders
-            fetch(`http://localhost:4000/api/checkout/orders/${parsed.id}`)
-                .then(res => res.json())
-                .then(data => {
-                    if (Array.isArray(data)) setOrders(data);
-                })
-                .catch(err => console.error("Order sync failure", err));
-        }
-    }, []);
+        Promise.all([
+            fetchUserOrders().catch(() => []),
+            fetchAddresses().catch(() => [])
+        ]).then(([orders, addresses]) => {
+            setRecentOrders(Array.isArray(orders) ? orders.slice(0, 3) : []);
+            const addressList = Array.isArray(addresses) ? addresses : [];
+            const primary = addressList.find((a: any) => a.isDefault) || addressList[0];
+            setDefaultAddress(primary);
+            setLoading(false);
+        });
+    }, [user]);
 
-    const userName = user?.name || "Architect";
+    const fullName = user ? `${user.firstName || ""} ${user.lastName || ""}`.trim() : "User";
 
     return (
-        <div className="space-y-12">
-            {/* Welcome Section */}
-            <BlurFadeIn delay={0.1}>
-                <div className="flex flex-col md:flex-row justify-between items-end gap-8 pb-12 border-b border-ink/10">
-                    <div className="space-y-2">
-                        <span className="font-mono text-[10px] uppercase tracking-[0.5em] text-accent font-bold">{userName}'s Dashboard</span>
-                        <h1 className="text-5xl md:text-6xl font-serif font-black text-ink uppercase leading-none tracking-tighter">
-                            Overview
-                        </h1>
-                    </div>
-                    <div className="text-right">
-                        <span className="block font-mono text-[9px] text-ink/30 uppercase tracking-[0.4em] mb-2">Account Node</span>
-                        <span className="font-mono text-xs font-bold text-ink uppercase tracking-widest">{user?.email || "NOT INITIALIZED"}</span>
-                    </div>
-                </div>
-            </BlurFadeIn>
-
-            {/* Stats Grid */}
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8">
-                <BlurFadeIn delay={0.2}>
-                    <StatsCard
-                        title="Active Orders"
-                        value={orders.length.toString().padStart(2, '0')}
-                        detail="Real-time Tracking"
-                        icon={Package}
-                    />
-                </BlurFadeIn>
-                <BlurFadeIn delay={0.3}>
-                    <StatsCard
-                        title="Voucher Grade"
-                        value="Sovereign"
-                        detail="Tier 1 Access"
-                        icon={TrendingUp}
-                    />
-                </BlurFadeIn>
-                <BlurFadeIn delay={0.4}>
-                    <StatsCard
-                        title="Protection"
-                        value="Active"
-                        detail="Secure Infrastructure"
-                        icon={ShieldCheck}
-                    />
-                </BlurFadeIn>
-                <BlurFadeIn delay={0.5}>
-                    <StatsCard
-                        title="Priority"
-                        value="High"
-                        detail="Direct Comm-Link"
-                        icon={Clock}
-                    />
-                </BlurFadeIn>
+        <div className="space-y-10">
+            {/* Greeting */}
+            <div className="border-b border-gray-200 pb-8">
+                <h1 className="text-3xl font-bold text-gray-900">Your Account</h1>
+                <p className="mt-2 text-gray-600">
+                    Hello, <span className="font-semibold">{fullName || user?.email}</span>. 
+                    Manage your orders, profile, and preferences here.
+                </p>
             </div>
 
-            {/* Orders Section */}
-            <div className="space-y-8">
-                <h2 className="text-2xl font-serif font-bold italic tracking-tight">Order Hive.</h2>
-                {orders.length === 0 ? (
-                    <BlurFadeIn delay={0.6}>
-                        <div className="bg-white border border-dashed border-ink/20 p-20 rounded-sm flex flex-col items-center justify-center space-y-6 text-center">
-                            <Package size={48} className="text-ink/10" strokeWidth={1} />
-                            <div className="space-y-2">
-                                <p className="font-serif italic text-lg text-ink/40">No orders detected in the system hive.</p>
-                                <p className="font-mono text-[10px] uppercase tracking-widest text-ink/20">Initialize your first procurement to begin.</p>
+            {/* Account Grid */}
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                <AccountCard 
+                    title="Your Orders" 
+                    description="Track, return, or buy things again" 
+                    icon={ShoppingBag} 
+                    href="/dashboard/orders" 
+                />
+                <AccountCard 
+                    title="Login & Security" 
+                    description="Edit login, name, and mobile number" 
+                    icon={ShieldCheck} 
+                    href="/dashboard/settings" 
+                />
+                <AccountCard 
+                    title="Your Addresses" 
+                    description="Edit addresses for orders and gifts" 
+                    icon={MapPin} 
+                    href="/dashboard/addresses" 
+                />
+                <AccountCard 
+                    title="Payment Options" 
+                    description="Edit or add payment methods" 
+                    icon={CreditCard} 
+                    href="/dashboard/payment" 
+                />
+                <AccountCard 
+                    title="Your Profile" 
+                    description="Manage your public profile and bio" 
+                    icon={UserIcon} 
+                    href="/dashboard/profile" 
+                />
+                <AccountCard 
+                    title="Contact Us" 
+                    description="View support tickets and get help" 
+                    icon={Headset} 
+                    href="/support" 
+                />
+            </div>
+
+            {/* Quick Status / Recent Activity */}
+            <div className="grid grid-cols-1 lg:grid-cols-2 gap-10 pt-4">
+                {/* Recent Orders Overview */}
+                <div className="bg-white border border-gray-200 rounded-xl overflow-hidden shadow-sm">
+                    <div className="px-6 py-4 border-b border-gray-100 flex items-center justify-between">
+                        <h2 className="font-bold text-gray-900">Recent Orders</h2>
+                        <Link href="/dashboard/orders" className="text-sm font-medium text-blue-600 hover:underline">
+                            View All
+                        </Link>
+                    </div>
+                    <div className="divide-y divide-gray-100">
+                        {loading ? (
+                            <div className="p-10 text-center text-gray-400 text-sm italic">Loading recent orders...</div>
+                        ) : recentOrders.length === 0 ? (
+                            <div className="p-10 text-center">
+                                <Package size={32} className="mx-auto text-gray-300 mb-3" />
+                                <p className="text-sm text-gray-500">No orders found.</p>
                             </div>
-                            <Link href="/products">
-                                <button className="bg-ink text-bg px-8 py-4 text-[10px] font-bold uppercase tracking-widest hover:bg-accent transition-all">
-                                    Explore Catalog
-                                </button>
+                        ) : (
+                            recentOrders.map((order) => (
+                                <Link key={order.id} href={`/dashboard/orders?id=${order.id}`} className="block p-5 hover:bg-gray-50 transition-colors">
+                                    <div className="flex justify-between items-start mb-2">
+                                        <span className="text-xs font-bold text-gray-400 uppercase tracking-wider">{order.orderNumber}</span>
+                                        <span className={`text-[10px] font-black px-2 py-0.5 rounded uppercase ${
+                                            order.status === 'DELIVERED' ? 'bg-green-100 text-green-700' : 
+                                            order.status === 'CANCELLED' ? 'bg-red-100 text-red-700' : 'bg-blue-100 text-blue-700'
+                                        }`}>
+                                            {order.status}
+                                        </span>
+                                    </div>
+                                    <p className="font-semibold text-gray-900">{order.items?.[0]?.productName || 'Order Items'}</p>
+                                    <p className="text-sm text-gray-500 mt-1">
+                                        {new Date(order.createdAt).toLocaleDateString()} · ₹{Number(order.total).toLocaleString()}
+                                    </p>
+                                </Link>
+                            ))
+                        )}
+                    </div>
+                </div>
+
+                {/* Default Address Overview */}
+                <div className="bg-white border border-gray-200 rounded-xl p-8 shadow-sm">
+                    <div className="flex items-center gap-3 mb-6">
+                        <MapPin size={20} className="text-gray-400" />
+                        <h2 className="font-bold text-gray-900 text-lg">Default Delivery Address</h2>
+                    </div>
+                    {loading ? (
+                        <div className="h-24 bg-gray-50 rounded animate-pulse" />
+                    ) : defaultAddress ? (
+                        <div className="space-y-2">
+                            <p className="font-bold text-gray-900">{defaultAddress.fullName}</p>
+                            <p className="text-gray-600 text-sm">{defaultAddress.line1}</p>
+                            {defaultAddress.line2 && <p className="text-gray-600 text-sm">{defaultAddress.line2}</p>}
+                            <p className="text-gray-600 text-sm">{defaultAddress.city}, {defaultAddress.state} {defaultAddress.pincode}</p>
+                            <p className="text-gray-600 text-sm">{defaultAddress.country}</p>
+                            <p className="text-gray-600 text-sm pt-2">Phone: {defaultAddress.phone}</p>
+                            <div className="pt-6">
+                                <Link href="/dashboard/addresses" className="text-sm text-blue-600 font-semibold hover:underline">
+                                    Edit Address
+                                </Link>
+                            </div>
+                        </div>
+                    ) : (
+                        <div className="text-center py-6">
+                            <p className="text-sm text-gray-500 mb-4">No addresses saved yet.</p>
+                            <Link href="/dashboard/addresses" className="inline-block bg-blue-600 text-white px-6 py-2 rounded-lg text-sm font-semibold hover:bg-blue-700 transition-colors">
+                                Add Address
                             </Link>
                         </div>
-                    </BlurFadeIn>
-                ) : (
-                    <div className="grid gap-6">
-                        {orders.map((order) => (
-                            <div key={order.id} className="bg-white border border-ink/5 p-8 rounded-sm flex flex-col md:flex-row justify-between items-center group hover:border-accent/30 transition-all">
-                                <div className="space-y-1">
-                                    <span className="font-mono text-[8px] uppercase tracking-widest text-accent font-bold">{order.orderNumber}</span>
-                                    <h3 className="text-xl font-serif font-black uppercase italic">{order.product.name}</h3>
-                                    <p className="font-mono text-[9px] text-ink/40 uppercase tracking-widest">{order.product.configuration.ram} // {order.product.configuration.ssd}</p>
-                                </div>
-                                <div className="flex items-center gap-10 mt-6 md:mt-0">
-                                    <div className="text-right">
-                                        <span className="block font-mono text-[8px] uppercase tracking-widest text-ink/20 mb-1">Status</span>
-                                        <span className="font-mono text-[10px] font-bold uppercase text-ink">{order.status}</span>
-                                    </div>
-                                    <div className="w-10 h-10 rounded-full border border-ink/10 flex items-center justify-center group-hover:bg-accent group-hover:border-accent transition-all">
-                                        <ArrowRight size={16} className="group-hover:text-bg transition-colors" />
-                                    </div>
-                                </div>
-                            </div>
-                        ))}
-                    </div>
-                )}
+                    )}
+                </div>
             </div>
         </div>
     );
 }
+
+export default function DashboardPage() {
+    return (
+        <AuthGuard>
+            <DashboardContent />
+        </AuthGuard>
+    );
+}
+
+

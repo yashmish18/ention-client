@@ -24,7 +24,7 @@ export function LetterAnimation({
         visible: {
             opacity: 1,
             transition: {
-                staggerChildren: 0.05,
+                staggerChildren: 0.1,
                 delayChildren: delay
             },
         },
@@ -33,17 +33,19 @@ export function LetterAnimation({
     const child = {
         visible: {
             opacity: 1,
+            y: 0,
             filter: "blur(0px)",
             transition: {
-                duration: duration,
-                ease: "easeOut" as any,
+                duration: 1.5,
+                ease: [0.22, 1, 0.36, 1] as any,
             },
         },
         hidden: {
             opacity: 0,
+            y: 0,
             filter: type === "blur" ? "blur(10px)" : "blur(0px)",
             transition: {
-                duration: duration,
+                duration: 0.8,
                 ease: "easeIn" as any,
             },
         },
@@ -54,15 +56,19 @@ export function LetterAnimation({
             style={{ display: "inline-block" }}
             variants={container}
             initial="hidden"
-            whileInView="visible"
-            viewport={{ once: true }}
+            animate="visible"
             className={className}
         >
             {letters.map((letter, index) => (
                 <motion.span
                     variants={child}
                     key={index}
-                    style={{ display: "inline-block", whiteSpace: "pre" }}
+                    style={{ 
+                        display: "inline-block", 
+                        whiteSpace: "pre",
+                        willChange: "transform, opacity, filter",
+                        transform: "translateZ(0)"
+                    }}
                 >
                     {letter}
                 </motion.span>

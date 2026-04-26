@@ -2,33 +2,94 @@
 
 import React, { useState } from "react";
 import Link from "next/link";
-import { ArrowRight, Laptop, Mail, Lock, ChevronRight } from "lucide-react";
+import { useRouter, useSearchParams } from "next/navigation";
+import { ArrowRight, Mail, Lock, ChevronRight, Loader2, AlertCircle } from "lucide-react";
 import { BlurFadeIn } from "@/components/BlurFadeIn";
 import { cn } from "@/lib/utils";
 import Image from "next/image";
+import { authLogin, authSignup } from "@/lib/api";
+import { useAuth } from "@/store/useAuth";
 
 interface AuthFormProps {
     initialMode?: "login" | "signup";
 }
 
+/**
+ * Sets auth cookies so the Next.js middleware can read them on SSR.
+ * localStorage is only available client-side; middleware uses cookies.
+ */
+function setAuthCookies(token: string, role: string = 'user') {
+    const maxAge = 60 * 60 * 24 * 30; // 30 days
+    document.cookie = `ention_token=${token}; path=/; max-age=${maxAge}; SameSite=Lax; Secure`;
+    document.cookie = `ention_role=${role}; path=/; max-age=${maxAge}; SameSite=Lax; Secure`;
+}
+
+function clearAuthCookies() {
+    document.cookie = 'ention_token=; path=/; max-age=0';
+    document.cookie = 'ention_role=; path=/; max-age=0';
+}
+
+export { clearAuthCookies };
+
 export const AuthForm = ({ initialMode = "login" }: AuthFormProps) => {
     const [mode, setMode] = useState<"login" | "signup">(initialMode);
+    const [loading, setLoading] = useState(false);
+    const [error, setError] = useState<string | null>(null);
+    const { setAuth } = useAuth();
+    const router = useRouter();
+    const searchParams = useSearchParams();
+
+    const redirectTo = searchParams.get('redirect') || '/products';
+
+    const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
+        e.preventDefault();
+        setError(null);
+        setLoading(true);
+
+        const formData = new FormData(e.currentTarget);
+        const email = formData.get('email') as string;
+        const password = formData.get('password') as string;
+        const name = formData.get('name') as string;
+
+        try {
+            let result;
+            if (mode === 'login') {
+                result = await authLogin(email, password);
+            } else {
+                result = await authSignup(name, email, password);
+            }
+
+            if (result.user && result.token) {
+                // Set both Zustand store and cookies
+                setAuth(result.user, result.token);
+                
+                // Safely extract role name for the cookie (middleware needs the string)
+                const roleName = result.user.roleName || 
+                                (typeof result.user.role === 'object' ? result.user.role?.name : result.user.role) || 
+                                'buyer';
+                
+                setAuthCookies(result.token, roleName);
+                router.push(redirectTo);
+            }
+        } catch (err: any) {
+            setError(err.message || 'Authentication failed. Please try again.');
+        } finally {
+            setLoading(false);
+        }
+    };
 
     return (
         <main className="min-h-screen bg-bg flex items-center justify-center px-4 md:px-8 py-16 selection:bg-accent selection:text-white relative overflow-hidden">
 
             {/* Cinematic Background Layer */}
             <div className="absolute inset-0 z-0">
-                <div className="absolute inset-0 bg-[#E4E3E0]" /> {/* Base Warm Gray */}
-                {/* Subtle Industrial Overlay */}
+                <div className="absolute inset-0 bg-[#E4E3E0]" />
                 <div className="absolute inset-0 opacity-[0.05] pointer-events-none">
                     <div className="w-full h-full bg-[linear-gradient(to_right,#141414_1px,transparent_1px),linear-gradient(to_bottom,#141414_1px,transparent_1px)] bg-[size:40px_40px]" />
                 </div>
-                {/* Faint Background Watermark */}
                 <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 pointer-events-none select-none opacity-[0.03]">
                     <h2 className="text-[25vw] font-serif font-black text-ink uppercase tracking-tighter italic">Ention</h2>
                 </div>
-                {/* Depth gradients */}
                 <div className="absolute inset-0 bg-gradient-to-br from-white/20 via-transparent to-ink/5" />
             </div>
 
@@ -38,7 +99,6 @@ export const AuthForm = ({ initialMode = "login" }: AuthFormProps) => {
                     {/* Left Column: Narrative Showcase */}
                     <div className="bg-ink p-12 md:p-16 flex flex-col justify-between relative overflow-hidden">
                         <div className="z-10">
-                            {/* Better Greeting instead of Top-Left Badge */}
                             <div className="mb-16">
                                 <span className="font-mono text-[9px] font-bold tracking-[0.5em] uppercase text-accent">
                                     Welcome to the Future of Bharat
@@ -60,7 +120,7 @@ export const AuthForm = ({ initialMode = "login" }: AuthFormProps) => {
                         {/* Cinematic Background Image */}
                         <div className="absolute inset-0 z-0">
                             <Image
-                                src="https://images.unsplash.com/photo-1543269865-cbf427effbad?auto=format&fit=crop&q=80&w=1200"
+                                src="/assets/images/e5/E5 New model laptop photo jpg/24.jpg"
                                 alt="Professional Workspace"
                                 fill
                                 className="object-cover opacity-30 filter grayscale mix-blend-luminosity"
@@ -91,11 +151,11 @@ export const AuthForm = ({ initialMode = "login" }: AuthFormProps) => {
                         </div>
                     </div>
 
-                    {/* Right Column: Grounded Form */}
+                    {/* Right Column: Form */}
                     <div className="p-12 md:p-16 bg-bg flex flex-col justify-center border-l border-ink/5">
                         <div className="mb-12 flex gap-12 border-b border-ink/10 pb-6">
                             <button
-                                onClick={() => setMode("login")}
+                                onClick={() => { setMode("login"); setError(null); }}
                                 className={cn(
                                     "font-serif text-3xl font-black uppercase tracking-tighter transition-all relative pb-4",
                                     mode === "login" ? "text-ink" : "text-ink/20 hover:text-ink/40"
@@ -105,7 +165,7 @@ export const AuthForm = ({ initialMode = "login" }: AuthFormProps) => {
                                 {mode === "login" && <div className="absolute bottom-[-2px] left-0 w-full h-1 bg-accent" />}
                             </button>
                             <button
-                                onClick={() => setMode("signup")}
+                                onClick={() => { setMode("signup"); setError(null); }}
                                 className={cn(
                                     "font-serif text-3xl font-black uppercase tracking-tighter transition-all relative pb-4",
                                     mode === "signup" ? "text-ink" : "text-ink/20 hover:text-ink/40"
@@ -116,36 +176,19 @@ export const AuthForm = ({ initialMode = "login" }: AuthFormProps) => {
                             </button>
                         </div>
 
-                        <form
-                            onSubmit={async (e) => {
-                                e.preventDefault();
-                                const formData = new FormData(e.currentTarget);
-                                const data = Object.fromEntries(formData);
+                        {/* Error Display */}
+                        {error && (
+                            <div className="mb-8 flex items-center gap-3 bg-red-50 border border-red-200 text-red-700 px-6 py-4 rounded-sm">
+                                <AlertCircle size={16} />
+                                <span className="font-mono text-[11px] uppercase tracking-widest">{error}</span>
+                            </div>
+                        )}
 
-                                try {
-                                    const res = await fetch(`http://localhost:4000/api/auth/${mode}`, {
-                                        method: "POST",
-                                        headers: { "Content-Type": "application/json" },
-                                        body: JSON.stringify(data)
-                                    });
-                                    const result = await res.json();
-                                    if (result.user) {
-                                        localStorage.setItem("ention_user", JSON.stringify(result.user));
-                                        localStorage.setItem("ention_token", result.token);
-                                        window.location.href = "/products";
-                                    } else {
-                                        alert(result.error || "Authentication failed");
-                                    }
-                                } catch (err) {
-                                    alert("Network error. Ensure backend is running.");
-                                }
-                            }}
-                            className="space-y-8"
-                        >
+                        <form onSubmit={handleSubmit} className="space-y-8">
                             {mode === "signup" && (
                                 <div className="space-y-2">
-                                    <label className="block font-mono text-[9px] uppercase tracking-[0.4em] text-ink/40 font-bold">Full Identity (Name)</label>
-                                    <input name="name" type="text" className="w-full bg-ink/5 border border-ink/10 px-6 py-4 font-mono text-[11px] text-ink focus:outline-none focus:border-accent/40 rounded-sm" placeholder="YASH VARDHAN" required />
+                                    <label className="block font-mono text-[9px] uppercase tracking-[0.4em] text-ink/40 font-bold">Full Name</label>
+                                    <input name="name" type="text" className="w-full bg-ink/5 border border-ink/10 px-6 py-4 font-mono text-[11px] text-ink focus:outline-none focus:border-accent/40 rounded-sm" placeholder="YOUR FULL NAME" required />
                                 </div>
                             )}
 
@@ -180,18 +223,27 @@ export const AuthForm = ({ initialMode = "login" }: AuthFormProps) => {
                                         name="password"
                                         type="password"
                                         placeholder="********"
+                                        minLength={8}
+                                        pattern="^(?=.*[a-z])(?=.*[A-Z])(?=.*\d).+$"
+                                        title="Password must contain at least 8 characters, including uppercase, lowercase and a number"
                                         className="w-full bg-ink/5 border border-ink/10 pl-16 pr-6 py-5 font-mono text-[11px] text-ink placeholder:text-ink/20 focus:outline-none focus:border-accent/40 transition-all rounded-sm"
                                         required
                                     />
                                 </div>
+                                {mode === "signup" && (
+                                    <p className="text-[8px] font-mono text-ink/40 uppercase tracking-wider mt-2 ml-1">
+                                        Min. 8 chars, must include A-Z, a-z, and 0-9
+                                    </p>
+                                )}
                             </div>
 
                             <button
                                 type="submit"
-                                className="group w-full flex items-center justify-between bg-ink text-bg px-10 py-6 text-[10px] font-bold uppercase tracking-[0.5em] hover:bg-accent transition-all rounded-sm shadow-2xl mt-12"
+                                disabled={loading}
+                                className="group w-full flex items-center justify-between bg-ink text-bg px-10 py-6 text-[10px] font-bold uppercase tracking-[0.5em] hover:bg-accent transition-all rounded-sm shadow-2xl mt-12 disabled:opacity-50"
                             >
-                                <span>{mode === "login" ? "Enter Dashboard" : "Create Account"}</span>
-                                <ArrowRight size={20} className="group-hover:translate-x-3 transition-transform" />
+                                <span>{loading ? "Authenticating..." : mode === "login" ? "Enter Dashboard" : "Create Account"}</span>
+                                {loading ? <Loader2 size={20} className="animate-spin" /> : <ArrowRight size={20} className="group-hover:translate-x-3 transition-transform" />}
                             </button>
                         </form>
 
