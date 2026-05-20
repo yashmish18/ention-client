@@ -4,6 +4,7 @@ import React, { useState, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { ChevronLeft, ChevronRight, ArrowRight } from "lucide-react";
 import Link from "next/link";
+import Image from "next/image";
 import { LetterAnimation } from "./LetterAnimation";
 // import { HeroCarousel as InnerAccordion } from "./HeroCarousel";
 
@@ -81,9 +82,14 @@ export function MainHeroCarousel() {
     const slide = SLIDES[current];
 
     return (
-        <section 
-            className="relative w-full max-w-[1920px] mx-auto bg-ink overflow-hidden text-bg"
+        <section
+            className="relative w-full h-[500px] sm:h-[600px] md:h-[700px] lg:h-[800px] xl:h-[850px] max-w-[1920px] mx-auto bg-ink overflow-hidden text-bg"
         >
+            {/* Preload slide images */}
+            {SLIDES.map((s) => s.bgImage && (
+                <link key={s.id} rel="preload" href={s.bgImage} as="image" />
+            ))}
+
             {/* Background Grid */}
             <div className="absolute inset-0 z-0 opacity-[0.02] pointer-events-none">
                 <div className="w-full h-full bg-[linear-gradient(to_right,#80808012_1px,transparent_1px),linear-gradient(to_bottom,#80808012_1px,transparent_1px)] bg-[size:50px_50px]" />
@@ -97,32 +103,39 @@ export function MainHeroCarousel() {
                     animate={{ opacity: 1 }}
                     exit={{ opacity: 0 }}
                     transition={{ duration: 0.8, ease: [0.22, 1, 0.36, 1] }}
-                    className="relative w-full"
+                    className="absolute inset-0 w-full h-full"
                 >
-                    {/* Image-only slides: Dynamic Height */}
+                    {/* Image-only slides */}
                     {slide.type === "image-only" && slide.bgImage && (
-                        <div className="relative w-full">
-                            <motion.img
-                                src={slide.bgImage}
-                                className="w-full h-auto block"
-                                initial={{ scale: 1.1 }}
+                        <div className="relative w-full h-full overflow-hidden">
+                            <motion.div
+                                className="relative w-full h-full"
+                                initial={{ scale: 1.08 }}
                                 animate={{ scale: 1 }}
                                 transition={{ duration: 0.8, ease: "easeOut" }}
-                                alt={`Ention Slide ${current}`}
-                            />
-                            <div className="absolute inset-0 bg-black/20" />
+                            >
+                                <Image
+                                    src={slide.bgImage}
+                                    className="object-fit"
+                                    fill
+                                    sizes="100vw"
+                                    priority
+                                    alt={`Ention Slide ${current}`}
+                                />
+                            </motion.div>
+                            <div className="absolute inset-0 bg-black/20 z-10" />
                         </div>
                     )}
 
                     {/* Split layout slides (Intro) */}
                     {slide.type === "split" && (
-                        <div className="min-h-[600px] md:min-h-[800px] w-full max-w-[1600px] mx-auto px-8 md:px-16 flex items-center justify-center py-20">
+                        <div className="w-full h-full max-w-[1600px] mx-auto px-8 md:px-16 flex items-center justify-center py-10">
                             <div className="w-full text-center space-y-12">
                                 <div className="space-y-6">
-                                    <LetterAnimation 
-                                        type="blur" 
-                                        text={slide.subtitle || ""} 
-                                        className="text-accent font-mono text-[1.5vw] md:text-[1vw] font-bold tracking-[0.8em] uppercase block mb-4" 
+                                    <LetterAnimation
+                                        type="blur"
+                                        text={slide.subtitle || ""}
+                                        className="text-accent font-mono text-[1.5vw] md:text-[1vw] font-bold tracking-[0.8em] uppercase block mb-4"
                                     />
                                     <h1 className="text-6xl md:text-9xl font-serif font-black text-bg uppercase leading-[0.85] tracking-tighter opacity-95">
                                         <LetterAnimation type="blur" text={slide.titleMain || ""} delay={0.4} />
@@ -135,12 +148,12 @@ export function MainHeroCarousel() {
                                         />
                                     </h1>
                                 </div>
-                                
+
                                 <div className="flex flex-col items-center gap-10">
                                     <h2 className="text-xl md:text-2xl font-mono text-bg/70 tracking-[0.6em] uppercase text-center max-w-3xl">
                                         <LetterAnimation type="blur" text={slide.description || ""} delay={1.2} duration={0.8} />
                                     </h2>
-                                    
+
                                     {slide.cta ? (
                                         <Link href={slide.href || "#"}>
                                             <button className="bg-white text-ink px-12 py-6 font-mono text-[12px] font-black uppercase tracking-[0.4em] hover:bg-accent hover:text-white transition-all flex items-center gap-4">
@@ -149,12 +162,6 @@ export function MainHeroCarousel() {
                                         </Link>
                                     ) : null}
                                 </div>
-
-                                {/* Accordion hidden/commented out 
-                                <div className="w-full lg:w-[55%] min-h-[500px] flex items-center justify-center">
-                                    {slide.hasAccordion ? <InnerAccordion /> : null}
-                                </div>
-                                */}
                             </div>
                         </div>
                     )}

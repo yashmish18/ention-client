@@ -1,7 +1,7 @@
 "use client";
 
 import React from "react";
-import { Laptop, ShoppingCart, GraduationCap, ArrowRight, Code, Brain, Settings, ShieldCheck, Zap, Globe, Building2, Truck, CheckCircle2 } from "lucide-react";
+import { Laptop, ShoppingCart, GraduationCap, ArrowRight, Code, Brain, Settings, ShieldCheck, Zap, Globe, Building2, Truck, CheckCircle2, Cpu, Headphones } from "lucide-react";
 import Image from "next/image";
 import Link from "next/link";
 import { motion } from "framer-motion";
@@ -33,24 +33,6 @@ const Hero = () => (
   <MainHeroCarousel />
 );
 
-// --- 2. VISION STATEMENT [BG] ---
-const VisionStatement = () => {
-  return (
-    <section className="px-8 py-16 lg:py-24 bg-bg text-ink relative overflow-hidden border-t border-ink/5">
-      <div className="max-w-[1200px] mx-auto text-center space-y-24">
-        <FadeUp className="space-y-6">
-          <h2 className="text-4xl md:text-6xl lg:text-7xl font-serif font-black italic tracking-tighter leading-tight overflow-hidden">
-            <motion.span initial={{ y: "100%", opacity: 0 }} whileInView={{ y: 0, opacity: 1 }} transition={{ delay: 0.1, duration: 0.8 }} className="block">Building India’s </motion.span>
-            <motion.span initial={{ y: "100%", opacity: 0 }} whileInView={{ y: 0, opacity: 1 }} transition={{ delay: 0.2, duration: 0.8 }} className="block">Computing Ecosystem</motion.span>
-          </h2>
-          <p className="text-sm md:text-base font-sans opacity-60 max-w-xl mx-auto leading-relaxed">
-            From system integration today to indigenous hardware, OS, and AI stack—we are building long-term capability, not just products.
-          </p>
-        </FadeUp>
-      </div>
-    </section>
-  );
-};
 
 const SectionHeader = ({ num, title, subtitle }: { num?: string, title: string, subtitle?: string }) => (
   <div className="flex justify-between items-end mb-12 border-b border-current/10 pb-4">
@@ -151,7 +133,7 @@ const ProgramsEcosystem = ({ onProgramClick }: { onProgramClick: (name: string) 
   <section className="px-8 py-16 lg:py-24 bg-ink text-bg border-t border-white/5">
     <FadeUp className="text-center max-w-3xl mx-auto mb-20 space-y-6">
       <h2 className="text-5xl md:text-7xl font-serif font-black italic tracking-tighter text-bg leading-tight">
-        Beyond Devices — Build with Our Ecosystem
+        Beyond Devices Build with the Ention Ecosystem
       </h2>
       <p className="text-bg/60 max-w-xl mx-auto text-lg leading-relaxed pt-6">
         We don’t just sell laptops. We help you build labs, enable startups, and create innovation ecosystems.
@@ -181,99 +163,207 @@ const ProgramsEcosystem = ({ onProgramClick }: { onProgramClick: (name: string) 
 // --- 6. CUSTOM OEM [BG] ---
 const CustomOEM = ({ onLeadClick }: { onLeadClick: () => void }) => {
   return (
-    <section className="px-8 py-16 lg:py-24 bg-bg text-ink border-t border-ink/5">
-      <div className="max-w-[1400px] mx-auto grid grid-cols-1 lg:grid-cols-2 gap-16 lg:gap-24 items-center">
-        <div className="z-10 relative">
-          <FadeUp>
-            <div className="flex justify-between items-end mb-12 border-b border-ink/10 pb-4">
-              <div>
-                <h2 className="text-4xl md:text-5xl mt-2 font-bold font-serif leading-tight">Custom Hardware &<br />White-Label Solutions</h2>
-              </div>
-            </div>
-          </FadeUp>
-          <FadeUp delay={0.1} className="space-y-12">
-            <p className="text-xl md:text-2xl opacity-70 font-sans leading-relaxed">Launch your own brand or build tailored hardware with us.</p>
-
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-x-8 gap-y-10 mb-16">
-              {[
-                { title: "Custom Configurations", desc: "Build endpoints tailored to your exact workforce needs." },
-                { title: "White-Label Laptops", desc: "Brand indigenous machines natively with your logo." },
-                { title: "Dedicated Batches", desc: "Secure production queues for bulk delivery." }
-              ].map((f, i) => (
-                <motion.div initial={{ opacity: 0, y: 10 }} whileInView={{ opacity: 1, y: 0 }} transition={{ delay: i * 0.1 }} key={i} className="flex items-start gap-4">
-                  <span className="w-1.5 h-1.5 rounded-full bg-accent mt-2 shrink-0" />
-                  <div>
-                    <h4 className="font-bold text-ink mb-2">{f.title}</h4>
-                    <p className="text-xs text-ink/60 font-sans leading-relaxed">{f.desc}</p>
-                  </div>
-                </motion.div>
-              ))}
-            </div>
-
-            <button onClick={onLeadClick} className="bg-ink text-bg px-12 py-5 text-[11px] font-bold uppercase tracking-[0.3em] hover:bg-accent hover:text-white transition-all shadow-xl hover:-translate-y-2 rounded-sm group flex items-center gap-4 w-max">
-              Contact Our Team <ArrowRight size={14} className="group-hover:translate-x-1 transition-transform" />
-            </button>
-          </FadeUp>
+    <section className="px-8 py-20 lg:py-32 bg-bg text-ink border-t border-ink/10">
+      <div className="max-w-[1200px] mx-auto space-y-20">
+        {/* Header Block */}
+        <div className="text-center space-y-6 max-w-3xl mx-auto">
+          <h2 className="text-4xl md:text-5xl lg:text-6xl font-serif font-bold leading-tight">
+            Custom Hardware &<br />White-Label Solutions
+          </h2>
+          <p className="text-lg md:text-xl opacity-75 font-sans leading-relaxed">
+            Launch your own brand or build tailored hardware with us.
+          </p>
         </div>
 
-        <FadeUp delay={0.2} className="relative w-full aspect-square lg:aspect-[4/5] bg-ink/5 p-4 flex items-center justify-center overflow-hidden">
-          <div className="absolute inset-4 border border-ink/20 z-10 pointer-events-none max-w-full" />
-          <div className="absolute inset-0 bg-ink/5" />
-          <Image src="/assets/landing_page/b2b.png" alt="Hardware Manufacturing" fill className="object-cover  opacity-90  hover:scale-100 hover:grayscale-0 transition-all duration-[2s] ease-[0.16,1,0.3,1]" unoptimized />
-        </FadeUp>
+        {/* 3-Column Split with Thin Borders */}
+        <div className="grid grid-cols-1 md:grid-cols-3 border-t border-b border-ink/10 py-12 md:py-16">
+          {[
+            { title: "Custom Configurations", desc: "Build endpoints tailored to your exact workforce needs." },
+            { title: "White-Label Laptops", desc: "Brand indigenous machines natively with your logo." },
+            { title: "Dedicated Batches", desc: "Secure production queues for bulk delivery." }
+          ].map((f, i) => (
+            <div 
+              key={i} 
+              className={`px-8 py-8 md:py-4 flex flex-col gap-4 ${
+                i < 2 ? "md:border-r border-b md:border-b-0 border-ink/10" : ""
+              }`}
+            >
+              <h4 className="font-sans font-bold text-xl uppercase tracking-tight text-ink">
+                {f.title}
+              </h4>
+              <p className="text-sm text-ink/70 leading-relaxed font-sans">
+                {f.desc}
+              </p>
+            </div>
+          ))}
+        </div>
+
+        {/* CTA Button centered at bottom */}
+        <div className="flex justify-center">
+          <button 
+            onClick={onLeadClick} 
+            className="bg-ink text-bg px-12 py-5 text-[11px] font-bold uppercase tracking-[0.3em] hover:bg-accent hover:text-white transition-all shadow-xl hover:-translate-y-1 rounded-sm group flex items-center gap-4"
+          >
+            Contact Our Team <ArrowRight size={14} className="group-hover:translate-x-1 transition-transform" />
+          </button>
+        </div>
       </div>
     </section>
   )
 };
 
-// --- 7. CHOOSE LAPTOP (Grid + Text Reveals) [INK] ---
+// --- 7. CHOOSE LAPTOP (Side-by-Side Cards) [BG] ---
 const ChooseLaptop = () => {
   return (
-    <section className="px-8 py-16 lg:py-24 bg-ink text-bg border-t border-white/5 relative">
-      <FadeUp className="text-center mb-24 space-y-6">
-        <h2 className="text-5xl md:text-7xl font-serif font-black italic tracking-tighter text-bg">Choose Your Laptop</h2>
-        <p className="opacity-50 max-w-xl mx-auto font-sans leading-relaxed text-lg">Designed for different needs, performance levels, and budgets.</p>
+    <section className="px-8 py-16 lg:py-24 bg-bg text-ink border-t border-ink/5 relative">
+      <FadeUp className="text-center mb-20 space-y-6">
+        <h2 className="text-5xl md:text-7xl font-serif font-black italic tracking-tighter text-ink leading-tight">
+          Choose Your Ention Laptop
+        </h2>
+        <p className="opacity-50 max-w-xl mx-auto font-sans leading-relaxed text-lg">
+          Designed for different needs, performance levels, and budgets.
+        </p>
       </FadeUp>
 
       <div className="grid grid-cols-1 md:grid-cols-2 gap-12 max-w-[1200px] mx-auto min-h-[500px]">
-        {/* Card 1 */}
+        {/* Card 1: Workbook */}
         <FadeUp delay={0.1} className="h-full">
-          <div className="p-12 border border-ink/10 bg-bg text-ink shadow-[0_0_50px_rgba(255,255,255,0.05)] hover:-translate-y-2 transition-transform duration-700 flex flex-col h-full rounded-sm">
-            <h3 className="text-4xl lg:text-5xl font-serif italic mb-4 font-bold text-ink tracking-tight overflow-hidden">
-              <motion.span initial={{ y: 80, opacity: 0 }} whileInView={{ y: 0, opacity: 1 }} transition={{ delay: 0.2, duration: 0.8 }} className="block"><span className="text-accent underline decoration-1 underline-offset-4">Workbook</span></motion.span>
-              <motion.span initial={{ y: 80, opacity: 0 }} whileInView={{ y: 0, opacity: 1 }} transition={{ delay: 0.3, duration: 0.8 }} className="block">Series</motion.span>
+          <div className="p-8 lg:p-10 border border-[#e0e0e0] bg-[#f4f4f4] text-ink shadow-[0_0_50px_rgba(0,0,0,0.02)] hover:-translate-y-2 transition-transform duration-700 flex flex-col h-full rounded-sm">
+            {/* Top Laptop Image Container */}
+            <div className="relative w-full aspect-[4/3] bg-white border border-[#e8e8e8] rounded-sm p-6 mb-8 overflow-hidden group flex items-center justify-center">
+              <div className="relative w-full h-full">
+                <Image
+                  src="/assets/all_product_page/e1-cat.png"
+                  alt="Workbook Series"
+                  fill
+                  className="object-contain filter drop-shadow-[0_12px_24px_rgba(0,0,0,0.06)]"
+                />
+              </div>
+            </div>
+
+            <h3 className="text-3xl font-sans font-black tracking-tight text-ink uppercase mb-2">
+              Workbook Series
             </h3>
-            <p className="text-ink/60 mb-8 border-b border-ink/10 pb-8 text-sm max-w-md font-sans">Versatile and reliable for professionals, students, and developers</p>
-            <ul className="space-y-4 font-mono text-[11px] uppercase tracking-widest text-ink/70 mb-12 flex-1">
-              <motion.li initial={{ opacity: 0, x: -10 }} whileInView={{ opacity: 1, x: 0 }} transition={{ delay: 0.4 }} className="flex gap-4 items-center">• <span className="opacity-90 font-bold">Intel i7 / i5 / N100 / N95</span></motion.li>
-              <motion.li initial={{ opacity: 0, x: -10 }} whileInView={{ opacity: 1, x: 0 }} transition={{ delay: 0.5 }} className="flex gap-4 items-center">• <span className="opacity-90 font-bold">Windows 11 ready</span></motion.li>
-              <motion.li initial={{ opacity: 0, x: -10 }} whileInView={{ opacity: 1, x: 0 }} transition={{ delay: 0.6 }} className="flex gap-4 items-center">• <span className="opacity-100 text-accent font-bold">Best for: Productivity, learning, development</span></motion.li>
+            <p className="text-ink/60 mb-6 text-sm font-sans min-h-[40px]">
+              Versatile and reliable for professionals, students, and developers.
+            </p>
+
+            {/* Badges Row */}
+            <div className="flex flex-wrap items-center gap-3 mb-6">
+              {/* Intel Inside */}
+              <div className="bg-[#0066cc] text-white px-2 py-0.5 flex flex-col justify-center items-center rounded-sm font-sans font-bold leading-none select-none w-10 h-8 border border-[#0052a3]">
+                <span className="text-[5px] font-normal tracking-wider opacity-90 uppercase">intel</span>
+                <span className="text-[7px] font-black tracking-tighter mt-0.5">inside</span>
+              </div>
+              {/* Intel Core i5 */}
+              <div className="bg-gradient-to-br from-[#0066cc] to-[#0099ff] text-white px-2 py-0.5 flex flex-col justify-center items-center rounded-sm font-sans font-bold leading-none select-none w-10 h-8 border border-[#0052a3]">
+                <span className="text-[4px] font-normal tracking-wider opacity-90 uppercase">intel</span>
+                <span className="text-[6px] font-black tracking-tight mt-0.5">CORE</span>
+                <span className="text-[5px] font-bold mt-0.5 opacity-90">i5</span>
+              </div>
+              {/* Intel Core i7 */}
+              <div className="bg-gradient-to-br from-[#0066cc] to-[#0099ff] text-white px-2 py-0.5 flex flex-col justify-center items-center rounded-sm font-sans font-bold leading-none select-none w-10 h-8 border border-[#0052a3]">
+                <span className="text-[4px] font-normal tracking-wider opacity-90 uppercase">intel</span>
+                <span className="text-[6px] font-black tracking-tight mt-0.5">CORE</span>
+                <span className="text-[5px] font-bold mt-0.5 opacity-90">i7</span>
+              </div>
+              {/* Windows 11 */}
+              <div className="flex items-center gap-2 px-2.5 py-1 bg-white border border-[#e0e0e0] rounded-sm select-none h-8">
+                <svg width="10" height="10" viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg">
+                  <path d="M0 0H7.5V7.5H0V0Z" fill="#0078D4"/>
+                  <path d="M8.5 0H16V7.5H8.5V0Z" fill="#0078D4"/>
+                  <path d="M0 8.5H7.5V16H0V8.5Z" fill="#0078D4"/>
+                  <path d="M8.5 8.5H16V16H8.5V8.5Z" fill="#0078D4"/>
+                </svg>
+                <span className="font-sans font-semibold text-[9px] text-[#333333] tracking-tight">Windows 11</span>
+              </div>
+            </div>
+
+            <ul className="space-y-3 font-mono text-[10px] uppercase tracking-widest text-ink/70 mb-8 border-t border-[#e0e0e0] pt-4 flex-1">
+              <li className="flex gap-2 items-center">• <span className="opacity-90 font-bold">Intel i7 / i5 / N100 / N95</span></li>
+              <li className="flex gap-2 items-center">• <span className="opacity-90 font-bold">Windows 11 ready</span></li>
+              <li className="flex gap-2 items-center">• <span className="text-accent font-bold">Best for: Productivity, learning, development</span></li>
             </ul>
-            <Link href="/products" className="bg-ink text-bg px-8 py-5 text-center text-[10px] uppercase tracking-widest font-bold hover:bg-accent hover:text-white transition-colors duration-500 mt-auto shadow-2xl">View Details</Link>
+            
+            <Link 
+              href="/products" 
+              className="w-full bg-[#e5e5e5] text-ink border border-[#d0d0d0] px-8 py-4 text-center text-[10px] uppercase tracking-widest font-bold hover:bg-ink hover:text-bg hover:border-ink transition-colors duration-500 mt-auto shadow-md"
+            >
+              View Details
+            </Link>
           </div>
         </FadeUp>
 
-        {/* Card 2 */}
+        {/* Card 2: Swapbook */}
         <FadeUp delay={0.2} className="h-full">
-          <div className="p-12 border border-white/10 flex flex-col bg-white/5 text-bg relative overflow-hidden group hover:-translate-y-2 transition-transform duration-700 h-full shadow-2xl rounded-sm">
-            <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_top,rgba(242,125,38,0.1),transparent_80%)] opacity-0 group-hover:opacity-100 transition-opacity duration-1000" />
-            <h3 className="text-4xl lg:text-5xl font-serif italic mb-4 font-bold relative z-10 tracking-tight overflow-hidden">
-              <motion.span initial={{ y: 80, opacity: 0 }} whileInView={{ y: 0, opacity: 1 }} transition={{ delay: 0.3, duration: 0.8 }} className="block">Swapbook</motion.span>
-              <motion.span initial={{ y: 80, opacity: 0 }} whileInView={{ y: 0, opacity: 1 }} transition={{ delay: 0.4, duration: 0.8 }} className="block">Series</motion.span>
+          <div className="p-8 lg:p-10 border border-[#e0e0e0] flex flex-col bg-[#f4f4f4] text-ink relative overflow-hidden hover:-translate-y-2 transition-transform duration-700 h-full shadow-2xl rounded-sm">
+            {/* Top Laptop Image Container */}
+            <div className="relative w-full aspect-[4/3] bg-white border border-[#e8e8e8] rounded-sm p-6 mb-8 overflow-hidden group flex items-center justify-center">
+              <div className="relative w-full h-full">
+                <Image
+                  src="/assets/all_product_page/s1-cat.png"
+                  alt="Swapbook Series"
+                  fill
+                  className="object-contain filter drop-shadow-[0_12px_24px_rgba(0,0,0,0.06)]"
+                />
+              </div>
+            </div>
+
+            <h3 className="text-3xl font-sans font-black tracking-tight text-ink uppercase mb-2">
+              Swapbook Series
             </h3>
-            <p className="text-bg/60 mb-8 border-b border-white/10 pb-8 text-sm relative z-10 max-w-md font-sans">High-performance machines for creators and advanced users</p>
-            <ul className="space-y-4 font-mono text-[11px] uppercase tracking-widest text-bg/70 mb-12 flex-1 relative z-10">
-              <motion.li initial={{ opacity: 0, x: -10 }} whileInView={{ opacity: 1, x: 0 }} transition={{ delay: 0.5 }} className="flex gap-4 items-center">• <span className="opacity-90 font-bold">Intel i9 processors</span></motion.li>
-              <motion.li initial={{ opacity: 0, x: -10 }} whileInView={{ opacity: 1, x: 0 }} transition={{ delay: 0.6 }} className="flex gap-4 items-center">• <span className="opacity-90 font-bold">RTX graphics</span></motion.li>
-              <motion.li initial={{ opacity: 0, x: -10 }} whileInView={{ opacity: 1, x: 0 }} transition={{ delay: 0.7 }} className="flex gap-4 items-center">• <span className="opacity-100 text-accent font-bold">Best for: Design, gaming, heavy workloads</span></motion.li>
+            <p className="text-ink/60 mb-6 text-sm font-sans min-h-[40px]">
+              High-performance machines for creators and advanced users.
+            </p>
+
+            {/* Badges Row */}
+            <div className="flex flex-wrap items-center gap-3 mb-6">
+              {/* Intel Inside */}
+              <div className="bg-[#0066cc] text-white px-2 py-0.5 flex flex-col justify-center items-center rounded-sm font-sans font-bold leading-none select-none w-10 h-8 border border-[#0052a3]">
+                <span className="text-[5px] font-normal tracking-wider opacity-90 uppercase">intel</span>
+                <span className="text-[7px] font-black tracking-tighter mt-0.5">inside</span>
+              </div>
+              {/* Intel Core i9 */}
+              <div className="bg-gradient-to-br from-[#0066cc] to-[#0099ff] text-white px-2 py-0.5 flex flex-col justify-center items-center rounded-sm font-sans font-bold leading-none select-none w-10 h-8 border border-[#0052a3]">
+                <span className="text-[4px] font-normal tracking-wider opacity-90 uppercase">intel</span>
+                <span className="text-[6px] font-black tracking-tight mt-0.5">CORE</span>
+                <span className="text-[5px] font-bold mt-0.5 opacity-90">i9</span>
+              </div>
+              {/* NVIDIA GeForce RTX */}
+              <div className="bg-black text-[#76b900] px-2.5 py-0.5 flex flex-col justify-center items-center rounded-sm font-sans font-bold leading-none select-none w-14 h-8 border border-[#222222]">
+                <span className="text-[4px] font-normal tracking-widest text-[#76b900]/80 uppercase">NVIDIA</span>
+                <span className="text-[5px] font-black tracking-widest text-[#76b900]">RTX</span>
+              </div>
+              {/* Windows 11 */}
+              <div className="flex items-center gap-2 px-2.5 py-1 bg-white border border-[#e0e0e0] rounded-sm select-none h-8">
+                <svg width="10" height="10" viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg">
+                  <path d="M0 0H7.5V7.5H0V0Z" fill="#0078D4"/>
+                  <path d="M8.5 0H16V7.5H8.5V0Z" fill="#0078D4"/>
+                  <path d="M0 8.5H7.5V16H0V8.5Z" fill="#0078D4"/>
+                  <path d="M8.5 8.5H16V16H8.5V8.5Z" fill="#0078D4"/>
+                </svg>
+                <span className="font-sans font-semibold text-[9px] text-[#333333] tracking-tight">Windows 11</span>
+              </div>
+            </div>
+
+            <ul className="space-y-3 font-mono text-[10px] uppercase tracking-widest text-ink/70 mb-8 border-t border-[#e0e0e0] pt-4 flex-1">
+              <li className="flex gap-2 items-center">• <span className="opacity-90 font-bold">Intel i9 processors</span></li>
+              <li className="flex gap-2 items-center">• <span className="opacity-90 font-bold">RTX graphics</span></li>
+              <li className="flex gap-2 items-center">• <span className="opacity-100 text-accent font-bold">Best for: Design, gaming, heavy workloads</span></li>
             </ul>
-            <Link href="/products" className="bg-bg text-ink px-8 py-5 text-center text-[10px] uppercase tracking-widest font-bold hover:bg-accent hover:text-white transition-colors duration-500 mt-auto relative z-10 shadow-xl">View Details</Link>
+            
+            <Link 
+              href="/products" 
+              className="w-full bg-[#e5e5e5] text-ink border border-[#d0d0d0] px-8 py-4 text-center text-[10px] uppercase tracking-widest font-bold hover:bg-ink hover:text-bg hover:border-ink transition-colors duration-500 mt-auto shadow-md"
+            >
+              View Details
+            </Link>
           </div>
         </FadeUp>
       </div>
     </section>
   );
-}
+};
 
 // --- 8. VIDEO CANVAS (Anatomy of Power) [BG] ---
 // Handled by component VideoScrollCanvas
@@ -282,56 +372,104 @@ const ChooseLaptop = () => {
 
 
 
-// --- 10. WHY ENTION [BG] --- 
-const WhyEntion = () => (
-  <section id="craft" className="px-8 py-16 lg:py-24 bg-bg text-ink border-t border-ink/5 relative z-10">
-    <FadeUp>
-      <SectionHeader title="Trust" subtitle="Philosophy" />
-    </FadeUp>
+// --- 10. WHY CHOOSE ENTION [BG] ---
+const WhyEntion = () => {
+  const points = [
+    {
+      title: "Built for India",
+      desc: "Engineered specifically for local temperatures, thermal conditions, dust resistance, and voltage fluctuations."
+    },
+    {
+      title: "Flexible customization",
+      desc: "Get components tailored directly to your technical requirements, completely bypassing mass OEM boundaries."
+    },
+    {
+      title: "Lower TCO",
+      desc: "Highly efficient component lifecycles, local repair support, and competitive enterprise procurement paths."
+    },
+    {
+      title: "Indigenous Hardware",
+      desc: "Building long-term self-reliance, local skill development, and customized system firmware security."
+    }
+  ];
 
-    <div className="grid grid-cols-1 md:grid-cols-3 border border-ink/10 mb-32 shadow-2xl rounded-sm bg-white">
-      {[
-        { id: "01", title: "Craftsmanship", desc: "Every machine is hand-assembled with obsessive attention to detail, ensuring a level of precision that mass production cannot match." },
-        { id: "02", title: "Materials", desc: "We source only the finest aerospace-grade alloys and sustainable components, built to last a lifetime of rigorous professional use." },
-        { id: "03", title: "Support", desc: "Our white-glove concierge support ensures that your creative flow is never interrupted, with 24/7 priority hardware assistance." },
-      ].map((item, i) => (
-        <FadeUp key={i} delay={i * 0.1}>
-          <div className="p-16 border-b md:border-b-0 md:border-r border-ink/10 relative group h-full flex flex-col justify-center transition-all duration-700 bg-white hover:-translate-y-4 hover:shadow-[0_20px_60px_rgba(0,0,0,0.06)] z-10 overflow-hidden">
-            <span className="text-[120px] font-serif text-ink opacity-[0.03] group-hover:opacity-10 transition-opacity select-none italic absolute -top-8 -right-4 font-black">{item.id}</span>
-            <h3 className="text-3xl mt-8 mb-6 font-bold text-ink relative tracking-tight">{item.title}</h3>
-            <p className="text-sm md:text-base opacity-70 leading-relaxed font-sans text-ink relative">{item.desc}</p>
-            <div className="mt-12 h-[2px] w-8 bg-accent group-hover:w-[150%] transition-all duration-[1.5s] ease-[0.16,1,0.3,1] relative -ml-4" />
-          </div>
-        </FadeUp>
-      ))}
-    </div>
+  const cards = [
+    {
+      icon: <Cpu className="w-5 h-5 text-accent" />,
+      title: "Craftsmanship",
+      desc: "Every machine is hand-assembled with obsessive attention to detail, ensuring a level of precision that mass production cannot match."
+    },
+    {
+      icon: <ShieldCheck className="w-5 h-5 text-accent" />,
+      title: "Materials",
+      desc: "We source only the finest aerospace-grade alloys and sustainable components, built to last a lifetime of rigorous professional use."
+    },
+    {
+      icon: <Headphones className="w-5 h-5 text-accent" />,
+      title: "Support",
+      desc: "Our white-glove concierge support ensures that your creative flow is never interrupted, with 24/7 priority hardware assistance."
+    }
+  ];
 
-    <div className="pt-12 mb-12 pb-12">
-      <FadeUp className="text-center mb-16 space-y-6 flex flex-col items-center">
-        <h2 className="text-5xl md:text-7xl font-serif font-black uppercase tracking-tighter text-ink leading-none">
-          Why Choose <span className="italic font-normal text-accent block mt-2">Us?</span>
-        </h2>
-      </FadeUp>
-      <div className="max-w-4xl mx-auto">
-        <ul className="grid grid-cols-1 md:grid-cols-2 gap-y-10 gap-x-12 text-sm md:text-base font-bold text-ink/90 leading-relaxed font-sans">
-          {[
-            "Built specifically for Indian users and environments",
-            "Flexible customization (unlike mass OEM brands)",
-            "Lower total cost of ownership",
-            "Focused on long-term indigenous innovation"
-          ].map((point, i) => (
-            <FadeUp key={i} delay={i * 0.1} className="flex items-start gap-6 group hover:-translate-y-1 transition-transform">
-              <div className="mt-1 w-6 h-6 rounded-full border border-accent/30 flex items-center justify-center shrink-0 group-hover:bg-accent transition-colors">
-                <CheckCircle2 size={12} className="text-accent group-hover:text-white" />
-              </div>
-              <span className="text-lg tracking-tight">{point}</span>
+  return (
+    <section id="why-choose" className="px-8 py-20 lg:py-32 bg-ink text-bg border-t border-white/5 relative z-10">
+      <div className="max-w-[1200px] mx-auto space-y-20">
+        
+        {/* Header Block at the top */}
+        <div className="space-y-4 text-center max-w-3xl mx-auto">
+          <h2 className="text-4xl md:text-5xl lg:text-6xl font-serif font-bold leading-tight text-bg">
+            Why Choose Ention?
+          </h2>
+          <p className="text-lg opacity-60 font-sans leading-relaxed text-bg">
+            We build with obsession, source with integrity, and support without compromise.
+          </p>
+        </div>
+
+        {/* Content points in a clean 4-column layout */}
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-8 pt-8">
+          {points.map((p, i) => (
+            <FadeUp key={i} delay={i * 0.1} className="space-y-3">
+              <span className="font-mono text-xs text-accent font-bold block">
+                0{i + 1}
+              </span>
+              <h4 className="font-sans font-bold text-base uppercase tracking-tight text-bg">
+                {p.title}
+              </h4>
+              <p className="text-sm text-bg/60 leading-relaxed font-sans">
+                {p.desc}
+              </p>
             </FadeUp>
           ))}
-        </ul>
+        </div>
+
+        {/* Divider */}
+        <div className="border-t border-white/10" />
+
+        {/* Cards Row (3-column grid) */}
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+          {cards.map((card, i) => (
+            <FadeUp 
+              key={i} 
+              delay={i * 0.1}
+              className="bg-white/5 border border-white/10 p-8 md:p-10 rounded-sm flex flex-col gap-6 hover:border-accent/40 hover:bg-white/8 hover:-translate-y-1 transition-all duration-500 group"
+            >
+              <div className="w-10 h-10 rounded-lg bg-white/5 flex items-center justify-center group-hover:bg-accent transition-all duration-500">
+                {card.icon}
+              </div>
+              <h3 className="text-xl font-bold font-serif text-bg tracking-tight">
+                {card.title}
+              </h3>
+              <p className="text-sm text-bg/55 leading-relaxed font-sans">
+                {card.desc}
+              </p>
+            </FadeUp>
+          ))}
+        </div>
+
       </div>
-    </div>
-  </section>
-);
+    </section>
+  );
+};
 
 // --- 11. TRUSTED STATS [INK] ---
 const TrustedStats = () => {
@@ -370,7 +508,7 @@ const Roadmap = () => (
   <section className="px-8 py-16 lg:py-24 bg-bg text-ink border-t border-ink/5 relative overflow-hidden">
     <div className="max-w-4xl mx-auto space-y-32 z-10 relative">
       <FadeUp className="text-center border-b border-ink/10 pb-20">
-        <h2 className="text-7xl md:text-9xl font-serif font-black italic tracking-tighter text-ink mb-12 leading-[0.80] drop-shadow-sm">Solving Today.<br />Building Tomorrow.</h2>
+        <h2 className="text-4xl md:text-6xl font-serif font-black italic tracking-tighter text-ink mb-8 leading-tight drop-shadow-sm">Solving Today. Building Tomorrow.</h2>
         <p className="opacity-70 text-xl font-sans max-w-2xl mx-auto leading-relaxed">We are addressing immediate computing needs while building India’s long-term technology foundation.</p>
       </FadeUp>
 
@@ -400,24 +538,30 @@ const Roadmap = () => (
 // --- 13. ACCESS [INK] ---  
 const Access = () => (
   <section id="order" className="px-8 py-16 lg:py-24 bg-ink text-bg border-t border-white/5 relative z-10">
-    <FadeUp>
-      <SectionHeader title="Availability" subtitle="Channels" />
-    </FadeUp>
-    <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
-      {[
-        { icon: Laptop, title: "Website", desc: "Browse our full catalog and configure your custom machine online." },
-        { icon: ShoppingCart, title: "E-commerce", desc: "Available through select premium retail partners across the globe." },
-        { icon: GraduationCap, title: "Campus", desc: "Special education pricing and workshops for students and faculty." },
-      ].map((item, i) => (
-        <FadeUp key={i} delay={i * 0.15}>
-          <div className="p-16 bg-white/5 border border-white/10 shadow-2xl flex flex-col items-center text-center rounded-sm group transition-all duration-[0.8s] ease-out hover:-translate-y-4 hover:shadow-[0_20px_50px_rgba(242,125,38,0.05)] hover:border-accent/30 relative overflow-hidden">
-            <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_top,rgba(242,125,38,0.1),transparent_70%)] opacity-0 group-hover:opacity-100 transition-opacity duration-1000 pointer-events-none" />
-            <item.icon size={64} strokeWidth={0.5} className="mb-10 opacity-30 group-hover:opacity-100 transition-all text-accent duration-1000 group-hover:scale-110 relative z-10 group-hover:-translate-y-2" />
-            <h3 className="text-3xl mb-4 font-bold text-bg relative z-10 tracking-tight">{item.title}</h3>
-            <p className="text-[11px] opacity-50 uppercase tracking-[0.2em] leading-relaxed font-bold group-hover:opacity-90 transition-opacity duration-1000 text-bg relative z-10 max-w-[200px]">{item.desc}</p>
-          </div>
-        </FadeUp>
-      ))}
+    <div className="max-w-[1200px] mx-auto">
+      <FadeUp>
+        <SectionHeader title="Availability" />
+      </FadeUp>
+      <div className="flex flex-col divide-y divide-white/5">
+        {[
+          { num: "01", title: "Website", tag: "ention.in", desc: "Browse our full catalog, compare specs, and configure your custom machine directly online." },
+          { num: "02", title: "E-commerce", tag: "Retail Partners", desc: "Available through select premium retail partners across India and select global markets." },
+          { num: "03", title: "Campus", tag: "Education", desc: "Special education pricing, hands-on workshops, and direct support for students and faculty." },
+        ].map((item, i) => (
+          <FadeUp key={i} delay={i * 0.1}>
+            <div className="group flex flex-col md:flex-row md:items-center justify-between gap-6 py-10 cursor-default hover:pl-3 transition-all duration-500">
+              <div className="flex items-start gap-8">
+                <span className="font-mono text-[10px] text-white/25 mt-1 shrink-0 pt-1">{item.num}</span>
+                <div>
+                  <h3 className="text-3xl md:text-4xl font-serif font-bold text-bg group-hover:text-accent transition-colors duration-500 tracking-tight leading-tight">{item.title}</h3>
+                  <span className="text-[10px] font-mono uppercase tracking-[0.25em] text-white/30 mt-2 block">{item.tag}</span>
+                </div>
+              </div>
+              <p className="text-sm text-bg/50 leading-relaxed font-sans max-w-sm md:text-right">{item.desc}</p>
+            </div>
+          </FadeUp>
+        ))}
+      </div>
     </div>
   </section>
 );
@@ -471,7 +615,64 @@ const ExperienceProgram = ({ onProgramClick }: { onProgramClick: (name: string) 
   );
 };
 
-// --- 15. FINAL CTA [INK] ---
+// --- 15. ECOSYSTEM GALLERY [INK] ---
+const EcosystemGallery = () => {
+  const slides = [
+    { label: "IIT Bombay Showcase", sub: "Innovation & Demo Day" },
+    { label: "Startup India Summit", sub: "Ecosystem Partnerships" },
+    { label: "Campus Lab Setup", sub: "Institutional Deployment" },
+    { label: "Founders Meet 2024", sub: "Product Experience" },
+    { label: "NASSCOM Pavilion", sub: "Industry Collaboration" },
+  ];
+
+  return (
+    <section className="py-20 lg:py-28 bg-ink text-bg border-t border-white/5 overflow-hidden">
+      <div className="max-w-[1200px] mx-auto px-8 mb-14">
+        <FadeUp>
+          <h2 className="text-4xl md:text-5xl font-serif font-bold text-bg leading-tight mb-4">
+            Building With the Ecosystem
+          </h2>
+          <p className="text-bg/50 text-base font-sans max-w-2xl leading-relaxed">
+            Ention is actively engaging with India's startup and innovation ecosystem—collaborating
+            with incubators, institutions, and emerging founders. From product showcase to ecosystem
+            partnerships, we are building real-world momentum.
+          </p>
+        </FadeUp>
+      </div>
+
+      {/* Horizontal Scroll Gallery */}
+      <div className="flex gap-4 overflow-x-auto pl-8 pr-8 pb-4 scrollbar-none snap-x snap-mandatory">
+        {slides.map((slide, i) => (
+          <div
+            key={i}
+            className="relative shrink-0 w-[320px] md:w-[400px] h-[260px] md:h-[320px] rounded-sm overflow-hidden snap-start bg-white/5 border border-white/8 group cursor-default"
+          >
+            {/* Faux image background using gradient placeholder */}
+            <div
+              className="absolute inset-0 transition-transform duration-700 group-hover:scale-105"
+              style={{
+                background: `linear-gradient(135deg, hsl(${(i * 47 + 20) % 360},12%,12%) 0%, hsl(${(i * 47 + 60) % 360},8%,8%) 100%)`
+              }}
+            />
+            {/* Subtle grain */}
+            <div className="absolute inset-0 opacity-[0.04] pointer-events-none" style={{ backgroundImage: "url('data:image/svg+xml,%3Csvg viewBox=\'0 0 256 256\' xmlns=\'http://www.w3.org/2000/svg\'%3E%3Cfilter id=\'noise\'%3E%3CfeTurbulence type=\'fractalNoise\' baseFrequency=\'0.9\' numOctaves=\'4\' stitchTiles=\'stitch\'/%3E%3C/filter%3E%3Crect width=\'100%25\' height=\'100%25\' filter=\'url(%23noise)\'/%3E%3C/svg%3E')" }} />
+            {/* Bottom overlay */}
+            <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/20 to-transparent" />
+            {/* Index */}
+            <span className="absolute top-5 left-5 font-mono text-[9px] text-white/25 tracking-[0.3em] uppercase">0{i + 1}</span>
+            {/* Text overlay */}
+            <div className="absolute bottom-0 left-0 p-6">
+              <p className="text-[9px] font-mono uppercase tracking-[0.25em] text-accent mb-2">{slide.sub}</p>
+              <h4 className="text-lg font-serif font-bold text-bg leading-snug">{slide.label}</h4>
+            </div>
+          </div>
+        ))}
+      </div>
+    </section>
+  );
+};
+
+// --- 16. FINAL CTA [INK] ---
 const FinalCTA = () => {
   return (
     <section className="relative min-h-[90vh] bg-ink text-bg flex items-center justify-center overflow-hidden border-t border-white/5">
@@ -519,19 +720,19 @@ export default function HomePage() {
         <main>
           <Ticker />
           <Hero /> {/* INK */}
-          <VisionStatement /> {/* BG */}
           <LaptopSolutions onLeadClick={() => setActiveForm("LEAD")} /> {/* BG */}
-          <Models /> {/* INK */}
+          {/* <Models /> */}
+          <ChooseLaptop /> {/* INK */}
           <ProgramsEcosystem onProgramClick={openProgramForm} /> {/* INK */}
           <CustomOEM onLeadClick={() => setActiveForm("LEAD")} /> {/* BG */}
-          <ChooseLaptop /> {/* INK */}
-          <VideoScrollCanvas videoSrc="https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/BigBuckBunny.mp4" /> {/* BG */}
+          {/* <VideoScrollCanvas videoSrc="https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/BigBuckBunny.mp4" /> */}
 
           <WhyEntion /> {/* BG */}
-          <TrustedStats /> {/* INK */}
+          {/* <TrustedStats /> */} {/* INK — hidden for now */}
           <Roadmap /> {/* BG */}
           <Access /> {/* INK */}
           <ExperienceProgram onProgramClick={openProgramForm} /> {/* BG */}
+          <EcosystemGallery /> {/* INK */}
           <FinalCTA /> {/* INK */}
         </main>
       </BlurFadeIn>
