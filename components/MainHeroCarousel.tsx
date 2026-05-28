@@ -30,33 +30,7 @@ const SLIDES: SlideData[] = [
         titleMain: "MADE IN",
         titleAccent: "India",
         description: "ENTION® COMPUTING DEVICE",
-        accentColor: "text-accent",
-        hasAccordion: true
-    },
-    {
-        id: "vanguard",
-        type: "image-only",
-        bgImage: "/assets/landing_page/slide-1.png"
-    },
-    {
-        id: "gaming",
-        type: "image-only",
-        bgImage: "/assets/landing_page/slide-2.png"
-    },
-    {
-        id: "professional",
-        type: "image-only",
-        bgImage: "/assets/landing_page/slide-3.png"
-    },
-    {
-        id: "foundry",
-        type: "image-only",
-        bgImage: "/assets/landing_page/slide-4.png"
-    },
-    {
-        id: "ecosystem",
-        type: "image-only",
-        bgImage: "/assets/landing_page/slide-5.png"
+        accentColor: "text-accent"
     }
 ];
 
@@ -65,16 +39,19 @@ export function MainHeroCarousel() {
     const [direction, setDirection] = useState(0);
 
     const next = () => {
+        if (SLIDES.length <= 1) return;
         setDirection(1);
         setCurrent((prev) => (prev + 1) % SLIDES.length);
     };
 
     const prev = () => {
+        if (SLIDES.length <= 1) return;
         setDirection(-1);
         setCurrent((prev) => (prev - 1 + SLIDES.length) % SLIDES.length);
     };
 
     useEffect(() => {
+        if (SLIDES.length <= 1) return;
         const timer = setInterval(next, 5000); // 5 seconds
         return () => clearInterval(timer);
     }, [current]);
@@ -169,31 +146,39 @@ export function MainHeroCarousel() {
             </AnimatePresence>
 
             {/* Navigation Dots */}
-            <div className="absolute bottom-12 left-1/2 -translate-x-1/2 flex gap-4 z-30">
-                {SLIDES.map((_, i) => (
-                    <button
-                        key={i}
-                        onClick={() => {
-                            setDirection(i > current ? 1 : -1);
-                            setCurrent(i);
-                        }}
-                        className={`h-[2px] transition-all duration-500 ${i === current ? "w-16 bg-accent" : "w-6 bg-white/20 hover:bg-white/40"}`}
-                    />
-                ))}
-            </div>
+            {SLIDES.length > 1 && (
+                <div className="absolute bottom-12 left-1/2 -translate-x-1/2 flex gap-4 z-30">
+                    {SLIDES.map((_, i) => (
+                        <button
+                            key={i}
+                            onClick={() => {
+                                setDirection(i > current ? 1 : -1);
+                                setCurrent(i);
+                            }}
+                            className={`h-[2px] transition-all duration-500 ${i === current ? "w-16 bg-accent" : "w-6 bg-white/20 hover:bg-white/40"}`}
+                        />
+                    ))}
+                </div>
+            )}
 
             {/* Side Arrows */}
-            <button onClick={prev} className="absolute left-8 top-1/2 -translate-y-1/2 z-30 p-4 border border-white/5 hover:bg-white/5 text-white/20 hover:text-accent transition-all hidden lg:block">
-                <ChevronLeft size={20} />
-            </button>
-            <button onClick={next} className="absolute right-8 top-1/2 -translate-y-1/2 z-30 p-4 border border-white/5 hover:bg-white/5 text-white/20 hover:text-accent transition-all hidden lg:block">
-                <ChevronRight size={20} />
-            </button>
+            {SLIDES.length > 1 && (
+                <>
+                    <button onClick={prev} className="absolute left-8 top-1/2 -translate-y-1/2 z-30 p-4 border border-white/5 hover:bg-white/5 text-white/20 hover:text-accent transition-all hidden lg:block">
+                        <ChevronLeft size={20} />
+                    </button>
+                    <button onClick={next} className="absolute right-8 top-1/2 -translate-y-1/2 z-30 p-4 border border-white/5 hover:bg-white/5 text-white/20 hover:text-accent transition-all hidden lg:block">
+                        <ChevronRight size={20} />
+                    </button>
+                </>
+            )}
 
             {/* Aesthetic Page Counter */}
-            <div className="absolute right-12 bottom-12 font-mono text-[8vw] md:text-[10vw] font-black text-white/[0.02] select-none pointer-events-none uppercase">
-                0{current + 1}
-            </div>
+            {SLIDES.length > 1 && (
+                <div className="absolute right-12 bottom-12 font-mono text-[8vw] md:text-[10vw] font-black text-white/[0.02] select-none pointer-events-none uppercase">
+                    0{current + 1}
+                </div>
+            )}
         </section>
     );
 }
