@@ -14,7 +14,9 @@ import { BlurFadeIn } from "@/components/BlurFadeIn";
 import FormModal from "@/components/FormModal";
 import LeadSalesForm from "@/components/forms/LeadSalesForm";
 import ProgramApplicationForm from "@/components/forms/ProgramApplicationForm";
-import { ExperienceProgram } from "@/components/ExperienceProgram";
+import AvailabilitySection from "@/components/v2/AvailabilitySection";
+import WhyChooseSection from "@/components/v2/WhyChooseSection";
+import { ExperienceProgramV2 } from "@/components/v2/ExperienceProgramV2";
 
 // --- GLOBAL ANIMATION UTILS ---
 const FadeUp = ({ children, delay = 0, className = "" }: { children: React.ReactNode, delay?: number, className?: string }) => (
@@ -375,100 +377,7 @@ const ChooseLaptop = () => {
 
 
 // --- 10. WHY CHOOSE ENTION [BG] ---
-const WhyEntion = () => {
-  const points = [
-    {
-      title: "Built for India",
-      desc: "Engineered specifically for local temperatures, thermal conditions, dust resistance, and voltage fluctuations."
-    },
-    {
-      title: "Flexible customization",
-      desc: "Get components tailored directly to your technical requirements, completely bypassing mass OEM boundaries."
-    },
-    {
-      title: "Lower TCO",
-      desc: "Highly efficient component lifecycles, local repair support, and competitive enterprise procurement paths."
-    },
-    {
-      title: "Indigenous Hardware",
-      desc: "Building long-term self-reliance, local skill development, and customized system firmware security."
-    }
-  ];
-
-  const cards = [
-    {
-      num: "01",
-      title: "Built by hand, not in batches",
-      desc: "We assemble and test every machine individually. If you need a custom Linux config or non-standard parts, we build it directly for your desk."
-    },
-    {
-      num: "02",
-      title: "Real, durable materials",
-      desc: "Anodized aluminum chassis and cooling components built to handle voltage drops, dust, and local temperatures without throttling."
-    },
-    {
-      num: "03",
-      title: "Direct developer support",
-      desc: "Skip the call centers. You talk directly to the engineering team who put the machine together. We repair and swap parts locally in India."
-    }
-  ];
-
-  return (
-    <section id="why-choose" className="px-8 py-20 lg:py-32 bg-ink text-bg border-t border-white/5 relative z-10">
-      <div className="max-w-[1200px] mx-auto space-y-20">
-
-        {/* Header Block at the top */}
-        <div className="space-y-4 text-center max-w-3xl mx-auto">
-          <h2 className="text-4xl md:text-5xl lg:text-6xl font-serif font-bold leading-tight text-bg">
-            Why Choose Ention?
-          </h2>
-          <p className="text-lg opacity-60 font-sans leading-relaxed text-bg">
-            We build with obsession, source with integrity, and support without compromise.
-          </p>
-        </div>
-
-        {/* Content points in a clean 4-column layout */}
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-8 pt-8">
-          {points.map((p, i) => (
-            <FadeUp key={i} delay={i * 0.1} className="space-y-3">
-              <span className="font-mono text-xs text-accent font-bold block">
-                0{i + 1}
-              </span>
-              <h4 className="font-sans font-bold text-base uppercase tracking-tight text-bg">
-                {p.title}
-              </h4>
-              <p className="text-sm text-bg/60 leading-relaxed font-sans">
-                {p.desc}
-              </p>
-            </FadeUp>
-          ))}
-        </div>
-
-        {/* Divider */}
-        <div className="border-t border-white/10" />
-
-        {/* Cards Row (3-column grid) */}
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-12">
-          {cards.map((card, i) => (
-            <FadeUp
-              key={i}
-              delay={i * 0.1}
-              className="flex flex-col gap-4 border-l border-white/10 pl-6 group hover:border-accent transition-colors duration-500"
-            >
-              <h3 className="text-xl font-bold font-serif text-bg tracking-tight">
-                {card.title}
-              </h3>
-              <p className="text-sm text-bg/60 leading-relaxed font-sans">
-                {card.desc}
-              </p>
-            </FadeUp>
-          ))}
-        </div>
-
-      </div>
-    </section>
-  );
-};
+// Replaced by WhyChooseSection (v2)
 
 // --- 11. TRUSTED STATS [INK] ---
 const TrustedStats = () => {
@@ -535,35 +444,7 @@ const Roadmap = () => (
 );
 
 // --- 13. ACCESS [INK] ---  
-const Access = () => (
-  <section id="order" className="px-8 py-16 lg:py-24 bg-ink text-bg border-t border-white/5 relative z-10">
-    <div className="max-w-[1200px] mx-auto">
-      <FadeUp>
-        <SectionHeader title="Availability" />
-      </FadeUp>
-      <div className="flex flex-col divide-y divide-white/5">
-        {[
-          { num: "01", title: "Website", tag: "ention.in", desc: "Browse our full catalog, compare specs, and configure your custom machine directly online." },
-          { num: "02", title: "E-commerce", tag: "Retail Partners", desc: "Available through select premium retail partners across India and select global markets." },
-          { num: "03", title: "Campus", tag: "Education", desc: "Special education pricing, hands-on workshops, and direct support for students and faculty." },
-        ].map((item, i) => (
-          <FadeUp key={i} delay={i * 0.1}>
-            <div className="group flex flex-col md:flex-row md:items-center justify-between gap-6 py-10 cursor-default hover:pl-3 transition-all duration-500">
-              <div className="flex items-start gap-8">
-                <span className="font-mono text-[10px] text-white/25 mt-1 shrink-0 pt-1">{item.num}</span>
-                <div>
-                  <h3 className="text-3xl md:text-4xl font-serif font-bold text-bg group-hover:text-accent transition-colors duration-500 tracking-tight leading-tight">{item.title}</h3>
-                  <span className="text-[10px] font-mono uppercase tracking-[0.25em] text-white/30 mt-2 block">{item.tag}</span>
-                </div>
-              </div>
-              <p className="text-sm text-bg/50 leading-relaxed font-sans max-w-sm md:text-right">{item.desc}</p>
-            </div>
-          </FadeUp>
-        ))}
-      </div>
-    </div>
-  </section>
-);
+// Replaced by AvailabilitySection (v2)
 
 // --- 14. EXPERIENCE PROGRAM [BG/INK] ---
 // Imported from @/components/ExperienceProgram
@@ -746,11 +627,11 @@ export default function HomePage() {
           <CustomOEM onLeadClick={() => setActiveForm("LEAD")} /> {/* BG */}
           {/* <VideoScrollCanvas videoSrc="https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/BigBuckBunny.mp4" /> */}
 
-          <WhyEntion /> {/* BG */}
+          <WhyChooseSection /> {/* BG */}
           {/* <TrustedStats /> */} {/* INK — hidden for now */}
           <Roadmap /> {/* BG */}
-          <Access /> {/* INK */}
-          <ExperienceProgram onProgramClick={openProgramForm} /> {/* BG */}
+          <AvailabilitySection /> {/* INK */}
+          <ExperienceProgramV2 /> {/* BG */}
           <EcosystemGallery /> {/* INK */}
           <FinalCTA /> {/* INK */}
         </main>
