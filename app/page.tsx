@@ -1,466 +1,761 @@
 "use client";
 
 import React from "react";
-import { Laptop, ShoppingCart, GraduationCap, ArrowRight, Code, Brain, Settings, ShieldCheck, Zap, Globe, Building2, Truck, CheckCircle2, Cpu, Headphones } from "lucide-react";
+import { ArrowRight, CheckCircle2, Brain } from "lucide-react";
 import Image from "next/image";
 import Link from "next/link";
-import { motion, AnimatePresence } from "framer-motion";
+import { motion, useScroll, useTransform, useMotionValueEvent } from "framer-motion";
 import { Ticker } from "@/components/Ticker";
-import { HeroCarousel } from "@/components/HeroCarousel";
-import { LetterAnimation } from "@/components/LetterAnimation";
 import { MainHeroCarousel } from "@/components/MainHeroCarousel";
-import { VideoScrollCanvas } from "@/components/VideoScrollCanvas";
-import { BlurFadeIn } from "@/components/BlurFadeIn";
 import FormModal from "@/components/FormModal";
 import LeadSalesForm from "@/components/forms/LeadSalesForm";
 import ProgramApplicationForm from "@/components/forms/ProgramApplicationForm";
 import AvailabilitySection from "@/components/v2/AvailabilitySection";
 import WhyChooseSection from "@/components/v2/WhyChooseSection";
-import { ExperienceProgramV2 } from "@/components/v2/ExperienceProgramV2";
+import ShowcaseSection from "@/components/v2/ShowcaseSection";
+import { ExperienceProgram } from "@/components/ExperienceProgram";
+import { gsap } from "gsap";
+import { ScrollTrigger } from "gsap/ScrollTrigger";
 
-// --- GLOBAL ANIMATION UTILS ---
-const FadeUp = ({ children, delay = 0, className = "" }: { children: React.ReactNode, delay?: number, className?: string }) => (
-  <motion.div
-    initial={{ opacity: 0, y: 50 }}
-    whileInView={{ opacity: 1, y: 0 }}
-    viewport={{ once: true, margin: "-10%" }}
-    transition={{ duration: 1.2, delay, ease: [0.16, 1, 0.3, 1] }}
-    className={className}
-  >
-    {children}
-  </motion.div>
-);
+if (typeof window !== "undefined") {
+  gsap.registerPlugin(ScrollTrigger);
+}
 
-// --- 1. HERO [INK] — 6-Slide Dynamic Showcase ---
-const Hero = () => (
-  <MainHeroCarousel />
-);
+// ─────────────────────────────────────────────
+// HERO
+// ─────────────────────────────────────────────
+const Hero = () => <MainHeroCarousel />;
 
+// ─────────────────────────────────────────────
+// LAPTOP SOLUTIONS [BG] — clip reveals + stagger
+// ─────────────────────────────────────────────
+const LaptopSolutions = ({ onLeadClick }: { onLeadClick?: () => void }) => {
+  const sectionRef = React.useRef<HTMLDivElement>(null);
 
-const SectionHeader = ({ num, title, subtitle }: { num?: string, title: string, subtitle?: string }) => (
-  <div className="flex flex-col items-center text-center mb-16 border-b border-current/10 pb-6 max-w-6xl mx-auto">
-    {num && <span className="font-mono text-xs opacity-50 block mb-2">— {num} / {title.toUpperCase()}</span>}
-    <h2 className="text-5xl md:text-7xl font-serif font-black italic tracking-tighter leading-tight">{title}</h2>
-    {subtitle && <span className="font-mono text-[10px] opacity-40 uppercase tracking-[0.4em] mt-3 block">{subtitle}</span>}
-  </div>
-);
+  React.useEffect(() => {
+    if (!sectionRef.current) return;
+    const ctx = gsap.context(() => {
+      // Heading words: each word in its own overflow-hidden, slides up
+      const words = sectionRef.current!.querySelectorAll(".ls-word");
+      gsap.set(words, { yPercent: 110 });
+      gsap.to(words, {
+        yPercent: 0,
+        stagger: 0.07,
+        duration: 1.05,
+        ease: "power4.out",
+        scrollTrigger: {
+          trigger: sectionRef.current,
+          start: "top 80%",
+          toggleActions: "play none none none",
+        },
+      });
 
-// --- 3. MODELS [INK] ---
-const Models = () => (
-  <section id="machine" className="px-8 py-16 lg:py-24 bg-ink text-bg border-t border-white/5 perspective-1000">
-    <FadeUp>
-      <SectionHeader title="Models we make" />
-    </FadeUp>
-    <div className="max-w-[1400px] mx-auto grid grid-cols-1 md:grid-cols-2 gap-12">
-      <FadeUp delay={0.1} className="group relative bg-white/5 p-12 overflow-hidden border border-white/5 flex flex-col justify-between min-h-[550px] transition-all duration-700 hover:border-accent/40 shadow-2xl">
-        <div className="z-10 relative">
-          <h2 className="text-5xl font-serif text-bg italic mb-6">For Students</h2>
-          <p className="text-bg/60 max-w-sm leading-relaxed font-sans text-sm">
-            Affordable, Lightweight, durable, and built to support your learning on the go. Engineered for the next generation of Bharat.
-          </p>
-        </div>
-        <div className="absolute inset-0 pointer-events-none scale-110 opacity-30 group-hover:opacity-40 group-hover:scale-100 transition-all duration-[1.5s] grayscale">
-          <Image src="/assets/landing_page/stud.png" fill className="object-fit" alt="Student Series" unoptimized />
-        </div>
-        <div className="z-10 relative pt-12 mt-12">
-          <Link href="/products" className="flex items-center gap-4 bg-accent text-bg px-10 py-5 text-xs font-bold uppercase tracking-[0.4em] hover:bg-white hover:text-ink transition-all rounded-sm w-max group/btn">
-            <span>Shop Now</span> <ArrowRight size={16} className="group-hover/btn:translate-x-2 transition-transform" />
-          </Link>
-        </div>
-      </FadeUp>
+      // Cards: clip-path reveal from bottom, staggered
+      const cards = sectionRef.current!.querySelectorAll(".ls-card");
+      gsap.set(cards, { clipPath: "inset(100% 0 0 0)" });
+      gsap.to(cards, {
+        clipPath: "inset(0% 0 0 0)",
+        stagger: 0.12,
+        duration: 1,
+        ease: "power3.out",
+        scrollTrigger: {
+          trigger: sectionRef.current,
+          start: "top 68%",
+          toggleActions: "play none none none",
+        },
+      });
 
-      <FadeUp delay={0.2} className="group relative bg-white/10 p-12 overflow-hidden border border-white/10 flex flex-col justify-between min-h-[550px] transition-all duration-700 hover:border-accent/50 shadow-2xl">
-        <div className="z-10 relative">
-          <h2 className="text-5xl font-serif text-bg italic mb-6">For Professionals</h2>
-          <p className="text-bg/70 max-w-sm leading-relaxed font-sans text-sm">
-            Customizable, seamlessly switch from work tasks to meetings with reliable performance. A powerful machine ready for code, design, or research.
-          </p>
-        </div>
-        <div className="absolute inset-0 pointer-events-none scale-110 opacity-30 group-hover:opacity-40 group-hover:scale-100 transition-all duration-[1.5s] grayscale">
-          <Image src="/assets/landing_page/prof.png" fill className="object-fit" alt="Professional Series" unoptimized />
-        </div>
-        <div className="z-10 relative pt-12 mt-12">
-          <Link href="/products" className="flex items-center gap-4 bg-bg text-ink px-10 py-5 text-xs font-bold uppercase tracking-[0.4em] hover:bg-accent hover:text-white transition-all rounded-sm shadow-xl w-max group/btn">
-            <span>Explore Pro</span> <ArrowRight size={16} className="group-hover/btn:translate-x-2 transition-transform" />
-          </Link>
-        </div>
-      </FadeUp>
-    </div>
-  </section>
-);
+      // Card inner content stagger reveal
+      const inners = sectionRef.current!.querySelectorAll(".ls-inner");
+      gsap.set(inners, { opacity: 0, y: 24 });
+      gsap.to(inners, {
+        opacity: 1,
+        y: 0,
+        stagger: 0.12,
+        duration: 0.8,
+        delay: 0.4,
+        ease: "power3.out",
+        scrollTrigger: {
+          trigger: sectionRef.current,
+          start: "top 68%",
+          toggleActions: "play none none none",
+        },
+      });
+    }, sectionRef);
+    return () => ctx.revert();
+  }, []);
 
-// --- 4. LAPTOP SOLUTIONS [BG] ---
-const LaptopSolutions = ({ onLeadClick }: { onLeadClick: () => void }) => (
-  <section className="px-8 py-16 lg:py-24 bg-bg text-ink border-t border-ink/5">
-    <FadeUp>
-      <SectionHeader title="Laptop Solutions for Every Need" />
-    </FadeUp>
-    <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
-      {[
-        { title: "Developers’ Solution", subtitle: "Build, test, and deploy faster", features: ["Optimized for coding and virtualization", "Expandable RAM and SSD", "Linux compatibility"], btn: "Explore Developer Laptops", href: "/products" },
-        { title: "Enterprise Solution", subtitle: "Deploy and manage infrastructure at scale", features: ["Bulk custom hardware configurations", "IT deployment support", "AMC services"], btn: "Request Enterprise Quote", isLead: true },
-        { title: "Educational Solution", subtitle: "Enable modern, scalable learning environments", features: ["Performance meets affordability", "Smart device control & management", "Institutional branding options"], btn: "View Education Models", href: "/products" },
-      ].map((card, i) => (
-        <FadeUp key={i} delay={i * 0.1} className="bg-white text-ink p-12 flex flex-col justify-between group overflow-hidden border border-ink/10 shadow-2xl transition-all duration-700 hover:border-accent hover:-translate-y-4">
-          <div className="z-10 mb-12">
-            <h3 className="text-3xl font-serif font-bold italic mb-4">{card.title}</h3>
-            <p className="font-mono text-[10px] uppercase tracking-[0.2em] text-accent mb-8">{card.subtitle}</p>
-            <ul className="space-y-4">
-              {card.features.map((f, j) => (
-                <li key={j} className="flex items-start gap-4 text-sm opacity-80 font-medium tracking-wide">
-                  <CheckCircle2 size={16} className="text-accent shrink-0 mt-0.5" />
-                  <span>{f}</span>
-                </li>
-              ))}
-            </ul>
-          </div>
-          {card.isLead ? (
-            <button onClick={onLeadClick} className="flex items-center gap-4 bg-ink/5 border border-ink/10 px-6 py-5 text-[10px] uppercase tracking-[0.2em] font-bold mt-auto transition-colors duration-500 hover:bg-accent hover:text-white w-max">
-              {card.btn} <ArrowRight size={14} />
-            </button>
-          ) : (
-            <Link href={card.href || "#"} className="flex items-center gap-4 bg-ink/5 border border-ink/10 px-6 py-5 text-[10px] uppercase tracking-[0.2em] font-bold mt-auto transition-colors duration-500 hover:bg-accent hover:text-white w-max">
-              {card.btn} <ArrowRight size={14} />
-            </Link>
-          )}
-        </FadeUp>
-      ))}
-    </div>
-  </section>
-);
+  const cards = [
+    {
+      title: "High Performance Solutions",
+      subtitle: "Gaming, graphic design, rendering, research",
+      features: [
+        "High-performance CPU & GPU options",
+        "RTX graphics support",
+        "Designed for rendering and intensive workloads",
+      ],
+      btn: "Explore Laptops",
+      href: "/products/s1",
+    },
+    {
+      title: "Developers' Solution",
+      subtitle: "Build, test, and deploy faster",
+      features: [
+        "Optimized for coding and virtualization",
+        "Expandable RAM and SSD",
+        "Linux compatibility",
+      ],
+      btn: "Explore Laptops",
+      href: "/products/e4",
+    },
+    {
+      title: "Educational Solution",
+      subtitle: "Enable modern, scalable learning environments",
+      features: [
+        "Performance meets affordability",
+        "Smart device control & management",
+        "Institutional branding options",
+      ],
+      btn: "Explore Laptops",
+      href: "/products/e1",
+    },
+  ];
 
-// --- 5. PROGRAMS ECOSYSTEM [INK] ---
-const ProgramsEcosystem = ({ onProgramClick }: { onProgramClick: (name: string) => void }) => (
-  <section className="px-8 py-16 lg:py-24 bg-ink text-bg border-t border-white/5">
-    <FadeUp className="text-center max-w-6xl mx-auto mb-20 space-y-6">
-      <h2 className="text-5xl md:text-7xl font-serif font-black italic tracking-tighter text-bg leading-tight">
-        Beyond Devices. <br className="hidden md:block" /> Build with the Ention Ecosystem
-      </h2>
-      <p className="text-bg/60 max-w-xl mx-auto text-lg leading-relaxed pt-6">
-        We don’t just sell laptops. We help you build labs, enable startups, and create innovation ecosystems.
-      </p>
-    </FadeUp>
-    <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
-      {[
-        { title: "Innovation Labs & Institutional Programs", desc: "Build future-ready labs for learning and research", btn: "Build Your Lab" },
-        { title: "Startup Ecosystem Partnerships", desc: "Empower startups with access to infrastructure", btn: "Partner With Us" },
-        { title: "Campus Ambassador Program", desc: "Lead innovation on your campus", btn: "Join Program" },
-        { title: "Co-Creation & Shared Innovation", desc: "Collaborate to build next-gen solutions", btn: "Start Collaboration" }
-      ].map((item, i) => (
-        <FadeUp key={i} delay={i * 0.1}>
-          <div onClick={() => onProgramClick(item.title)} className="p-10 border border-white/5 group transition-all duration-700 hover:bg-bg hover:border-bg hover:text-ink hover:-translate-y-2 bg-white/5 flex flex-col items-start min-h-[350px] shadow-sm hover:shadow-2xl block w-full h-full cursor-pointer">
-            <h3 className="text-2xl font-serif font-bold italic mb-6 leading-tight group-hover:text-ink transition-colors duration-700">{item.title}</h3>
-            <p className="text-xs opacity-60 font-mono leading-relaxed mb-8 group-hover:opacity-80 transition-colors duration-700 mt-auto">{item.desc}</p>
-            <div className="mt-auto flex items-center gap-3 text-[10px] uppercase font-bold tracking-[0.2em] text-accent cursor-pointer group-hover:text-ink transition-colors duration-700">
-              {item.btn} <ArrowRight size={14} className="group-hover:translate-x-2 transition-transform" />
-            </div>
-          </div>
-        </FadeUp>
-      ))}
-    </div>
-  </section>
-);
-
-// --- 6. CUSTOM OEM [BG] ---
-const CustomOEM = ({ onLeadClick }: { onLeadClick: () => void }) => {
   return (
-    <section className="px-8 py-20 lg:py-32 bg-bg text-ink border-t border-ink/10">
-      <div className="max-w-[1200px] mx-auto space-y-20">
-        {/* Header Block */}
-        <div className="text-center space-y-6 max-w-3xl mx-auto">
-          <h2 className="text-4xl md:text-5xl lg:text-6xl font-serif font-bold leading-tight">
-            Custom Hardware &<br />White-Label Solutions
-          </h2>
-          <p className="text-lg md:text-xl opacity-75 font-sans leading-relaxed">
-            Launch your own brand or build tailored hardware with us.
-          </p>
-        </div>
-
-        {/* 3-Column Split with Thin Borders */}
-        <div className="grid grid-cols-1 md:grid-cols-3 border-t-1 border-b-1 border-ink py-12 md:py-16">
-          {[
-            { title: "Custom Configurations", desc: "Build endpoints tailored to your exact workforce needs." },
-            { title: "White-Label Laptops", desc: "Brand indigenous machines natively with your logo." },
-            { title: "Dedicated Batches", desc: "Secure production queues for bulk delivery." }
-          ].map((f, i) => (
-            <div
+    <section ref={sectionRef} className="px-8 py-16 lg:py-24 bg-bg text-ink border-t border-ink/5">
+      {/* Heading */}
+      <div className="flex flex-col items-center text-center mb-16 border-b border-current/10 pb-6 max-w-6xl mx-auto">
+        <h2 className="text-5xl md:text-7xl font-serif font-black italic tracking-tighter leading-tight">
+          {["Laptop", "Solutions", "for", "Every", "Need"].map((w, i) => (
+            <span
               key={i}
-              className={`px-8 py-8 md:py-4 flex flex-col gap-4 ${i < 2 ? "md:border-r-1 border-b-1 md:border-b-0 border-ink" : ""
-                }`}
+              className="inline-block overflow-hidden align-bottom mr-[0.22em] last:mr-0"
             >
-              <h4 className="font-sans font-bold text-xl uppercase tracking-tight text-ink">
-                {f.title}
-              </h4>
-              <p className="text-sm text-ink/70 leading-relaxed font-sans">
-                {f.desc}
-              </p>
-            </div>
+              <span className="ls-word inline-block">{w}</span>
+            </span>
           ))}
+        </h2>
+      </div>
+
+      <div className="grid grid-cols-1 md:grid-cols-3 gap-8 max-w-7xl mx-auto">
+        {cards.map((card, i) => (
+          <div
+            key={i}
+            className="ls-card bg-white text-ink overflow-hidden border border-ink/10 shadow-2xl transition-all duration-700 hover:border-accent hover:-translate-y-4"
+          >
+            <div className="ls-inner p-12 flex flex-col justify-between h-full min-h-[380px]">
+              <div className="mb-12">
+                <h3 className="text-xl md:text-2xl font-serif font-bold italic mb-4 whitespace-nowrap">
+                  {card.title}
+                </h3>
+                <p className="font-sans text-xs font-semibold text-accent mb-8">{card.subtitle}</p>
+                <ul className="space-y-4">
+                  {card.features.map((f, j) => (
+                    <li key={j} className="flex items-start gap-4 text-sm opacity-80 font-medium tracking-wide">
+                      <CheckCircle2 size={16} className="text-accent shrink-0 mt-0.5" />
+                      <span>{f}</span>
+                    </li>
+                  ))}
+                </ul>
+              </div>
+              <Link
+                href={card.href}
+                className="relative overflow-hidden z-10 bg-transparent border border-ink/20 text-ink hover:text-white px-6 py-5 text-[10px] uppercase tracking-[0.2em] font-bold flex items-center gap-4 w-max transition-colors duration-500 group/btn"
+              >
+                <span className="absolute inset-0 bg-accent -z-10 translate-y-full group-hover/btn:translate-y-0 transition-transform duration-500 ease-[cubic-bezier(0.16,1,0.3,1)]" />
+                <span className="relative z-10">{card.btn}</span>
+                <ArrowRight size={14} className="relative z-10 group-hover/btn:translate-x-1 transition-transform duration-500" />
+              </Link>
+            </div>
+          </div>
+        ))}
+      </div>
+    </section>
+  );
+};
+
+// ─────────────────────────────────────────────
+// CHOOSE LAPTOP [BG] — cards enter from opposite sides
+// ─────────────────────────────────────────────
+const ChooseLaptop = () => {
+  const sectionRef = React.useRef<HTMLDivElement>(null);
+
+  React.useEffect(() => {
+    if (!sectionRef.current) return;
+    const ctx = gsap.context(() => {
+      // Heading words clip up
+      const words = sectionRef.current!.querySelectorAll(".cl-word");
+      gsap.set(words, { yPercent: 110 });
+      gsap.to(words, {
+        yPercent: 0,
+        stagger: 0.06,
+        duration: 1.05,
+        ease: "power4.out",
+        scrollTrigger: {
+          trigger: sectionRef.current,
+          start: "top 80%",
+          toggleActions: "play none none none",
+        },
+      });
+
+      // Sub text
+      const sub = sectionRef.current!.querySelector(".cl-sub") as HTMLElement;
+      if (sub) {
+        gsap.set(sub, { opacity: 0, y: 18 });
+        gsap.to(sub, {
+          opacity: 1,
+          y: 0,
+          duration: 0.8,
+          delay: 0.4,
+          ease: "power3.out",
+          scrollTrigger: {
+            trigger: sectionRef.current,
+            start: "top 80%",
+            toggleActions: "play none none none",
+          },
+        });
+      }
+
+      // Left card enters from left, right card from right
+      const cardL = sectionRef.current!.querySelector(".cl-card-l") as HTMLElement;
+      const cardR = sectionRef.current!.querySelector(".cl-card-r") as HTMLElement;
+      if (cardL && cardR) {
+        gsap.set(cardL, { x: -60, opacity: 0 });
+        gsap.set(cardR, { x: 60, opacity: 0 });
+        const st = {
+          trigger: sectionRef.current,
+          start: "top 70%",
+          toggleActions: "play none none none",
+        };
+        gsap.to(cardL, { x: 0, opacity: 1, duration: 1.1, ease: "power3.out", scrollTrigger: st });
+        gsap.to(cardR, { x: 0, opacity: 1, duration: 1.1, delay: 0.1, ease: "power3.out", scrollTrigger: st });
+      }
+    }, sectionRef);
+    return () => ctx.revert();
+  }, []);
+
+  return (
+    <section ref={sectionRef} className="px-8 py-16 lg:py-24 bg-bg text-ink border-t border-ink/5 relative overflow-hidden">
+      <div className="text-center mb-20 space-y-6">
+        <h2 className="text-5xl md:text-7xl font-serif font-black italic tracking-tighter text-ink leading-tight">
+          {["Choose", "Your", "Ention", "Laptop"].map((w, i) => (
+            <span
+              key={i}
+              className="inline-block overflow-hidden align-bottom mr-[0.22em] last:mr-0"
+            >
+              <span className="cl-word inline-block">{w}</span>
+            </span>
+          ))}
+        </h2>
+        <p className="cl-sub opacity-50 max-w-xl mx-auto font-sans leading-relaxed text-lg">
+          Designed for different needs, performance levels, and budgets.
+        </p>
+      </div>
+
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-8 max-w-[1000px] mx-auto">
+        {/* Workbook */}
+        <div className="cl-card-l h-full">
+          <div className="p-8 lg:p-10 border border-ink/10 bg-white text-ink shadow-[0_4px_24px_rgba(0,0,0,0.04)] hover:border-ink/30 hover:-translate-y-1 transition-all duration-700 flex flex-col h-full rounded-sm min-h-[280px] justify-between">
+            <div>
+              <h3 className="text-2xl font-serif font-bold italic tracking-tight text-ink uppercase mb-3">
+                Workbook Series
+              </h3>
+              <p className="text-ink/60 mb-6 text-sm font-sans leading-relaxed">
+                Versatile and reliable for professionals, students, and developers.
+              </p>
+              <div className="flex flex-wrap items-center gap-3 mb-6">
+                <div className="bg-[#0066cc] text-white px-2 py-0.5 flex flex-col justify-center items-center rounded-sm font-sans font-bold leading-none select-none w-10 h-8 border border-[#0052a3]">
+                  <span className="text-[5px] font-normal tracking-wider opacity-90 uppercase">intel</span>
+                  <span className="text-[7px] font-black tracking-tighter mt-0.5">inside</span>
+                </div>
+                <div className="bg-gradient-to-br from-[#0066cc] to-[#0099ff] text-white px-2 py-0.5 flex flex-col justify-center items-center rounded-sm font-sans font-bold leading-none select-none w-10 h-8 border border-[#0052a3]">
+                  <span className="text-[4px] font-normal tracking-wider opacity-90 uppercase">intel</span>
+                  <span className="text-[6px] font-black tracking-tight mt-0.5">CORE</span>
+                  <span className="text-[5px] font-bold mt-0.5 opacity-90">i5</span>
+                </div>
+                <div className="bg-gradient-to-br from-[#0066cc] to-[#0099ff] text-white px-2 py-0.5 flex flex-col justify-center items-center rounded-sm font-sans font-bold leading-none select-none w-10 h-8 border border-[#0052a3]">
+                  <span className="text-[4px] font-normal tracking-wider opacity-90 uppercase">intel</span>
+                  <span className="text-[6px] font-black tracking-tight mt-0.5">CORE</span>
+                  <span className="text-[5px] font-bold mt-0.5 opacity-90">i7</span>
+                </div>
+                <div className="flex items-center gap-2 px-2.5 py-1 bg-white border border-[#e0e0e0] rounded-sm select-none h-8 shadow-sm">
+                  <svg width="10" height="10" viewBox="0 0 16 16" fill="none">
+                    <path d="M0 0H7.5V7.5H0V0Z" fill="#0078D4" />
+                    <path d="M8.5 0H16V7.5H8.5V0Z" fill="#0078D4" />
+                    <path d="M0 8.5H7.5V16H0V8.5Z" fill="#0078D4" />
+                    <path d="M8.5 8.5H16V16H8.5V8.5Z" fill="#0078D4" />
+                  </svg>
+                  <span className="font-sans font-semibold text-[9px] text-[#333333] tracking-tight">Windows 11</span>
+                </div>
+              </div>
+            </div>
+            <Link
+              href="/products"
+              className="inline-flex items-center gap-2 bg-transparent text-ink border-b border-ink/20 pb-1.5 hover:border-accent hover:text-accent text-[10px] uppercase tracking-[0.25em] font-bold transition-all duration-300 w-max group/btn"
+            >
+              <span>View Details</span>
+              <ArrowRight size={12} className="group-hover/btn:translate-x-1 transition-transform duration-300" />
+            </Link>
+          </div>
         </div>
 
-        {/* CTA Button centered at bottom */}
+        {/* Swapbook */}
+        <div className="cl-card-r h-full">
+          <div className="p-8 lg:p-10 border border-ink/10 bg-white text-ink shadow-[0_4px_24px_rgba(0,0,0,0.04)] hover:border-ink/30 hover:-translate-y-1 transition-all duration-700 flex flex-col h-full rounded-sm min-h-[280px] justify-between">
+            <div>
+              <h3 className="text-2xl font-serif font-bold italic tracking-tight text-ink uppercase mb-3">
+                Swapbook Series
+              </h3>
+              <p className="text-ink/60 mb-6 text-sm font-sans leading-relaxed">
+                High-performance machines for creators and advanced users.
+              </p>
+              <div className="flex flex-wrap items-center gap-3 mb-6">
+                <div className="bg-[#0066cc] text-white px-2 py-0.5 flex flex-col justify-center items-center rounded-sm font-sans font-bold leading-none select-none w-10 h-8 border border-[#0052a3]">
+                  <span className="text-[5px] font-normal tracking-wider opacity-90 uppercase">intel</span>
+                  <span className="text-[7px] font-black tracking-tighter mt-0.5">inside</span>
+                </div>
+                <div className="bg-gradient-to-br from-[#0066cc] to-[#0099ff] text-white px-2 py-0.5 flex flex-col justify-center items-center rounded-sm font-sans font-bold leading-none select-none w-10 h-8 border border-[#0052a3]">
+                  <span className="text-[4px] font-normal tracking-wider opacity-90 uppercase">intel</span>
+                  <span className="text-[6px] font-black tracking-tight mt-0.5">CORE</span>
+                  <span className="text-[5px] font-bold mt-0.5 opacity-90">i9</span>
+                </div>
+                <div className="flex items-center gap-1.5 px-2 py-1 bg-black border border-white/10 rounded-sm select-none h-8 shadow-sm">
+                  <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="#76B900" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" className="shrink-0">
+                    <path d="M12 2a10 10 0 0 0-10 10c0 5.52 4.48 10 10 10a10 10 0 0 0 10-10" />
+                    <path d="M12 6a6 6 0 0 0-6 6c0 3.31 2.69 6 6 6a6 6 0 0 0 6-6" />
+                    <path d="M12 10a2 2 0 0 0-2 2" />
+                  </svg>
+                  <span className="font-sans font-bold text-[7px] text-[#76B900] tracking-widest uppercase">NVIDIA RTX</span>
+                </div>
+                <div className="flex items-center gap-2 px-2.5 py-1 bg-white border border-[#e0e0e0] rounded-sm select-none h-8 shadow-sm">
+                  <svg width="10" height="10" viewBox="0 0 16 16" fill="none">
+                    <path d="M0 0H7.5V7.5H0V0Z" fill="#0078D4" />
+                    <path d="M8.5 0H16V7.5H8.5V0Z" fill="#0078D4" />
+                    <path d="M0 8.5H7.5V16H0V8.5Z" fill="#0078D4" />
+                    <path d="M8.5 8.5H16V16H8.5V8.5Z" fill="#0078D4" />
+                  </svg>
+                  <span className="font-sans font-semibold text-[9px] text-[#333333] tracking-tight">Windows 11</span>
+                </div>
+              </div>
+            </div>
+            <Link
+              href="/products"
+              className="inline-flex items-center gap-2 bg-transparent text-ink border-b border-ink/20 pb-1.5 hover:border-accent hover:text-accent text-[10px] uppercase tracking-[0.25em] font-bold transition-all duration-300 w-max group/btn"
+            >
+              <span>View Details</span>
+              <ArrowRight size={12} className="group-hover/btn:translate-x-1 transition-transform duration-300" />
+            </Link>
+          </div>
+        </div>
+      </div>
+    </section>
+  );
+};
+
+// ─────────────────────────────────────────────
+// PROGRAMS ECOSYSTEM [INK] — heading lines + grid stagger
+// ─────────────────────────────────────────────
+const ProgramsEcosystem = ({ onProgramClick }: { onProgramClick: (name: string) => void }) => {
+  const sectionRef = React.useRef<HTMLDivElement>(null);
+
+  React.useEffect(() => {
+    if (!sectionRef.current) return;
+    const ctx = gsap.context(() => {
+      // Heading lines clip up
+      const lines = sectionRef.current!.querySelectorAll(".pe-line");
+      gsap.set(lines, { yPercent: 105 });
+      gsap.to(lines, {
+        yPercent: 0,
+        stagger: 0.12,
+        duration: 1.1,
+        ease: "power4.out",
+        scrollTrigger: {
+          trigger: sectionRef.current,
+          start: "top 75%",
+          toggleActions: "play none none none",
+        },
+      });
+
+      // Sub
+      const sub = sectionRef.current!.querySelector(".pe-sub") as HTMLElement;
+      if (sub) {
+        gsap.set(sub, { opacity: 0, y: 24 });
+        gsap.to(sub, {
+          opacity: 1,
+          y: 0,
+          duration: 0.9,
+          delay: 0.5,
+          ease: "power3.out",
+          scrollTrigger: {
+            trigger: sectionRef.current,
+            start: "top 75%",
+            toggleActions: "play none none none",
+          },
+        });
+      }
+
+      // Grid cards: scale up + fade in, stagger
+      const cards = sectionRef.current!.querySelectorAll(".pe-card");
+      gsap.set(cards, { opacity: 0, y: 48, scale: 0.97 });
+      gsap.to(cards, {
+        opacity: 1,
+        y: 0,
+        scale: 1,
+        stagger: 0.09,
+        duration: 0.85,
+        ease: "power3.out",
+        scrollTrigger: {
+          trigger: sectionRef.current,
+          start: "top 65%",
+          toggleActions: "play none none none",
+        },
+      });
+    }, sectionRef);
+    return () => ctx.revert();
+  }, []);
+
+  const items = [
+    { title: "Innovation Labs & Institutional Programs", desc: "Build future-ready labs for learning and research", btn: "Build Your Lab" },
+    { title: "Startup Ecosystem Partnerships", desc: "Empower startups with access to infrastructure", btn: "Partner With Us" },
+    { title: "Campus Ambassador Program", desc: "Lead innovation on your campus", btn: "Join Program" },
+    { title: "Co-Creation & Shared Innovation", desc: "Collaborate to build next-gen solutions", btn: "Start Collaboration" },
+  ];
+
+  return (
+    <section ref={sectionRef} className="px-8 py-16 lg:py-24 bg-ink text-bg border-t border-white/5">
+      <div className="text-center max-w-6xl mx-auto mb-20 space-y-6">
+        <h2 className="text-5xl md:text-7xl font-serif font-black italic tracking-tighter text-bg leading-tight">
+          <span className="block overflow-hidden py-1">
+            <span className="pe-line block">Beyond Devices.</span>
+          </span>
+          <span className="block overflow-hidden py-1">
+            <span className="pe-line block">Build with the Ention Ecosystem</span>
+          </span>
+        </h2>
+        <p className="pe-sub text-bg/60 max-w-xl mx-auto text-lg leading-relaxed pt-6">
+          We don't just sell laptops. We help you build labs, enable startups, and create innovation ecosystems.
+        </p>
+      </div>
+
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+        {items.map((item, i) => (
+          <div
+            key={i}
+            onClick={() => onProgramClick(item.title)}
+            className="pe-card p-10 border border-white/5 group transition-all duration-700 hover:bg-bg hover:border-bg hover:text-ink hover:-translate-y-2 bg-white/5 flex flex-col items-start min-h-[350px] shadow-sm hover:shadow-2xl cursor-pointer rounded-sm"
+          >
+            <div className="min-h-[3.25rem] md:min-h-[3.75rem] flex items-center w-full mb-6">
+              <h3 className="text-lg md:text-xl font-serif font-bold italic leading-tight group-hover:text-ink transition-colors duration-700">
+                {item.title}
+              </h3>
+            </div>
+            <p className="text-sm opacity-80 font-sans leading-relaxed mb-8 group-hover:opacity-90 transition-colors duration-700 mt-auto">
+              {item.desc}
+            </p>
+            <div className="mt-auto w-full relative overflow-hidden z-10 bg-accent text-white border border-accent px-6 py-3.5 text-[10px] uppercase font-bold tracking-[0.2em] transition-colors duration-500 flex items-center justify-between rounded-sm shadow-md">
+              <span className="absolute inset-0 bg-ink -z-10 translate-y-full group-hover:translate-y-0 transition-transform duration-500 ease-[cubic-bezier(0.16,1,0.3,1)]" />
+              <span className="relative z-10">{item.btn}</span>
+              <ArrowRight size={12} className="relative z-10 group-hover:translate-x-1 transition-transform duration-500" />
+            </div>
+          </div>
+        ))}
+      </div>
+    </section>
+  );
+};
+
+// ─────────────────────────────────────────────
+// CUSTOM OEM [BG] — existing GSAP preserved
+// ─────────────────────────────────────────────
+const CustomOEM = ({ onLeadClick }: { onLeadClick: () => void }) => {
+  const sectionRef = React.useRef<HTMLDivElement>(null);
+  const gridRef = React.useRef<HTMLDivElement>(null);
+  const headingRef = React.useRef<HTMLHeadingElement>(null);
+  const lineTopRef = React.useRef<HTMLDivElement>(null);
+  const lineBottomRef = React.useRef<HTMLDivElement>(null);
+  const colsWrapperRef = React.useRef<HTMLDivElement>(null);
+  const buttonRef = React.useRef<HTMLButtonElement>(null);
+
+  React.useEffect(() => {
+    if (!sectionRef.current || !gridRef.current || !headingRef.current || !lineTopRef.current || !lineBottomRef.current || !colsWrapperRef.current) return;
+
+    const sectionEl = sectionRef.current;
+    const gridEl = gridRef.current;
+    const headingEl = headingRef.current;
+    const lineTopEl = lineTopRef.current;
+    const lineBottomEl = lineBottomRef.current;
+    const colsEl = colsWrapperRef.current;
+    const btnEl = buttonRef.current;
+
+    const ctx = gsap.context(() => {
+      const tl = gsap.timeline({
+        scrollTrigger: {
+          trigger: sectionEl,
+          start: "top 80%",
+          toggleActions: "play none none none",
+        },
+      });
+
+      // Grid radial reveal
+      tl.fromTo(gridEl,
+        { clipPath: "circle(0% at 50% 50%)" },
+        { clipPath: "circle(100% at 50% 50%)", ease: "power2.out", duration: 0.8 }
+      );
+
+      // Divider lines draw simultaneously
+      tl.fromTo([lineTopEl, lineBottomEl],
+        { scaleX: 0 },
+        { scaleX: 1, ease: "power2.out", duration: 0.6 },
+        "-=0.5"
+      );
+
+      // Heading mask reveal
+      const headingLines = headingEl.querySelectorAll(".heading-line");
+      if (headingLines.length > 0) {
+        tl.to(headingLines, { y: "0%", ease: "power3.out", duration: 0.55, stagger: 0.1 }, "-=0.4");
+      }
+
+      // Feature text stagger
+      const featureTexts = colsEl.querySelectorAll(".feature-reveal-text");
+      if (featureTexts.length > 0) {
+        tl.fromTo(featureTexts,
+          { yPercent: 100, opacity: 0 },
+          { yPercent: 0, opacity: 1, ease: "power3.out", duration: 0.45, stagger: 0.07 },
+          "-=0.3"
+        );
+      }
+
+      // Vertical separators
+      const separators = colsEl.querySelectorAll(".vertical-separator");
+      if (separators.length > 0) {
+        tl.fromTo(separators,
+          { scaleY: 0 },
+          { scaleY: 1, ease: "power2.out", duration: 0.35, stagger: 0.06 },
+          "<"
+        );
+      }
+
+      // CTA button wipe
+      if (btnEl) {
+        tl.fromTo(btnEl,
+          { clipPath: "polygon(0 0, 0 0, 0 100%, 0 100%)", opacity: 0, y: 15 },
+          { clipPath: "polygon(0 0, 100% 0, 100% 100%, 0 100%)", opacity: 1, y: 0, ease: "power2.out", duration: 0.45 },
+          "-=0.35"
+        );
+      }
+    }, sectionEl);
+
+    return () => ctx.revert();
+  }, []);
+
+  const features = [
+    "Tailored Configurations",
+    "Dedicated Production Batches",
+    "Dedicated Deployment Support",
+    "Dedicated After-sales Service",
+  ];
+
+  return (
+    <section ref={sectionRef} className="px-8 py-24 lg:py-36 bg-bg text-ink relative border-t border-ink/10 overflow-hidden">
+      <div ref={gridRef} className="absolute inset-0 opacity-[0.02] pointer-events-none z-0" style={{ clipPath: "circle(0% at 50% 50%)" }}>
+        <svg width="100%" height="100%">
+          <pattern id="custom-grid" width="40" height="40" patternUnits="userSpaceOnUse">
+            <path d="M 40 0 L 0 0 0 40" fill="none" stroke="currentColor" strokeWidth="1" />
+          </pattern>
+          <rect width="100%" height="100%" fill="url(#custom-grid)" />
+        </svg>
+      </div>
+
+      <div className="max-w-[1200px] mx-auto space-y-20 relative z-10">
+        <div className="text-center max-w-3xl mx-auto select-none overflow-hidden">
+          <h2
+            ref={headingRef}
+            className="text-4xl md:text-5xl lg:text-6xl font-serif font-bold italic leading-tight text-ink"
+          >
+            <span className="block overflow-hidden py-1">
+              <span className="heading-line block transform translate-y-[110%]">Custom Hardware &</span>
+            </span>
+            <span className="block overflow-hidden py-1">
+              <span className="heading-line block transform translate-y-[110%]">White-Label Solutions</span>
+            </span>
+          </h2>
+        </div>
+
+        <div className="space-y-12">
+          <div ref={lineTopRef} className="h-[2px] bg-ink/40 w-full scale-x-0 origin-center" />
+
+          <div ref={colsWrapperRef} className="flex flex-col lg:flex-row items-stretch justify-between py-6 gap-y-8 lg:gap-y-0">
+            {features.map((feature, i) => (
+              <React.Fragment key={i}>
+                <div className="feature-col flex-1 px-8 py-12 flex flex-col justify-center items-start text-left cursor-pointer select-none group relative overflow-hidden rounded-sm transition-all duration-500 hover:bg-ink/[0.02]">
+                  <span className="absolute bottom-0 left-0 w-full h-[2px] bg-accent scale-x-0 group-hover:scale-x-100 origin-center transition-transform duration-500 ease-out" />
+                  <div className="w-full overflow-hidden py-1">
+                    <h4 className="feature-reveal-text font-sans font-bold text-lg lg:text-xl uppercase tracking-tight text-ink leading-tight pointer-events-none transition-all duration-500 group-hover:text-accent group-hover:translate-x-1 block transform">
+                      {feature}
+                    </h4>
+                  </div>
+                </div>
+                {i < features.length - 1 && (
+                  <div className="hidden lg:block w-[2px] bg-ink/40 self-stretch scale-y-0 origin-center vertical-separator" />
+                )}
+              </React.Fragment>
+            ))}
+          </div>
+
+          <div ref={lineBottomRef} className="h-[2px] bg-ink/40 w-full scale-x-0 origin-center" />
+        </div>
+
         <div className="flex justify-center">
           <button
+            ref={buttonRef}
             onClick={onLeadClick}
-            className="bg-ink text-bg px-12 py-5 text-[11px] font-bold uppercase tracking-[0.3em] hover:bg-accent hover:text-white transition-all shadow-xl hover:-translate-y-1 rounded-sm group flex items-center gap-4"
+            className="relative overflow-hidden z-10 bg-transparent border border-accent text-accent hover:text-white px-12 py-5 text-[11px] font-bold uppercase tracking-[0.3em] transition-colors duration-500 rounded-sm group/btn flex items-center gap-4 cursor-pointer shadow-xl"
+            style={{ clipPath: "polygon(0 0, 0 0, 0 100%, 0 100%)", opacity: 0 }}
           >
-            Contact Our Team <ArrowRight size={14} className="group-hover:translate-x-1 transition-transform" />
+            <span className="absolute inset-0 bg-accent -z-10 translate-y-full group-hover/btn:translate-y-0 transition-transform duration-500 ease-[cubic-bezier(0.16,1,0.3,1)]" />
+            <span className="relative z-10">Discuss Your Requirements</span>
+            <ArrowRight size={14} className="relative z-10 group-hover/btn:translate-x-1 transition-transform duration-500" />
           </button>
         </div>
       </div>
     </section>
-  )
-};
-
-// --- 7. CHOOSE LAPTOP (Side-by-Side Cards) [BG] ---
-const ChooseLaptop = () => {
-  return (
-    <section className="px-8 py-16 lg:py-24 bg-bg text-ink border-t border-ink/5 relative">
-      <FadeUp className="text-center mb-20 space-y-6">
-        <h2 className="text-5xl md:text-7xl font-serif font-black italic tracking-tighter text-ink leading-tight">
-          Choose Your Ention Laptop
-        </h2>
-        <p className="opacity-50 max-w-xl mx-auto font-sans leading-relaxed text-lg">
-          Designed for different needs, performance levels, and budgets.
-        </p>
-      </FadeUp>
-
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-12 max-w-[1200px] mx-auto min-h-[500px]">
-        {/* Card 1: Workbook */}
-        <FadeUp delay={0.1} className="h-full">
-          <div className="p-8 lg:p-10 border border-[#e0e0e0] bg-[#f4f4f4] text-ink shadow-[0_0_50px_rgba(0,0,0,0.02)] hover:-translate-y-2 transition-transform duration-700 flex flex-col h-full rounded-sm">
-            {/* Top Laptop Image Container */}
-            <div className="relative w-full aspect-[4/3] bg-transparent mb-8 overflow-hidden group flex items-center justify-center">
-              <div className="relative w-full h-full">
-                <Image
-                  src="/assets/all_product_page/e1-cat.png"
-                  alt="Workbook Series"
-                  fill
-                  className="object-contain filter drop-shadow-[0_12px_24px_rgba(0,0,0,0.06)] mix-blend-multiply"
-                />
-              </div>
-            </div>
-
-            <h3 className="text-3xl font-sans font-black tracking-tight text-ink uppercase mb-2">
-              Workbook Series
-            </h3>
-            <p className="text-ink/60 mb-6 text-sm font-sans min-h-[40px]">
-              Versatile and reliable for professionals, students, and developers.
-            </p>
-
-            {/* Badges Row */}
-            <div className="flex flex-wrap items-center gap-3 mb-6">
-              {/* Intel Inside */}
-              <div className="bg-[#0066cc] text-white px-2 py-0.5 flex flex-col justify-center items-center rounded-sm font-sans font-bold leading-none select-none w-10 h-8 border border-[#0052a3]">
-                <span className="text-[5px] font-normal tracking-wider opacity-90 uppercase">intel</span>
-                <span className="text-[7px] font-black tracking-tighter mt-0.5">inside</span>
-              </div>
-              {/* Intel Core i5 */}
-              <div className="bg-gradient-to-br from-[#0066cc] to-[#0099ff] text-white px-2 py-0.5 flex flex-col justify-center items-center rounded-sm font-sans font-bold leading-none select-none w-10 h-8 border border-[#0052a3]">
-                <span className="text-[4px] font-normal tracking-wider opacity-90 uppercase">intel</span>
-                <span className="text-[6px] font-black tracking-tight mt-0.5">CORE</span>
-                <span className="text-[5px] font-bold mt-0.5 opacity-90">i5</span>
-              </div>
-              {/* Intel Core i7 */}
-              <div className="bg-gradient-to-br from-[#0066cc] to-[#0099ff] text-white px-2 py-0.5 flex flex-col justify-center items-center rounded-sm font-sans font-bold leading-none select-none w-10 h-8 border border-[#0052a3]">
-                <span className="text-[4px] font-normal tracking-wider opacity-90 uppercase">intel</span>
-                <span className="text-[6px] font-black tracking-tight mt-0.5">CORE</span>
-                <span className="text-[5px] font-bold mt-0.5 opacity-90">i7</span>
-              </div>
-              {/* Windows 11 */}
-              <div className="flex items-center gap-2 px-2.5 py-1 bg-white border border-[#e0e0e0] rounded-sm select-none h-8">
-                <svg width="10" height="10" viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg">
-                  <path d="M0 0H7.5V7.5H0V0Z" fill="#0078D4" />
-                  <path d="M8.5 0H16V7.5H8.5V0Z" fill="#0078D4" />
-                  <path d="M0 8.5H7.5V16H0V8.5Z" fill="#0078D4" />
-                  <path d="M8.5 8.5H16V16H8.5V8.5Z" fill="#0078D4" />
-                </svg>
-                <span className="font-sans font-semibold text-[9px] text-[#333333] tracking-tight">Windows 11</span>
-              </div>
-            </div>
-
-            <ul className="space-y-3 font-mono text-[10px] uppercase tracking-widest text-ink/70 mb-8 border-t border-[#e0e0e0] pt-4 flex-1">
-              <li className="flex gap-2 items-center">• <span className="opacity-90 font-bold">Intel i7 / i5 / N100 / N95</span></li>
-              <li className="flex gap-2 items-center">• <span className="opacity-90 font-bold">Windows 11 ready</span></li>
-              <li className="flex gap-2 items-center">• <span className="text-accent font-bold">Best for: Productivity, learning, development</span></li>
-            </ul>
-
-            <Link
-              href="/products"
-              className="w-full bg-[#e5e5e5] text-ink border border-[#d0d0d0] px-8 py-4 text-center text-[10px] uppercase tracking-widest font-bold hover:bg-ink hover:text-bg hover:border-ink transition-colors duration-500 mt-auto shadow-md"
-            >
-              View Details
-            </Link>
-          </div>
-        </FadeUp>
-
-        {/* Card 2: Swapbook */}
-        <FadeUp delay={0.2} className="h-full">
-          <div className="p-8 lg:p-10 border border-[#e0e0e0] flex flex-col bg-[#f4f4f4] text-ink relative overflow-hidden hover:-translate-y-2 transition-transform duration-700 h-full shadow-2xl rounded-sm">
-            {/* Top Laptop Image Container */}
-            <div className="relative w-full aspect-[4/3] bg-transparent mb-8 overflow-hidden group flex items-center justify-center">
-              <div className="relative w-full h-full">
-                <Image
-                  src="/assets/all_product_page/s1-cat.png"
-                  alt="Swapbook Series"
-                  fill
-                  className="object-contain filter drop-shadow-[0_12px_24px_rgba(0,0,0,0.06)] mix-blend-multiply"
-                />
-              </div>
-            </div>
-
-            <h3 className="text-3xl font-sans font-black tracking-tight text-ink uppercase mb-2">
-              Swapbook Series
-            </h3>
-            <p className="text-ink/60 mb-6 text-sm font-sans min-h-[40px]">
-              High-performance machines for creators and advanced users.
-            </p>
-
-            {/* Badges Row */}
-            <div className="flex flex-wrap items-center gap-3 mb-6">
-              {/* Intel Inside */}
-              <div className="bg-[#0066cc] text-white px-2 py-0.5 flex flex-col justify-center items-center rounded-sm font-sans font-bold leading-none select-none w-10 h-8 border border-[#0052a3]">
-                <span className="text-[5px] font-normal tracking-wider opacity-90 uppercase">intel</span>
-                <span className="text-[7px] font-black tracking-tighter mt-0.5">inside</span>
-              </div>
-              {/* Intel Core i9 */}
-              <div className="bg-gradient-to-br from-[#0066cc] to-[#0099ff] text-white px-2 py-0.5 flex flex-col justify-center items-center rounded-sm font-sans font-bold leading-none select-none w-10 h-8 border border-[#0052a3]">
-                <span className="text-[4px] font-normal tracking-wider opacity-90 uppercase">intel</span>
-                <span className="text-[6px] font-black tracking-tight mt-0.5">CORE</span>
-                <span className="text-[5px] font-bold mt-0.5 opacity-90">i9</span>
-              </div>
-              {/* NVIDIA GeForce RTX */}
-              <div className="flex items-center gap-1.5 px-2 py-1 bg-black border border-white/10 rounded-sm select-none h-8">
-                <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="#76B900" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" className="shrink-0">
-                  <path d="M12 2a10 10 0 0 0-10 10c0 5.52 4.48 10 10 10a10 10 0 0 0 10-10" />
-                  <path d="M12 6a6 6 0 0 0-6 6c0 3.31 2.69 6 6 6a6 6 0 0 0 6-6" />
-                  <path d="M12 10a2 2 0 0 0-2 2" />
-                </svg>
-                <span className="font-sans font-bold text-[7px] text-[#76B900] tracking-widest uppercase">NVIDIA RTX</span>
-              </div>
-              {/* Windows 11 */}
-              <div className="flex items-center gap-2 px-2.5 py-1 bg-white border border-[#e0e0e0] rounded-sm select-none h-8">
-                <svg width="10" height="10" viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg">
-                  <path d="M0 0H7.5V7.5H0V0Z" fill="#0078D4" />
-                  <path d="M8.5 0H16V7.5H8.5V0Z" fill="#0078D4" />
-                  <path d="M0 8.5H7.5V16H0V8.5Z" fill="#0078D4" />
-                  <path d="M8.5 8.5H16V16H8.5V8.5Z" fill="#0078D4" />
-                </svg>
-                <span className="font-sans font-semibold text-[9px] text-[#333333] tracking-tight">Windows 11</span>
-              </div>
-            </div>
-
-            <ul className="space-y-3 font-mono text-[10px] uppercase tracking-widest text-ink/70 mb-8 border-t border-[#e0e0e0] pt-4 flex-1">
-              <li className="flex gap-2 items-center">• <span className="opacity-90 font-bold">Intel i9 processors</span></li>
-              <li className="flex gap-2 items-center">• <span className="opacity-90 font-bold">RTX graphics</span></li>
-              <li className="flex gap-2 items-center">• <span className="opacity-100 text-accent font-bold">Best for: Design, gaming, heavy workloads</span></li>
-            </ul>
-
-            <Link
-              href="/products"
-              className="w-full bg-[#e5e5e5] text-ink border border-[#d0d0d0] px-8 py-4 text-center text-[10px] uppercase tracking-widest font-bold hover:bg-ink hover:text-bg hover:border-ink transition-colors duration-500 mt-auto shadow-md"
-            >
-              View Details
-            </Link>
-          </div>
-        </FadeUp>
-      </div>
-    </section>
   );
 };
 
-// --- 8. VIDEO CANVAS (Anatomy of Power) [BG] ---
-// Handled by component VideoScrollCanvas
+// ─────────────────────────────────────────────
+// ROADMAP [BG — HORIZONTAL SCROLL]
+// Framer Motion horizontal scroll preserved, heading gets GSAP
+// ─────────────────────────────────────────────
+const Roadmap = () => {
+  const containerRef = React.useRef<HTMLDivElement>(null);
+  const { scrollYProgress } = useScroll({ target: containerRef });
+  const [scrollProgress, setScrollProgress] = React.useState(0);
+  useMotionValueEvent(scrollYProgress, "change", (latest) => setScrollProgress(latest));
 
-// --- 9. SYNE ARCHITECTURE (ENGINEERING) [INK] ---
+  const [isMobile, setIsMobile] = React.useState(false);
+  React.useEffect(() => {
+    const checkMobile = () => setIsMobile(window.innerWidth < 768);
+    checkMobile();
+    window.addEventListener("resize", checkMobile);
+    return () => window.removeEventListener("resize", checkMobile);
+  }, []);
 
+  const x = useTransform(scrollYProgress, [0, 1], ["0vw", isMobile ? "-230vw" : "-115vw"]);
 
+  const steps = [
+    {
+      time: "Today",
+      text: "System Integration & Deployment",
+      desc: "Setting up native assembly, deploying tailored devices, and establishing our baseline quality.",
+    },
+    {
+      time: "Next",
+      text: "Optimization & Control Layer",
+      desc: "Building our own firmware optimizations, device control configurations, and deep software integrations.",
+    },
+    {
+      time: "Future",
+      text: "Indigenous Hardware, OS & AI Stack",
+      desc: "Designing indigenous motherboards, customizing OS layers, and creating our native AI ecosystem.",
+    },
+  ];
 
-// --- 10. WHY CHOOSE ENTION [BG] ---
-// Replaced by WhyChooseSection (v2)
-
-// --- 11. TRUSTED STATS [INK] ---
-const TrustedStats = () => {
   return (
-    <section className="px-8 py-16 lg:py-24 bg-ink text-bg text-center border-t border-white/5 relative z-10 overflow-hidden">
-      <div className="absolute inset-0 flex items-center justify-center opacity-[0.03] pointer-events-none origin-center">
-        <Globe size={1200} strokeWidth={0.2} />
-      </div>
+    <div ref={containerRef} className="relative h-[300vh] bg-bg border-t border-ink/5">
+      <div className="sticky top-0 h-screen overflow-hidden flex items-center">
+        <motion.div style={{ x }} className="flex gap-20 md:gap-32 items-center px-[10vw] min-w-max">
+          <div className="w-[85vw] md:w-[45vw] shrink-0 space-y-6 pr-12 border-r border-ink/10 flex flex-col justify-center">
+            <h2 className="text-4xl md:text-6xl font-serif font-bold italic tracking-tighter text-ink leading-tight">
+              Solving Today.<br />Building Tomorrow.
+            </h2>
+            <p className="opacity-70 text-lg md:text-xl font-sans leading-relaxed max-w-md">
+              We are addressing immediate computing needs while building India's long-term technology foundation.
+            </p>
+          </div>
 
-      <div className="max-w-[1200px] mx-auto z-10 relative">
-        <FadeUp>
-          <h2 className="text-5xl md:text-8xl font-serif font-black italic tracking-tighter text-bg mb-6 leading-none">Growing with Institutions, Startups & Innovators</h2>
-          <p className="text-accent font-mono uppercase tracking-widest mb-32 mt-8 text-xs font-bold bg-white/5 px-6 py-2 rounded-full w-max mx-auto">Trusted by Emerging Ecosystems</p>
-        </FadeUp>
-
-        <div className="grid grid-cols-1 sm:grid-cols-3 gap-16 border-t border-b border-white/10 py-24">
-          {[
-            { stat: "XX+", label: "Devices Deployed" },
-            { stat: "XX+", label: "Institutions Engaged" },
-            { stat: "XX+", label: "Startups Supported" },
-          ].map((s, i) => (
-            <FadeUp delay={i * 0.2} key={i} className="flex flex-col gap-6 items-center px-4 group">
-              <span className="text-[5rem] md:text-[8rem] font-black text-bg tracking-tighter mix-blend-screen group-hover:-translate-y-4 transition-transform duration-[1s] leading-none text-transparent bg-clip-text bg-gradient-to-b from-white to-white/40">{s.stat}</span>
-              <div className="h-[1px] w-12 bg-white/10 group-hover:w-full group-hover:bg-accent transition-all duration-700" />
-              <span className="font-mono text-xs tracking-[0.3em] uppercase text-bg/60 font-bold group-hover:text-accent transition-colors">{s.label}</span>
-            </FadeUp>
-          ))}
-        </div>
+          <div className="flex gap-16 md:gap-24 items-center">
+            {steps.map((r, i) => {
+              const isStepActive =
+                (i === 0 && scrollProgress > 0.15) ||
+                (i === 1 && scrollProgress > 0.45) ||
+                (i === 2 && scrollProgress > 0.75);
+              return (
+                <div key={i} className="w-[80vw] md:w-[32vw] shrink-0 flex flex-col gap-6 relative group">
+                  {i > 0 && (
+                    <div className="absolute -left-12 md:-left-16 top-1/2 -translate-y-1/2 w-12 md:w-16 h-[1px] bg-ink/15" />
+                  )}
+                  <div className="flex items-center gap-3">
+                    <div className={`w-3.5 h-3.5 rounded-full border border-bg shadow-sm transition-all duration-500 ${isStepActive ? "bg-accent scale-125" : "bg-ink/20 group-hover:bg-accent/50 group-hover:scale-110"}`} />
+                    <span className="font-sans text-[10px] tracking-[0.4em] font-bold uppercase text-ink/50 bg-ink/5 px-3 py-1 rounded-sm">
+                      {r.time}
+                    </span>
+                  </div>
+                  <h3 className="text-2xl md:text-4xl font-serif italic font-bold tracking-tight text-ink">{r.text}</h3>
+                  <p className="text-sm md:text-base font-sans text-ink/75 leading-relaxed max-w-sm">{r.desc}</p>
+                </div>
+              );
+            })}
+          </div>
+        </motion.div>
       </div>
-    </section>
+      <div className="absolute top-1/2 -translate-y-1/2 right-10 opacity-[0.015] pointer-events-none">
+        <Brain size={800} strokeWidth={0.2} className="text-ink" />
+      </div>
+    </div>
   );
 };
 
-// --- 12. ROADMAP [BG] ---
-const Roadmap = () => (
-  <section className="px-8 py-16 lg:py-24 bg-bg text-ink border-t border-ink/5 relative overflow-hidden">
-    <div className="max-w-6xl mx-auto space-y-32 z-10 relative">
-      <FadeUp className="text-center border-b border-ink/10 pb-20">
-        <h2 className="text-4xl md:text-6xl font-serif font-black italic tracking-tighter text-ink mb-8 leading-tight drop-shadow-sm">Solving Today. Building Tomorrow.</h2>
-        <p className="opacity-70 text-xl font-sans max-w-2xl mx-auto leading-relaxed">We are addressing immediate computing needs while building India’s long-term technology foundation.</p>
-      </FadeUp>
-
-      <div className="space-y-16 pl-8 md:pl-24 border-l-2 border-ink/10 relative max-w-3xl mx-auto">
-        {[
-          { time: "Today", text: "System Integration & Deployment", active: true },
-          { time: "Next", text: "Optimization & Control Layer", active: false },
-          { time: "Future", text: "Indigenous Hardware, OS & AI Stack", active: false }
-        ].map((r, i) => (
-          <FadeUp key={i} delay={i * 0.15} className="relative group cursor-default">
-            <div className={`absolute -left-[38px] md:-left-[103px] top-1/2 -translate-y-1/2 w-4 h-4 rounded-full border border-bg transition-all duration-700 shadow-xl ${r.active ? 'bg-accent scale-150' : 'bg-ink/20 group-hover:bg-accent/50 group-hover:scale-125'}`} />
-            <div className="pl-4 md:pl-16 flex flex-col items-start gap-3">
-              <div className="text-[11px] font-mono tracking-[0.4em] font-bold uppercase text-ink/50 bg-ink/5 px-4 py-1 rounded-sm">{r.time}</div>
-              <div className={`text-3xl md:text-5xl font-serif italic font-bold transition-all duration-700 tracking-tight ${r.active ? 'text-ink' : 'text-ink/30 group-hover:text-ink/60 group-hover:translate-x-4'}`}>{r.text}</div>
-            </div>
-          </FadeUp>
-        ))}
-      </div>
-    </div>
-
-    <div className="absolute top-1/2 -translate-y-1/2 left-0 opacity-[0.02] pointer-events-none -translate-x-1/2">
-      <Brain size={1200} strokeWidth={0.2} className="text-ink" />
-    </div>
-  </section>
-);
-
-// --- 13. ACCESS [INK] ---  
-// Replaced by AvailabilitySection (v2)
-
-// --- 14. EXPERIENCE PROGRAM [BG/INK] ---
-// Imported from @/components/ExperienceProgram
-
-
-// --- 15. ECOSYSTEM GALLERY [INK] ---
+// ─────────────────────────────────────────────
+// ECOSYSTEM GALLERY [INK] — heading clip + infinite strip
+// ─────────────────────────────────────────────
 const EcosystemGallery = () => {
-  const row1Slides = [
+  const sectionRef = React.useRef<HTMLDivElement>(null);
+
+  React.useEffect(() => {
+    if (!sectionRef.current) return;
+    const ctx = gsap.context(() => {
+      // Heading lines clip up
+      const lines = sectionRef.current!.querySelectorAll(".eg-line");
+      gsap.set(lines, { yPercent: 105 });
+      gsap.to(lines, {
+        yPercent: 0,
+        stagger: 0.1,
+        duration: 1,
+        ease: "power4.out",
+        scrollTrigger: {
+          trigger: sectionRef.current,
+          start: "top 80%",
+          toggleActions: "play none none none",
+        },
+      });
+
+      // Sub
+      const sub = sectionRef.current!.querySelector(".eg-sub") as HTMLElement;
+      if (sub) {
+        gsap.set(sub, { opacity: 0, y: 20 });
+        gsap.to(sub, {
+          opacity: 1,
+          y: 0,
+          duration: 0.9,
+          delay: 0.45,
+          ease: "power3.out",
+          scrollTrigger: {
+            trigger: sectionRef.current,
+            start: "top 80%",
+            toggleActions: "play none none none",
+          },
+        });
+      }
+    }, sectionRef);
+    return () => ctx.revert();
+  }, []);
+
+  const slides = [
     { label: "IIT Bombay Showcase", sub: "Innovation & Demo Day" },
     { label: "Startup India Summit", sub: "Ecosystem Partnerships" },
     { label: "Campus Lab Setup", sub: "Institutional Deployment" },
     { label: "Founders Meet 2024", sub: "Product Experience" },
     { label: "NASSCOM Pavilion", sub: "Industry Collaboration" },
-  ];
-
-  const row2Slides = [
     { label: "IIT Madras Research Park", sub: "Institutional Collaboration" },
     { label: "Bangalore Founders Meet", sub: "Product Demo" },
     { label: "Delhi Incubation Center", sub: "Startup Support" },
@@ -469,98 +764,47 @@ const EcosystemGallery = () => {
   ];
 
   return (
-    <section className="py-20 lg:py-28 bg-ink text-bg border-t border-white/5 overflow-hidden">
+    <section ref={sectionRef} className="py-20 lg:py-28 bg-ink text-bg border-t border-white/5 overflow-hidden">
       <div className="max-w-[1200px] mx-auto px-8 mb-14 text-center flex flex-col items-center">
-        <FadeUp className="flex flex-col items-center text-center">
+        <div className="flex flex-col items-center text-center">
           <h2 className="text-4xl md:text-5xl font-serif font-bold text-bg leading-tight mb-4">
-            Building With the Ecosystem
+            <span className="block overflow-hidden"><span className="eg-line block">Building With the Ecosystem</span></span>
           </h2>
-          <p className="text-bg/50 text-base font-sans max-w-2xl leading-relaxed">
+          <p className="eg-sub text-bg/50 text-base font-sans max-w-2xl leading-relaxed">
             Ention is actively engaging with India's startup and innovation ecosystem—collaborating
             with incubators, institutions, and emerging founders. From product showcase to ecosystem
             partnerships, we are building real-world momentum.
           </p>
-        </FadeUp>
+        </div>
       </div>
 
       <div className="flex flex-col gap-0 w-full overflow-hidden">
-        {/* Row 1 Scroll Gallery */}
         <div className="w-full overflow-hidden flex py-1">
           <motion.div
             className="flex flex-nowrap gap-0 shrink-0"
             animate={{ x: ["0%", "-50%"] }}
-            transition={{
-              ease: "linear",
-              duration: 25,
-              repeat: Infinity,
-            }}
+            transition={{ ease: "linear", duration: 70, repeat: Infinity }}
           >
-            {[...row1Slides, ...row1Slides].map((slide, i) => {
-              const origIndex = i % row1Slides.length;
+            {[...slides, ...slides].map((slide, i) => {
+              const origIndex = i % slides.length;
+              const num = origIndex + 1;
+              const formattedIndex = num < 10 ? `0${num}` : `${num}`;
               return (
                 <div
                   key={i}
-                  className="relative shrink-0 w-[300px] md:w-[380px] h-[200px] md:h-[240px] overflow-hidden bg-white/5 group cursor-default"
+                  className="relative shrink-0 w-[500px] md:w-[640px] h-[320px] md:h-[400px] overflow-hidden bg-white/5 group cursor-default"
                 >
-                  {/* Faux image background using gradient placeholder */}
                   <div
                     className="absolute inset-0 transition-transform duration-700 group-hover:scale-105"
                     style={{
-                      background: `linear-gradient(135deg, hsl(${(origIndex * 47 + 20) % 360},12%,12%) 0%, hsl(${(origIndex * 47 + 60) % 360},8%,8%) 100%)`
+                      background: `linear-gradient(135deg, hsl(${(origIndex * 37 + 20) % 360},12%,12%) 0%, hsl(${(origIndex * 37 + 60) % 360},8%,8%) 100%)`,
                     }}
                   />
-                  {/* Subtle grain */}
-                  <div className="absolute inset-0 opacity-[0.04] pointer-events-none" style={{ backgroundImage: "url('data:image/svg+xml,%3Csvg viewBox=\'0 0 256 256\' xmlns=\'http://www.w3.org/2000/svg\'%3E%3Cfilter id=\'noise\'%3E%3CfeTurbulence type=\'fractalNoise\' baseFrequency=\'0.9\' numOctaves=\'4\' stitchTiles=\'stitch\'/%3E%3C/filter%3E%3Crect width=\'100%25\' height=\'100%25\' filter=\'url(%23noise)\'/%3E%3C/svg%3E')" }} />
-                  {/* Bottom overlay */}
                   <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/20 to-transparent" />
-                  {/* Index */}
-                  <span className="absolute top-5 left-5 font-mono text-[9px] text-white/25 tracking-[0.3em] uppercase">0{origIndex + 1}</span>
-                  {/* Text overlay */}
+                  <span className="absolute top-5 left-5 font-mono text-[9px] text-white/25 tracking-[0.3em] uppercase">{formattedIndex}</span>
                   <div className="absolute bottom-0 left-0 p-6 text-left">
                     <p className="text-[9px] font-mono uppercase tracking-[0.25em] text-accent mb-2">{slide.sub}</p>
-                    <h4 className="text-lg font-serif font-bold text-bg leading-snug">{slide.label}</h4>
-                  </div>
-                </div>
-              );
-            })}
-          </motion.div>
-        </div>
-
-        {/* Row 2 Scroll Gallery */}
-        <div className="w-full overflow-hidden flex py-1">
-          <motion.div
-            className="flex flex-nowrap gap-0 shrink-0"
-            animate={{ x: ["-50%", "0%"] }}
-            transition={{
-              ease: "linear",
-              duration: 25,
-              repeat: Infinity,
-            }}
-          >
-            {[...row2Slides, ...row2Slides].map((slide, i) => {
-              const origIndex = i % row2Slides.length;
-              return (
-                <div
-                  key={i}
-                  className="relative shrink-0 w-[300px] md:w-[380px] h-[200px] md:h-[240px] overflow-hidden bg-white/5 group cursor-default"
-                >
-                  {/* Faux image background using gradient placeholder */}
-                  <div
-                    className="absolute inset-0 transition-transform duration-700 group-hover:scale-105"
-                    style={{
-                      background: `linear-gradient(135deg, hsl(${(origIndex * 59 + 180) % 360},12%,12%) 0%, hsl(${(origIndex * 59 + 220) % 360},8%,8%) 100%)`
-                    }}
-                  />
-                  {/* Subtle grain */}
-                  <div className="absolute inset-0 opacity-[0.04] pointer-events-none" style={{ backgroundImage: "url('data:image/svg+xml,%3Csvg viewBox=\'0 0 256 256\' xmlns=\'http://www.w3.org/2000/svg\'%3E%3Cfilter id=\'noise\'%3E%3CfeTurbulence type=\'fractalNoise\' baseFrequency=\'0.9\' numOctaves=\'4\' stitchTiles=\'stitch\'/%3E%3C/filter%3E%3Crect width=\'100%25\' height=\'100%25\' filter=\'url(%23noise)\'/%3E%3C/svg%3E')" }} />
-                  {/* Bottom overlay */}
-                  <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/20 to-transparent" />
-                  {/* Index */}
-                  <span className="absolute top-5 left-5 font-mono text-[9px] text-white/25 tracking-[0.3em] uppercase">0{origIndex + 6}</span>
-                  {/* Text overlay */}
-                  <div className="absolute bottom-0 left-0 p-6 text-left">
-                    <p className="text-[9px] font-mono uppercase tracking-[0.25em] text-accent mb-2">{slide.sub}</p>
-                    <h4 className="text-lg font-serif font-bold text-bg leading-snug">{slide.label}</h4>
+                    <h4 className="text-xl font-serif font-bold text-bg leading-snug">{slide.label}</h4>
                   </div>
                 </div>
               );
@@ -572,34 +816,106 @@ const EcosystemGallery = () => {
   );
 };
 
-// --- 16. FINAL CTA [INK] ---
+// ─────────────────────────────────────────────
+// FINAL CTA [INK] — cinematic reveal
+// ─────────────────────────────────────────────
 const FinalCTA = () => {
+  const sectionRef = React.useRef<HTMLDivElement>(null);
+
+  React.useEffect(() => {
+    if (!sectionRef.current) return;
+    const ctx = gsap.context(() => {
+      // Heading lines clip up
+      const lines = sectionRef.current!.querySelectorAll(".cta-line");
+      gsap.set(lines, { yPercent: 110 });
+      gsap.to(lines, {
+        yPercent: 0,
+        stagger: 0.1,
+        duration: 1.1,
+        ease: "power4.out",
+        scrollTrigger: {
+          trigger: sectionRef.current,
+          start: "top 75%",
+          toggleActions: "play none none none",
+        },
+      });
+
+      // Sub text
+      const sub = sectionRef.current!.querySelector(".cta-sub") as HTMLElement;
+      if (sub) {
+        gsap.set(sub, { opacity: 0, y: 24 });
+        gsap.to(sub, {
+          opacity: 1,
+          y: 0,
+          duration: 0.9,
+          delay: 0.5,
+          ease: "power3.out",
+          scrollTrigger: {
+            trigger: sectionRef.current,
+            start: "top 75%",
+            toggleActions: "play none none none",
+          },
+        });
+      }
+
+      // Buttons: clip-path wipe from left
+      const btns = sectionRef.current!.querySelectorAll(".cta-btn");
+      gsap.set(btns, { clipPath: "inset(0 100% 0 0)" });
+      gsap.to(btns, {
+        clipPath: "inset(0 0% 0 0)",
+        stagger: 0.13,
+        duration: 0.9,
+        delay: 0.7,
+        ease: "power3.out",
+        scrollTrigger: {
+          trigger: sectionRef.current,
+          start: "top 75%",
+          toggleActions: "play none none none",
+        },
+      });
+    }, sectionRef);
+    return () => ctx.revert();
+  }, []);
+
   return (
-    <section className="relative min-h-[90vh] bg-ink text-bg flex items-center justify-center overflow-hidden border-t border-white/5">
+    <section ref={sectionRef} className="relative min-h-[90vh] bg-ink text-bg flex items-center justify-center overflow-hidden border-t border-white/5">
       <div className="absolute inset-0 z-0">
         <Image src="/assets/landing_page/final-cta.png" alt="Experience Ention" fill className="object-cover opacity-[0.5] grayscale" unoptimized />
       </div>
-
       <div className="absolute inset-0 bg-gradient-to-t from-ink via-transparent to-ink z-0 pointer-events-none" />
-
       <div className="z-10 text-center px-4 max-w-5xl">
-        <FadeUp>
-          <h2 className="text-6xl md:text-8xl text-bg font-serif mb-8 italic leading-[0.85] tracking-tighter drop-shadow-2xl">Ready to Build, Scale, or Upgrade?</h2>
-          <p className="text-bg/60 mb-20 text-xl md:text-2xl font-sans max-w-3xl mx-auto leading-relaxed">Whether you need laptops, labs, or ecosystem partnerships—we’re ready to work with you.</p>
-        </FadeUp>
-        <FadeUp delay={0.2} className="flex flex-col sm:flex-row items-center justify-center gap-8">
-          <Link href="/products" className="bg-accent text-bg px-14 py-6 text-[11px] uppercase tracking-[0.4em] font-bold hover:bg-white hover:text-ink transition-colors duration-500 rounded-sm w-full sm:w-auto shadow-[0_20px_50px_rgba(242,125,38,0.2)] hover:-translate-y-2">
+        <h2 className="text-6xl md:text-8xl text-bg font-serif mb-8 italic leading-[0.85] tracking-tighter drop-shadow-2xl">
+          {["Ready to Build,", "Scale, or Upgrade?"].map((line, i) => (
+            <span key={i} className="block overflow-hidden py-1">
+              <span className="cta-line inline-block">{line}</span>
+            </span>
+          ))}
+        </h2>
+        <p className="cta-sub text-bg/60 mb-20 text-xl md:text-2xl font-sans max-w-3xl mx-auto leading-relaxed">
+          Whether you need laptops, labs, or ecosystem partnerships—we're ready to work with you.
+        </p>
+        <div className="flex flex-col sm:flex-row items-center justify-center gap-8">
+          <Link
+            href="/products"
+            className="cta-btn bg-accent text-bg px-14 py-6 text-[11px] uppercase tracking-[0.4em] font-bold hover:bg-white hover:text-ink transition-colors duration-500 rounded-sm w-full sm:w-auto shadow-[0_20px_50px_rgba(242,125,38,0.2)] hover:-translate-y-2"
+          >
             Explore Laptops
           </Link>
-          <Link href="/support" className="bg-transparent text-bg border border-bg/20 px-14 py-6 text-[11px] uppercase tracking-[0.4em] font-bold hover:bg-white hover:text-ink transition-colors duration-500 rounded-sm w-full sm:w-auto shadow-sm hover:-translate-y-2 text-center">
+          <Link
+            href="/support"
+            className="cta-btn bg-transparent text-bg border border-bg/20 px-14 py-6 text-[11px] uppercase tracking-[0.4em] font-bold hover:bg-white hover:text-ink transition-colors duration-500 rounded-sm w-full sm:w-auto shadow-sm hover:-translate-y-2 text-center"
+          >
             Contact Team
           </Link>
-        </FadeUp>
+        </div>
       </div>
     </section>
   );
 };
 
+// ─────────────────────────────────────────────
+// HOME PAGE ASSEMBLY
+// ─────────────────────────────────────────────
 export default function HomePage() {
   const [activeForm, setActiveForm] = React.useState<"LEAD" | "PROGRAM" | null>(null);
   const [programName, setProgramName] = React.useState("");
@@ -610,32 +926,27 @@ export default function HomePage() {
   };
 
   return (
-    <div className="min-h-screen selection:bg-accent selection:text-white bg-bg overflow-x-hidden">
+    <div className="min-h-screen selection:bg-accent selection:text-white bg-bg">
       <FormModal isOpen={activeForm !== null} onClose={() => setActiveForm(null)}>
         {activeForm === "LEAD" && <LeadSalesForm source="Homepage Quote Request" onSuccess={() => setActiveForm(null)} />}
         {activeForm === "PROGRAM" && <ProgramApplicationForm programName={programName} onSuccess={() => setActiveForm(null)} />}
       </FormModal>
 
-      <BlurFadeIn delay={0.1}>
-        <main>
-          <Ticker />
-          <Hero /> {/* INK */}
-          <LaptopSolutions onLeadClick={() => setActiveForm("LEAD")} /> {/* BG */}
-          {/* <Models /> */}
-          <ChooseLaptop /> {/* INK */}
-          <ProgramsEcosystem onProgramClick={openProgramForm} /> {/* INK */}
-          <CustomOEM onLeadClick={() => setActiveForm("LEAD")} /> {/* BG */}
-          {/* <VideoScrollCanvas videoSrc="https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/BigBuckBunny.mp4" /> */}
-
-          <WhyChooseSection /> {/* BG */}
-          {/* <TrustedStats /> */} {/* INK — hidden for now */}
-          <Roadmap /> {/* BG */}
-          <AvailabilitySection /> {/* INK */}
-          <ExperienceProgramV2 /> {/* BG */}
-          <EcosystemGallery /> {/* INK */}
-          <FinalCTA /> {/* INK */}
-        </main>
-      </BlurFadeIn>
+      <main>
+        <Ticker />
+        <Hero />
+        <LaptopSolutions onLeadClick={() => setActiveForm("LEAD")} />
+        <ChooseLaptop />
+        <ProgramsEcosystem onProgramClick={openProgramForm} />
+        <CustomOEM onLeadClick={() => setActiveForm("LEAD")} />
+        <WhyChooseSection />
+        <ShowcaseSection />
+        <Roadmap />
+        <AvailabilitySection />
+        <ExperienceProgram onProgramClick={openProgramForm} />
+        <EcosystemGallery />
+        <FinalCTA />
+      </main>
     </div>
   );
 }
