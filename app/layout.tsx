@@ -2,12 +2,7 @@ import type { Metadata } from "next";
 import { Inter, Libre_Baskerville, JetBrains_Mono } from "next/font/google";
 import "./globals.css";
 import { cn } from "@/lib/utils";
-import Navbar from "@/components/Navbar";
-import Footer from "@/components/Footer";
-import CookieConsent from "@/components/CookieConsent";
-import CartDrawer from "@/components/products/CartDrawer";
-import ScrollToTop from "@/components/ScrollToTop";
-import FloatingTalkToUs from "@/components/FloatingTalkToUs";
+import AppShell from "@/components/AppShell";
 
 const inter = Inter({
   subsets: ["latin"],
@@ -50,13 +45,7 @@ export default function RootLayout({
       jetbrainsMono.variable
     )}>
       <body className="antialiased font-sans h-full relative">
-        <ScrollToTop />
-        <Navbar />
-        <CartDrawer />
-        <FloatingTalkToUs />
-        {children}
-        <Footer />
-        <CookieConsent />
+        <AppShell>{children}</AppShell>
       </body>
     </html>
   );

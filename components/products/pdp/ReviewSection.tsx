@@ -62,31 +62,38 @@ export default function ReviewSection({ product }: { product: any }) {
     };
 
     return (
-        <section className="bg-white py-32 lg:py-48 px-12 border-t border-black/5">
-            <div className="max-w-7xl mx-auto space-y-32">
+        <section className="bg-transparent py-24 px-6 md:px-12 lg:px-16 border-t border-[#C8BFB0]/30">
+            <div className="max-w-7xl mx-auto space-y-16">
                 {/* Header Section */}
                 <div className="space-y-6">
                     <div className="flex items-center gap-4">
-                        <span className="text-[#F27D26] uppercase tracking-[0.6em] font-black text-[10px]">Customer Feedback</span>
-                        <div className="h-[1px] w-12 bg-black/10" />
+                        <span className="text-[#B5843A] uppercase tracking-[0.4em] font-bold text-[10px]">Customer Feedback</span>
+                        <div className="h-[1px] w-12 bg-[#C8BFB0]" />
                     </div>
-                    <div className="flex flex-col md:flex-row justify-between items-end gap-12">
+                    <div className="flex flex-col md:flex-row justify-between items-end gap-8">
                         <div className="space-y-4">
-                            <h2 className="text-6xl md:text-8xl font-serif font-bold italic leading-[0.8] tracking-tighter">Reviews.</h2>
+                            <h2 
+                                className="text-4xl md:text-5xl font-serif font-semibold italic leading-[0.92] tracking-tight text-[#1A1714]"
+                                style={{ fontFamily: "'Cormorant Garamond', serif" }}
+                            >
+                                Reviews.
+                            </h2>
                         </div>
 
-                        <div className="flex flex-col items-end gap-6">
-                            <div className="flex items-center gap-6 pb-4 border-b border-black/10 w-full justify-end">
-                                <div className="flex gap-1 text-[#F27D26]">
+                        <div className="flex flex-col items-end gap-4">
+                            <div className="flex items-center gap-6 pb-4 border-b border-[#C8BFB0] w-full justify-end">
+                                <div className="flex gap-1 text-[#B5843A]">
                                     {[...Array(5)].map((_, i) => <Star key={i} size={14} fill="currentColor" />)}
                                 </div>
-                                <span className="text-[12px] font-mono font-bold">{averageRating} AVERAGE RATING</span>
+                                <span className="text-[10px] font-mono font-bold tracking-wider text-[#6B6258]">
+                                    AVERAGE RATING {averageRating}
+                                </span>
                             </div>
                             <button
                                 onClick={() => setIsFormOpen(!isFormOpen)}
-                                className="bg-[#141414] text-white px-8 py-4 text-[10px] font-bold uppercase tracking-[0.3em] rounded-sm hover:bg-[#F27D26] transition-all flex items-center gap-4"
+                                className="bg-[#1A1714] text-[#FAF7F2] px-6 py-3.5 text-[9px] font-mono uppercase tracking-[0.18em] hover:bg-[#B5843A] transition-all flex items-center gap-3 cursor-pointer rounded-sm"
                             >
-                                {isFormOpen ? "Cancel" : "Write a Review"} <Plus size={16} className={isFormOpen ? "rotate-45 transition-transform" : ""} />
+                                {isFormOpen ? "Cancel" : "Write a Review"} <Plus size={14} className={isFormOpen ? "rotate-45 transition-transform" : ""} />
                             </button>
                         </div>
                     </div>
@@ -99,57 +106,57 @@ export default function ReviewSection({ product }: { product: any }) {
                             initial={{ height: 0, opacity: 0 }}
                             animate={{ height: "auto", opacity: 1 }}
                             exit={{ height: 0, opacity: 0 }}
-                            className="overflow-hidden border-b border-black/5"
+                            className="overflow-hidden"
                         >
-                            <form onSubmit={handleSubmit} className="grid grid-cols-1 md:grid-cols-2 gap-12 pb-24">
-                                <div className="space-y-10">
-                                    <h3 className="text-2xl font-serif font-bold italic">Share your experience.</h3>
-                                    <div className="space-y-6">
-                                        <div className="space-y-2">
-                                            <label className="text-[9px] uppercase font-black tracking-widest text-black/40">Your Name</label>
+                            <form onSubmit={handleSubmit} className="grid grid-cols-1 md:grid-cols-2 gap-10 pb-16 border-b border-[#C8BFB0]/50 pt-4">
+                                <div className="space-y-6">
+                                    <h3 className="text-lg font-serif italic font-semibold text-[#1A1714]">Share your experience.</h3>
+                                    <div className="space-y-4">
+                                        <div className="space-y-1">
+                                            <label className="text-[8px] uppercase font-mono tracking-widest text-[#A09288] block mb-2 font-semibold">Your Name</label>
                                             <input
                                                 required
                                                 value={formData.user}
                                                 onChange={(e) => setFormData({ ...formData, user: e.target.value })}
-                                                className="w-full bg-[#FAF9F6] border border-black/10 p-4 text-sm font-serif outline-none focus:border-[#F27D26]"
+                                                className="w-full bg-[#EDE8DF] border border-[#C8BFB0] p-4 text-xs font-mono outline-none focus:border-[#B5843A] rounded-sm text-[#1A1714]"
                                                 placeholder="e.g. Vikram R."
                                             />
                                         </div>
-                                        <div className="space-y-2">
-                                            <label className="text-[9px] uppercase font-black tracking-widest text-black/40">Your Profession</label>
+                                        <div className="space-y-1">
+                                            <label className="text-[8px] uppercase font-mono tracking-widest text-[#A09288] block mb-2 font-semibold">Your Profession</label>
                                             <input
                                                 required
                                                 value={formData.role}
                                                 onChange={(e) => setFormData({ ...formData, role: e.target.value })}
-                                                className="w-full bg-[#FAF9F6] border border-black/10 p-4 text-sm font-serif outline-none focus:border-[#F27D26]"
+                                                className="w-full bg-[#EDE8DF] border border-[#C8BFB0] p-4 text-xs font-mono outline-none focus:border-[#B5843A] rounded-sm text-[#1A1714]"
                                                 placeholder="e.g. Designer"
                                             />
                                         </div>
                                     </div>
                                 </div>
-                                <div className="space-y-10">
-                                    <div className="space-y-2">
-                                        <label className="text-[9px] uppercase font-black tracking-widest text-black/40">Review Message</label>
+                                <div className="space-y-6">
+                                    <div className="space-y-1">
+                                        <label className="text-[8px] uppercase font-mono tracking-widest text-[#A09288] block mb-2 font-semibold">Review Message</label>
                                         <textarea
                                             required
                                             value={formData.content}
                                             onChange={(e) => setFormData({ ...formData, content: e.target.value })}
-                                            className="w-full bg-[#FAF9F6] border border-black/10 p-4 h-40 text-sm font-serif outline-none focus:border-[#F27D26] resize-none"
+                                            className="w-full bg-[#EDE8DF] border border-[#C8BFB0] p-4 h-36 text-xs outline-none focus:border-[#B5843A] resize-none rounded-sm text-[#1A1714]"
                                             placeholder="What do you think about the performance and quality?"
                                         />
                                     </div>
-                                    <div className="flex justify-between items-center bg-[#FAF9F6] p-6 border border-black/[0.03]">
+                                    <div className="flex justify-between items-center bg-[#EDE8DF]/50 p-5 border border-[#C8BFB0] rounded-sm">
                                         <div className="space-y-1">
-                                            <p className="text-[9px] font-black uppercase tracking-widest">Rating</p>
+                                            <p className="text-[8px] font-mono uppercase tracking-widest text-[#A09288] font-semibold">Rating</p>
                                             <div className="flex gap-2">
                                                 {[1, 2, 3, 4, 5].map(s => (
                                                     <button
                                                         key={s}
                                                         type="button"
                                                         onClick={() => setFormData({ ...formData, rating: s })}
-                                                        className={`transition-colors ${formData.rating >= s ? "text-[#F27D26]" : "text-black/10"}`}
+                                                        className={`transition-colors cursor-pointer ${formData.rating >= s ? "text-[#B5843A]" : "text-[#C8BFB0]"}`}
                                                     >
-                                                        <Star size={18} fill={formData.rating >= s ? "currentColor" : "none"} />
+                                                        <Star size={16} fill={formData.rating >= s ? "currentColor" : "none"} />
                                                     </button>
                                                 ))}
                                             </div>
@@ -157,9 +164,9 @@ export default function ReviewSection({ product }: { product: any }) {
                                         <button
                                             disabled={isSubmitting}
                                             type="submit"
-                                            className="bg-[#141414] text-white px-10 py-6 text-[10px] font-bold uppercase tracking-[0.4em] flex items-center gap-4 hover:bg-[#F27D26]"
+                                            className="bg-[#1A1714] text-[#FAF7F2] px-8 py-4 text-[9px] font-mono uppercase tracking-[0.18em] flex items-center gap-3 hover:bg-[#B5843A] cursor-pointer rounded-sm"
                                         >
-                                            {isSubmitting ? <><Loader2 size={16} className="animate-spin" /> Sending...</> : <><Send size={16} /> Post Review</>}
+                                            {isSubmitting ? <><Loader2 size={12} className="animate-spin" /> Sending...</> : <><Send size={12} /> Post Review</>}
                                         </button>
                                     </div>
                                 </div>
@@ -169,45 +176,45 @@ export default function ReviewSection({ product }: { product: any }) {
                 </AnimatePresence>
 
                 {/* Review Grid */}
-                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-12">
+                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
                     <AnimatePresence mode="popLayout">
-                        {reviews.map((rev, i) => (
+                        {reviews.map((rev) => (
                             <motion.div
-                                key={rev.id}
+                                key={rev.id || rev._id}
                                 layout
                                 initial={{ opacity: 0, scale: 0.95 }}
                                 animate={{ opacity: 1, scale: 1 }}
                                 exit={{ opacity: 0, scale: 0.9 }}
-                                className="bg-[#FAF9F6] p-12 space-y-12 border border-black/[0.03] flex flex-col justify-between group hover:border-[#F27D26]/20 transition-all relative"
+                                className="py-6 border-b border-[#C8BFB0]/40 flex flex-col justify-between min-h-[220px]"
                             >
-                                <div className="space-y-8">
+                                <div className="space-y-6">
                                     <div className="flex justify-between items-start">
-                                        <div className="flex gap-1 text-[#F27D26]">
+                                        <div className="flex gap-1 text-[#B5843A]">
                                             {[...Array(5)].map((_, j) => (
-                                                <Star key={j} size={12} fill={j < rev.rating ? "currentColor" : "none"} className={j < rev.rating ? "" : "text-black/10"} />
+                                                <Star key={j} size={12} fill={j < rev.rating ? "currentColor" : "none"} className={j < rev.rating ? "" : "text-[#C8BFB0]"} />
                                             ))}
                                         </div>
-                                        <span className="text-[8px] font-mono text-black/20 uppercase tracking-widest">{rev.date}</span>
+                                        <span className="text-[8px] font-mono text-[#A09288] uppercase tracking-widest">{rev.date}</span>
                                     </div>
-                                    <p className="text-lg font-serif italic text-black/80 leading-relaxed min-h-[120px]">
+                                    <p className="text-sm font-serif italic text-[#1A1714] leading-relaxed min-h-[100px]">
                                         "{rev.content}"
                                     </p>
                                 </div>
 
-                                <div className="space-y-6 pt-12 border-t border-black/5">
-                                    <div className="flex items-center gap-4">
-                                        <div className="w-10 h-10 bg-white flex items-center justify-center rounded-full border border-black/5">
-                                            <User size={18} className="text-black/10" />
+                                <div className="space-y-4 pt-6 border-t border-[#C8BFB0]/50">
+                                    <div className="flex items-center gap-3">
+                                        <div className="w-8 h-8 bg-[#FAF7F2] flex items-center justify-center rounded-full border border-[#C8BFB0]/40">
+                                            <User size={14} className="text-[#A09288]" />
                                         </div>
                                         <div>
-                                            <p className="text-[12px] font-bold uppercase tracking-tight">{rev.user}</p>
-                                            <p className="text-[9px] uppercase tracking-widest text-black/40 font-mono">{rev.role}</p>
+                                            <p className="text-xs font-bold uppercase tracking-tight text-[#1A1714]">{rev.user}</p>
+                                            <p className="text-[8px] uppercase tracking-widest text-[#A09288] font-mono">{rev.role}</p>
                                         </div>
                                     </div>
 
-                                    <div className="flex items-center gap-2">
-                                        <ShieldCheck size={14} className="text-[#F27D26]" />
-                                        <span className="text-[10px] font-black uppercase tracking-widest text-[#F27D26]">{rev.recommendation}</span>
+                                    <div className="flex items-center gap-1.5">
+                                        <ShieldCheck size={12} className="text-[#B5843A]" />
+                                        <span className="text-[8px] font-mono font-bold uppercase tracking-widest text-[#B5843A]">{rev.recommendation || "Verified Purchase"}</span>
                                     </div>
                                 </div>
                             </motion.div>
@@ -217,4 +224,4 @@ export default function ReviewSection({ product }: { product: any }) {
             </div>
         </section>
     );
-};
+}

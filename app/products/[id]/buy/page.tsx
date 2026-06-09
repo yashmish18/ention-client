@@ -1,11 +1,8 @@
 import React from "react";
 import { notFound } from "next/navigation";
-
-
-import WorkbookPDP from "@/components/products/pdp/WorkbookPDP";
-import CartDrawer from "@/components/products/CartDrawer";
+import ProductConfigurator from "@/components/products/ProductConfigurator";
 import { fetchProductById, fetchProducts } from "@/lib/api";
-import type { Metadata } from 'next';
+import type { Metadata } from "next";
 
 export async function generateStaticParams() {
     const products = await fetchProducts();
@@ -21,22 +18,17 @@ export async function generateMetadata({ params }: { params: Promise<{ id: strin
     if (!product) {
         return {
             title: "Product Not Found | Ention",
-            description: "The product you are looking for does not exist."
+            description: "The product configuration could not be found."
         };
     }
 
     return {
-        title: `${product.name} | Ention Desktop Ecosystem`,
-        description: product.description || `Buy ${product.name} with Ention's custom high-end specifications.`,
-        openGraph: {
-            title: `${product.name} | Ention`,
-            description: product.description,
-            images: [product.images?.[0] || '/assets/ention-logo.png']
-        }
+        title: `Configure ${product.name} | Ention Desktop Ecosystem`,
+        description: `Customize and buy ${product.name} with bespoke RAM, SSD, and warranty options.`
     };
 }
 
-export default async function ProductPage({ params }: { params: Promise<{ id: string }> }) {
+export default async function BuyPage({ params }: { params: Promise<{ id: string }> }) {
     const { id } = await params;
     const product = await fetchProductById(id);
 
@@ -64,10 +56,11 @@ export default async function ProductPage({ params }: { params: Promise<{ id: st
         "/assets/0N1A1389.png"
     ];
 
+    const allProducts = await fetchProducts();
+
     return (
-        <main className="bg-[#FAF7F2] min-h-screen pt-0">
-            <WorkbookPDP product={product} images={images} />
-            <CartDrawer />
+        <main className="bg-[#FAF7F2] min-h-screen">
+            <ProductConfigurator product={product} images={images} allProducts={allProducts} />
         </main>
     );
 }

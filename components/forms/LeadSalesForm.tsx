@@ -39,9 +39,9 @@ export default function LeadSalesForm({ source = "General", onSuccess }: LeadSal
 
     if (isSuccess) {
         return (
-            <motion.div 
-                initial={{ opacity: 0, scale: 0.9 }} 
-                animate={{ opacity: 1, scale: 1 }} 
+            <motion.div
+                initial={{ opacity: 0, scale: 0.9 }}
+                animate={{ opacity: 1, scale: 1 }}
                 className="bg-white p-12 text-center space-y-6 border border-black/5"
             >
                 <div className="w-16 h-16 bg-green-50 text-green-600 rounded-full flex items-center justify-center mx-auto">

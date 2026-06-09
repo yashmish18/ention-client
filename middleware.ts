@@ -61,11 +61,11 @@ export function middleware(request: NextRequest) {
     const csp = `
         default-src 'self';
         script-src 'self' 'unsafe-eval' 'unsafe-inline';
-        style-src 'self' 'unsafe-inline';
+        style-src 'self' 'unsafe-inline' https://fonts.googleapis.com;
         img-src 'self' blob: data: https://images.unsplash.com ${apiOrigin};
-        font-src 'self' data:;
-        media-src 'self' https://commondatastorage.googleapis.com;
-        connect-src 'self' ${apiOrigin};
+        font-src 'self' data: https://fonts.googleapis.com https://fonts.gstatic.com;
+        media-src 'self' https://commondatastorage.googleapis.com https://player.vimeo.com https://*.vimeo.com https://*.vimeocdn.com;
+        connect-src 'self' ${apiOrigin} https://fonts.googleapis.com https://fonts.gstatic.com;
         frame-ancestors 'none';
         base-uri 'self';
         form-action 'self';

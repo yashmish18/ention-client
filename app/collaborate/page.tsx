@@ -30,7 +30,7 @@ const SectionHeader = ({ num, title, subtitle }: { num: string, title: string, s
     </div>
 );
 
-const ICON_MAP: Record<string, React.ElementType> = {
+const ICON_MAP: Record<string, React.ComponentType<any>> = {
     "innovation-labs": Beaker,
     "startup-ecosystem": Rocket,
     "campus-ambassador": GraduationCap,
