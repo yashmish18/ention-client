@@ -11,6 +11,9 @@ import { ArrowRight, ArrowLeft, Play, Pause, Volume2, VolumeX, Heart, Cpu } from
 import { useCart } from "@/store/useCart";
 import type { Product } from "@/lib/products-data";
 import { motion, useScroll, useTransform, LayoutGroup, useMotionValueEvent } from "framer-motion";
+import FormModal from "@/components/FormModal";
+import LeadSalesForm from "@/components/forms/LeadSalesForm";
+import ProgramApplicationForm from "@/components/forms/ProgramApplicationForm";
 
 interface WorkbookPDPProps {
   product: Product;
@@ -23,6 +26,7 @@ export default function WorkbookPDP({ product, images }: WorkbookPDPProps) {
 
   // Active Performance Tab State
   const [activePerfTab, setActivePerfTab] = useState("multitasking");
+  const [activeForm, setActiveForm] = useState<"ENQUIRE" | "EXPERIENCE" | null>(null);
 
   const PERF_TABS_DATA: Record<string, {
     label: string;
@@ -392,6 +396,24 @@ export default function WorkbookPDP({ product, images }: WorkbookPDPProps) {
 
   return (
     <div ref={rootRef} className="workbook-pdp bg-[#FAF7F2] text-[#1A1714] select-none font-sans pb-20 md:pb-24">
+      <FormModal isOpen={activeForm !== null} onClose={() => setActiveForm(null)}>
+          {activeForm === "ENQUIRE" && (
+              <LeadSalesForm 
+                  source="product_detail_buy" 
+                  initialDescription={`I am interested in the ${product?.name || 'product'}. Please provide more details on bulk purchase or B2B pricing.`} 
+                  initialUseCase="Enterprise"
+                  onSuccess={() => setActiveForm(null)} 
+              />
+          )}
+          {activeForm === "EXPERIENCE" && (
+              <ProgramApplicationForm 
+                  source="product_detail_experience" 
+                  programName="Experience Program"
+                  onSuccess={() => setActiveForm(null)} 
+              />
+          )}
+      </FormModal>
+
       <style jsx global>{`
         @import url('https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,500;0,600;0,700;1,300;1,400;1,500;1,600;1,700&family=Outfit:wght@300;400;500;600;700&display=swap');
         .workbook-pdp { font-family: 'Outfit', sans-serif; cursor: default; }
@@ -438,6 +460,12 @@ export default function WorkbookPDP({ product, images }: WorkbookPDPProps) {
                   {tab.label}
                 </button>
               ))}
+              <button
+                onClick={() => setActiveForm("ENQUIRE")}
+                className="border border-[#FAF7F2] text-[#FAF7F2] px-5 py-1.5 text-[11px] uppercase tracking-wider hover:bg-[#FAF7F2] hover:text-[#1A1714] transition-all duration-300 cursor-pointer"
+              >
+                Enquire
+              </button>
               <button
                 onClick={() => scrollTo("buy-now")}
                 className="border border-[#FAF7F2] text-[#FAF7F2] px-5 py-1.5 text-[11px] uppercase tracking-wider hover:bg-[#FAF7F2] hover:text-[#1A1714] transition-all duration-300 cursor-pointer"
@@ -943,7 +971,7 @@ export default function WorkbookPDP({ product, images }: WorkbookPDPProps) {
                   Qualcomm® <br />Adreno™ GPU
                 </h3>
                 <p className="text-[11px] text-[#D4CDC5] font-light leading-relaxed">
-                  Discrete-level graphics processing built to deliver fluid framerates under CAD and design workloads.
+                  Discrete-level graphics processing built to deliver fluid frame rates under CAD and design workloads.
                 </p>
               </div>
               <div className="border-t border-[#C8BFB0]/20 pt-4">
@@ -1899,6 +1927,12 @@ export default function WorkbookPDP({ product, images }: WorkbookPDPProps) {
             >
               Browse All Products <ArrowRight size={12} />
             </Link>
+            <button
+              onClick={() => setActiveForm("EXPERIENCE")}
+              className="inline-flex items-center justify-center gap-2 bg-[#1A1714] text-[#FAF7F2] px-8 py-3.5 text-[11px] uppercase tracking-wider hover:bg-[#C5A059] hover:text-white transition-colors cursor-pointer"
+            >
+              Not Sure? Try Experience
+            </button>
             <Link
               href="/products"
               className="inline-flex items-center justify-center gap-2 text-xs text-[#A09288] hover:text-[#1A1714] transition-colors py-3.5"
@@ -1965,6 +1999,14 @@ export default function WorkbookPDP({ product, images }: WorkbookPDPProps) {
               className="bg-[#1A1714] border border-[#1A1714] text-white rounded px-4 md:px-6 py-2.5 text-[10px] uppercase tracking-wider font-bold hover:bg-black transition-all cursor-pointer whitespace-nowrap"
             >
               Buy Now
+            </button>
+
+            {/* Enquire Button */}
+            <button
+              onClick={() => setActiveForm("ENQUIRE")}
+              className="bg-[#C5A059] border border-[#C5A059] text-white rounded px-4 md:px-6 py-2.5 text-[10px] uppercase tracking-wider font-bold hover:bg-[#a68444] transition-all cursor-pointer whitespace-nowrap"
+            >
+              Enquire
             </button>
           </div>
         </div>

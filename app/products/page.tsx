@@ -5,9 +5,12 @@ import Image from "next/image";
 import Link from "next/link";
 import { gsap } from "gsap";
 import { ScrollTrigger } from "gsap/ScrollTrigger";
-import { ArrowRight, ChevronLeft, ChevronRight, Cpu, HardDrive, Monitor } from "lucide-react";
+import { ArrowRight, ChevronLeft, ChevronRight, Cpu, HardDrive, Monitor, Settings2, MessageSquare } from "lucide-react";
 import { fetchProducts } from "@/lib/api";
 import { useCart } from "@/store/useCart";
+import FormModal from "@/components/FormModal";
+import LeadSalesForm from "@/components/forms/LeadSalesForm";
+import SmartSupportForm from "@/components/forms/SmartSupportForm";
 
 if (typeof window !== "undefined") {
     gsap.registerPlugin(ScrollTrigger);
@@ -237,6 +240,8 @@ const ProductShowcase = () => {
     const [products, setProducts] = useState<any[]>([]);
     const [loading, setLoading] = useState(true);
     const [activeTab, setActiveTab] = useState<"all" | "swapbook" | "workbook">("all");
+    const [activeForm, setActiveForm] = useState<"ENQUIRE" | "CUSTOMIZE" | "SUPPORT" | null>(null);
+    const [selectedProduct, setSelectedProduct] = useState<any>(null);
     const { addItem } = useCart();
     const sectionRef = useRef<HTMLElement>(null);
 
@@ -290,6 +295,16 @@ const ProductShowcase = () => {
         });
     };
 
+    const handleEnquire = (product: any) => {
+        setSelectedProduct(product);
+        setActiveForm("ENQUIRE");
+    };
+
+    const handleCustomize = (product: any) => {
+        setSelectedProduct(product);
+        setActiveForm("CUSTOMIZE");
+    };
+
     if (loading) {
         return (
             <section className="min-h-[50vh] flex flex-col items-center justify-center bg-bg space-y-5">
@@ -304,6 +319,30 @@ const ProductShowcase = () => {
 
     return (
         <section ref={sectionRef} id="lineup" className="bg-bg py-20 md:py-28 px-5 md:px-10 lg:px-16">
+            <FormModal isOpen={activeForm !== null} onClose={() => setActiveForm(null)}>
+                {activeForm === "ENQUIRE" && (
+                    <LeadSalesForm 
+                        source="product_enquire" 
+                        initialDescription={`I am interested in bulk/B2B purchasing for the ${selectedProduct?.name} (${selectedProduct?.id}).`} 
+                        onSuccess={() => setActiveForm(null)} 
+                    />
+                )}
+                {activeForm === "CUSTOMIZE" && (
+                    <LeadSalesForm 
+                        source="product_customize" 
+                        initialDescription={`I would like to request a custom configuration for the ${selectedProduct?.name}. Please contact me to discuss RAM, SSD, and Processor options.`} 
+                        initialUseCase="Enterprise"
+                        onSuccess={() => setActiveForm(null)} 
+                    />
+                )}
+                {activeForm === "SUPPORT" && (
+                    <SmartSupportForm 
+                        source="product_need_help" 
+                        initialCategory="Product Support"
+                        onSuccess={() => setActiveForm(null)} 
+                    />
+                )}
+            </FormModal>
             <div className="max-w-[82rem] mx-auto">
                 {/* Main Section Heading */}
                 <div className="text-center mb-12 md:mb-16 space-y-4">
@@ -357,6 +396,8 @@ const ProductShowcase = () => {
                                 key={product.id || i}
                                 product={product}
                                 onAddToCart={handleAddToCart}
+                                onEnquire={handleEnquire}
+                                onCustomize={handleCustomize}
                             />
                         ))}
                     </div>
@@ -382,6 +423,8 @@ const ProductShowcase = () => {
                                     key={product.id || i}
                                     product={product}
                                     onAddToCart={handleAddToCart}
+                                    onEnquire={handleEnquire}
+                                    onCustomize={handleCustomize}
                                 />
                             ))}
                         </div>
@@ -408,6 +451,8 @@ const ProductShowcase = () => {
                                     key={product.id || i}
                                     product={product}
                                     onAddToCart={handleAddToCart}
+                                    onEnquire={handleEnquire}
+                                    onCustomize={handleCustomize}
                                 />
                             ))}
                         </div>
@@ -422,9 +467,9 @@ const ProductShowcase = () => {
 /* ─── Product Card ───────────────────────────────────────────────── */
 
 const ProductCard = ({
-    product, onAddToCart
+    product, onAddToCart, onEnquire, onCustomize
 }: {
-    product: any; onAddToCart: (p: any) => void;
+    product: any; onAddToCart: (p: any) => void; onEnquire: (p: any) => void; onCustomize: (p: any) => void;
 }) => {
     const catName = typeof product.category === "object" ? product.category?.name : product.category;
     const accentColor = CATEGORY_ACCENTS[catName] || "#F27D26";
@@ -489,27 +534,46 @@ const ProductCard = ({
                     <div className="mt-auto" />
 
                     {/* Price + CTA row */}
-                    <div className="flex items-center justify-between pt-5 border-t border-ink/8">
-                        <div>
-                            <span className="text-[8px] font-mono uppercase tracking-wider text-ink/25 block">From</span>
-                            <span className="text-lg font-serif italic font-bold text-ink">
-                                ₹{product.basePrice?.toLocaleString("en-IN")}
-                            </span>
+                    <div className="flex flex-col gap-3 pt-5 border-t border-ink/8">
+                        <div className="flex items-center justify-between mb-1">
+                            <div>
+                                <span className="text-[8px] font-mono uppercase tracking-wider text-ink/25 block">From</span>
+                                <span className="text-lg font-serif italic font-bold text-ink">
+                                    ₹{product.basePrice?.toLocaleString("en-IN")}
+                                </span>
+                            </div>
+                            <Link
+                                href={`/products/${product.slug || product.id}`}
+                                className="text-[9px] font-mono uppercase tracking-wider text-ink/30 hover:text-accent px-2 py-1 transition-colors"
+                            >
+                                Details
+                            </Link>
                         </div>
-                        <div className="flex items-center gap-2">
+                        
+                        <div className="flex flex-col gap-2">
                             <button
                                 onClick={() => onAddToCart(product)}
-                                className="group/btn bg-ink text-bg px-4 py-2.5 text-[9px] uppercase tracking-[0.15em] font-bold hover:bg-accent transition-colors duration-400 flex items-center gap-1.5"
+                                className="w-full group/btn bg-ink text-bg px-4 py-2.5 text-[9px] uppercase tracking-[0.15em] font-bold hover:bg-accent transition-colors duration-400 flex items-center justify-center gap-1.5"
                             >
                                 Add to Cart
                                 <ArrowRight size={11} className="group-hover/btn:translate-x-0.5 transition-transform duration-300" />
                             </button>
-                            <Link
-                                href={`/products/${product.slug || product.id}`}
-                                className="text-[9px] font-mono uppercase tracking-wider text-ink/30 hover:text-accent px-2 py-2.5 transition-colors"
-                            >
-                                Details
-                            </Link>
+                            
+                            <div className="grid grid-cols-2 gap-2">
+                                <button
+                                    onClick={() => onEnquire(product)}
+                                    className="bg-ink/[0.03] hover:bg-ink/[0.08] text-ink border border-ink/10 px-3 py-2.5 text-[8px] font-mono uppercase tracking-widest font-bold transition-colors"
+                                >
+                                    Enquire Now
+                                </button>
+                                <button
+                                    onClick={() => onCustomize(product)}
+                                    className="bg-ink/[0.03] hover:bg-ink/[0.08] text-ink border border-ink/10 px-3 py-2.5 text-[8px] font-mono uppercase tracking-widest font-bold transition-colors flex items-center justify-center gap-1.5"
+                                >
+                                    <Settings2 size={10} className="text-accent" />
+                                    Customize
+                                </button>
+                            </div>
                         </div>
                     </div>
                 </div>

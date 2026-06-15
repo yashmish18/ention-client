@@ -14,6 +14,7 @@ import AvailabilitySection from "@/components/v2/AvailabilitySection";
 import WhyChooseSection from "@/components/v2/WhyChooseSection";
 import ShowcaseSection from "@/components/v2/ShowcaseSection";
 import { ExperienceProgram } from "@/components/ExperienceProgram";
+import { InquirySource } from "@/lib/inquiry-sources";
 import { gsap } from "gsap";
 import { ScrollTrigger } from "gsap/ScrollTrigger";
 
@@ -355,7 +356,7 @@ const ChooseLaptop = () => {
 // ─────────────────────────────────────────────
 // PROGRAMS ECOSYSTEM [INK] — heading lines + grid stagger
 // ─────────────────────────────────────────────
-const ProgramsEcosystem = ({ onProgramClick }: { onProgramClick: (name: string) => void }) => {
+const ProgramsEcosystem = ({ onProgramClick }: { onProgramClick: (name: string, source: InquirySource) => void }) => {
   const sectionRef = React.useRef<HTMLDivElement>(null);
 
   React.useEffect(() => {
@@ -414,11 +415,11 @@ const ProgramsEcosystem = ({ onProgramClick }: { onProgramClick: (name: string) 
     return () => ctx.revert();
   }, []);
 
-  const items = [
-    { title: "Innovation Labs & Institutional Programs", desc: "Build future-ready labs for learning and research", btn: "Build Your Lab" },
-    { title: "Startup Ecosystem Partnerships", desc: "Empower startups with access to infrastructure", btn: "Partner With Us" },
-    { title: "Campus Ambassador Program", desc: "Lead innovation on your campus", btn: "Join Program" },
-    { title: "Co-Creation & Shared Innovation", desc: "Collaborate to build next-gen solutions", btn: "Start Collaboration" },
+  const items: { title: string, desc: string, btn: string, source: InquirySource }[] = [
+    { title: "Innovation Labs & Institutional Programs", desc: "Build future-ready labs for learning and research", btn: "Build Your Lab", source: "homepage_build_lab" },
+    { title: "Startup Ecosystem Partnerships", desc: "Empower startups with access to infrastructure", btn: "Partner With Us", source: "homepage_experience_program" },
+    { title: "Campus Ambassador Program", desc: "Lead innovation on your campus", btn: "Join Program", source: "homepage_experience_program" },
+    { title: "Co-Creation & Shared Innovation", desc: "Collaborate to build next-gen solutions", btn: "Start Collaboration", source: "homepage_experience_program" },
   ];
 
   return (
@@ -441,7 +442,7 @@ const ProgramsEcosystem = ({ onProgramClick }: { onProgramClick: (name: string) 
         {items.map((item, i) => (
           <div
             key={i}
-            onClick={() => onProgramClick(item.title)}
+            onClick={() => onProgramClick(item.title, item.source)}
             className="pe-card p-10 border border-white/5 group transition-all duration-700 hover:bg-bg hover:border-bg hover:text-ink hover:-translate-y-2 bg-white/5 flex flex-col items-start min-h-[350px] shadow-sm hover:shadow-2xl cursor-pointer rounded-sm"
           >
             <div className="min-h-[3.25rem] md:min-h-[3.75rem] flex items-center w-full mb-6">
@@ -919,17 +920,19 @@ const FinalCTA = () => {
 export default function HomePage() {
   const [activeForm, setActiveForm] = React.useState<"LEAD" | "PROGRAM" | null>(null);
   const [programName, setProgramName] = React.useState("");
+  const [programSource, setProgramSource] = React.useState<InquirySource>("homepage_experience_program");
 
-  const openProgramForm = (name: string) => {
+  const openProgramForm = (name: string, source: InquirySource = "homepage_experience_program") => {
     setProgramName(name);
+    setProgramSource(source);
     setActiveForm("PROGRAM");
   };
 
   return (
     <div className="min-h-screen selection:bg-accent selection:text-white bg-bg">
       <FormModal isOpen={activeForm !== null} onClose={() => setActiveForm(null)}>
-        {activeForm === "LEAD" && <LeadSalesForm source="Homepage Quote Request" onSuccess={() => setActiveForm(null)} />}
-        {activeForm === "PROGRAM" && <ProgramApplicationForm programName={programName} onSuccess={() => setActiveForm(null)} />}
+        {activeForm === "LEAD" && <LeadSalesForm source="homepage_request_quote" onSuccess={() => setActiveForm(null)} />}
+        {activeForm === "PROGRAM" && <ProgramApplicationForm programName={programName} source={programSource} onSuccess={() => setActiveForm(null)} />}
       </FormModal>
 
       <main>

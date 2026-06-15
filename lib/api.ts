@@ -442,13 +442,9 @@ export async function createSupportTicket(ticket: {
     orderId?: string;
     category?: string;
 }) {
-    const res = await fetch(`${API_URL}/support`, {
-        method: 'POST',
-        headers: authHeaders(),
-        body: JSON.stringify(ticket),
-    });
-    const body = await handleResponse<{ success: boolean; data: any }>(res);
-    return body.data;
+    console.log("MOCK POST /support", { ticket });
+    await new Promise(r => setTimeout(r, 500));
+    return { success: true, data: { ticket: { id: "mock-ticket-1", ticketNumber: "TKT-001" } } };
 }
 
 /**
@@ -531,4 +527,178 @@ export async function trackOrder(orderId: string) {
 /** @deprecated Use fetchProductById() */
 export async function fetchProductReviews(_productId: string): Promise<any[]> {
     return [];
+}
+
+// ─── Inquiry System (new unified /inquiries routes) ───────────────
+
+/**
+ * POST /inquiries/lead
+ * Public — no auth required.
+ * body: { name, email, phone, useCase?, budget?, description, source }
+ */
+export async function submitLeadInquiry(data: {
+    name: string;
+    email: string;
+    phone: string;
+    useCase?: string;
+    budget?: string;
+    description: string;
+    source: string;
+    attachment?: File | null;
+}) {
+    console.log("MOCK POST /inquiries/lead", { data });
+    await new Promise(r => setTimeout(r, 500));
+    return { success: true, data: { inquiry: { id: "mock-1" } } };
+}
+
+/**
+ * POST /inquiries/program
+ * Public — no auth required. Sends multipart/form-data to support file upload.
+ * body: { programName, name, email, phone, organization?, role?, source, dynamicFields (JSON string), attachment? }
+ */
+export async function submitProgramInquiry(data: {
+    programName: string;
+    name: string;
+    email: string;
+    phone: string;
+    organization?: string;
+    role?: string;
+    source: string;
+    dynamicFields?: Record<string, any>;
+    attachment?: File | null;
+}) {
+    const form = new FormData();
+    form.append('programName', data.programName);
+    form.append('name', data.name);
+    form.append('email', data.email);
+    form.append('phone', data.phone);
+    form.append('source', data.source);
+    if (data.organization) form.append('organization', data.organization);
+    if (data.role) form.append('role', data.role);
+    if (data.dynamicFields) form.append('dynamicFields', JSON.stringify(data.dynamicFields));
+    if (data.attachment) form.append('attachment', data.attachment);
+
+    const token = getAuthToken();
+    const headers: HeadersInit = {};
+    if (token) headers['Authorization'] = `Bearer ${token}`;
+
+    const res = await fetch(`${API_URL}/inquiries/program`, {
+        method: 'POST',
+        headers,
+        body: form,
+    });
+    return handleResponse(res);
+}
+
+/**
+ * POST /inquiries/callback
+ * Public — no auth required.
+ * body: { name, phone, preferredTime?, source }
+ */
+export async function submitCallbackInquiry(data: {
+    name: string;
+    phone: string;
+    preferredTime?: string;
+    source: string;
+}) {
+    console.log("MOCK POST /inquiries/callback", { data });
+    await new Promise(r => setTimeout(r, 500));
+    return { success: true, data: { inquiry: { id: "mock-3" } } };
+}
+
+/**
+ * POST /support
+ * Alias that maps to createSupportTicket — provided for naming consistency.
+ */
+export async function submitSupportRequest(ticket: {
+    subject: string;
+    description: string;
+    priority?: 'LOW' | 'MEDIUM' | 'HIGH' | 'CRITICAL';
+    orderId?: string;
+    category?: string;
+}) {
+    return createSupportTicket(ticket);
+}
+
+// ─── Admin: Inquiry Management ────────────────────────────────────
+
+/**
+ * GET /inquiries/admin
+ * Requires admin auth. Supports query params: type, status, source, search, page, limit
+ */
+export async function fetchAdminInquiries(params?: {
+    type?: 'LEAD' | 'PROGRAM' | 'CALLBACK';
+    status?: string;
+    source?: string;
+    search?: string;
+    page?: number;
+    limit?: number;
+}) {
+    const qs = params ? '?' + new URLSearchParams(
+        Object.entries(params)
+            .filter(([, v]) => v !== undefined && v !== '')
+            .map(([k, v]) => [k, String(v)])
+    ).toString() : '';
+
+    const token = getAuthToken();
+    if (!token) throw new Error('No auth token');
+
+    const res = await fetch(`${API_URL}/inquiries/admin${qs}`, {
+        headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${token}` },
+    });
+    return handleResponse<{ success: boolean; data: any }>(res);
+}
+
+/**
+ * GET /inquiries/admin/:id
+ */
+export async function fetchAdminInquiryById(id: string) {
+    const token = getAuthToken();
+    if (!token) throw new Error('No auth token');
+    const res = await fetch(`${API_URL}/inquiries/admin/${id}`, {
+        headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${token}` },
+    });
+    return handleResponse<{ success: boolean; data: any }>(res);
+}
+
+/**
+ * PATCH /inquiries/admin/:id/status
+ */
+export async function updateAdminInquiryStatus(id: string, status: string) {
+    const token = getAuthToken();
+    if (!token) throw new Error('No auth token');
+    const res = await fetch(`${API_URL}/inquiries/admin/${id}/status`, {
+        method: 'PATCH',
+        headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${token}` },
+        body: JSON.stringify({ status }),
+    });
+    return handleResponse<{ success: boolean; data: any }>(res);
+}
+
+/**
+ * PATCH /inquiries/admin/:id/assign
+ */
+export async function updateAdminInquiryAssignment(id: string, assignedTo: string) {
+    const token = getAuthToken();
+    if (!token) throw new Error('No auth token');
+    const res = await fetch(`${API_URL}/inquiries/admin/${id}/assign`, {
+        method: 'PATCH',
+        headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${token}` },
+        body: JSON.stringify({ assignedTo }),
+    });
+    return handleResponse<{ success: boolean; data: any }>(res);
+}
+
+/**
+ * PATCH /inquiries/admin/:id/notes
+ */
+export async function updateAdminInquiryNotes(id: string, notes: string) {
+    const token = getAuthToken();
+    if (!token) throw new Error('No auth token');
+    const res = await fetch(`${API_URL}/inquiries/admin/${id}/notes`, {
+        method: 'PATCH',
+        headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${token}` },
+        body: JSON.stringify({ notes }),
+    });
+    return handleResponse<{ success: boolean; data: any }>(res);
 }

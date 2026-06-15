@@ -6,6 +6,8 @@ import { motion, AnimatePresence } from "framer-motion";
 import { ArrowRight, CheckCircle2, ChevronDown, Beaker, Rocket, GraduationCap, Handshake, Network, Globe } from "lucide-react";
 import { BlurFadeIn } from "@/components/BlurFadeIn";
 import { PROGRAMS } from "@/lib/programs-data";
+import FormModal from "@/components/FormModal";
+import ProgramApplicationForm from "@/components/forms/ProgramApplicationForm";
 
 // --- GLOBAL ANIMATION UTILS (Cloned from homepage for consistency) ---
 const FadeUp = ({ children, delay = 0, className = "" }: { children: React.ReactNode, delay?: number, className?: string }) => (
@@ -39,9 +41,19 @@ const ICON_MAP: Record<string, React.ComponentType<any>> = {
 
 export default function CollaboratePage() {
     const [activeProgram, setActiveProgram] = useState<string | null>(null);
+    const [formOpenFor, setFormOpenFor] = useState<{name: string} | null>(null);
 
     return (
         <main className="min-h-screen bg-bg text-ink overflow-x-hidden selection:bg-accent selection:text-bg">
+            <FormModal isOpen={formOpenFor !== null} onClose={() => setFormOpenFor(null)}>
+                {formOpenFor && (
+                    <ProgramApplicationForm 
+                        source="program_page" 
+                        programName={formOpenFor.name} 
+                        onSuccess={() => setFormOpenFor(null)} 
+                    />
+                )}
+            </FormModal>
 
             {/* ── 1. HERO [INK] ─────────────────────────────────────────── */}
             <section className="relative min-h-screen bg-ink text-bg flex flex-col items-center justify-center px-8 md:px-16 pt-32 pb-24 overflow-hidden">
@@ -133,12 +145,12 @@ export default function CollaboratePage() {
                                         </div>
 
                                         <div className="pt-12 relative z-10 border-t border-ink/5 mt-12 flex items-center gap-6">
-                                            <Link
-                                                href={`/collaborate/${program.slug}`}
-                                                className="flex-1 bg-ink text-bg px-8 py-5 text-[10px] font-black uppercase tracking-[0.4em] hover:bg-accent transition-all flex items-center justify-center gap-4"
+                                            <button
+                                                onClick={() => setFormOpenFor({ name: program.title })}
+                                                className="flex-1 bg-ink text-bg px-8 py-5 text-[10px] font-black uppercase tracking-[0.4em] hover:bg-accent transition-all flex items-center justify-center gap-4 cursor-pointer"
                                             >
                                                 {program.ctaLabel} <ArrowRight size={14} />
-                                            </Link>
+                                            </button>
                                             <button 
                                                 onClick={() => setActiveProgram(activeProgram === program.slug ? null : program.slug)}
                                                 className="p-5 border border-ink/10 hover:border-accent/30 transition-colors"

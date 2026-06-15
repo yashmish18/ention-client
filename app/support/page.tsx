@@ -176,7 +176,7 @@ export default function SupportPage() {
 
                         {/* Right: Support Ticket Form */}
                         <div className="bg-[#1C1C1C] border border-white/10 rounded-sm p-1 shadow-sm relative overflow-hidden">
-                            <SmartSupportForm initialCategory="General Inquiry" />
+                            <SmartSupportForm initialCategory="General Inquiry" source="support_page" />
                         </div>
                     </div>
                 </section>

@@ -14,7 +14,7 @@ if (typeof window !== "undefined") {
 }
 
 export default function SolutionsPage() {
-    const [activeForm, setActiveForm] = useState(false);
+    const [activeForm, setActiveForm] = useState<"ENTERPRISE" | "DEVELOPER" | null>(null);
     const [currentSlide, setCurrentSlide] = useState(0);
     const [slideDirection, setSlideDirection] = useState("right");
 
@@ -446,8 +446,13 @@ export default function SolutionsPage() {
 
     return (
         <main ref={mainRef} className="min-h-screen bg-bg text-ink overflow-x-hidden selection:bg-accent selection:text-white relative">
-            <FormModal isOpen={activeForm} onClose={() => setActiveForm(false)}>
-                <LeadSalesForm source="Solutions Page Core Inquiry" onSuccess={() => setActiveForm(false)} />
+            <FormModal isOpen={activeForm !== null} onClose={() => setActiveForm(null)}>
+                {activeForm === "ENTERPRISE" && (
+                    <LeadSalesForm source="solutions_enterprise" onSuccess={() => setActiveForm(null)} />
+                )}
+                {activeForm === "DEVELOPER" && (
+                    <LeadSalesForm source="solutions_developer" initialDescription="I am interested in developer hardware and environments." onSuccess={() => setActiveForm(null)} />
+                )}
             </FormModal>
 
             {/* ── 1. HERO SECTION (Simple Carousel with Text & Photo Slate) ───────────────────────────────────────── */}
@@ -894,13 +899,20 @@ export default function SolutionsPage() {
                     <p className="text-white/85 text-lg md:text-xl font-sans max-w-xl mx-auto leading-relaxed">
                         Contact our engineering and solutions team to design custom device specifications and leasing terms.
                     </p>
-                    <div className="pt-6">
+                    <div className="pt-6 flex flex-col sm:flex-row gap-4 justify-center">
                         <button
-                            onClick={() => setActiveForm(true)}
-                            className="relative overflow-hidden z-10 bg-transparent border border-white text-white hover:text-accent px-12 py-5 text-[11px] font-bold uppercase tracking-[0.3em] transition-colors duration-500 rounded-sm group/btn flex items-center gap-4 cursor-pointer shadow-xl mx-auto"
+                            onClick={() => setActiveForm("ENTERPRISE")}
+                            className="relative overflow-hidden z-10 bg-transparent border border-white text-white hover:text-accent px-12 py-5 text-[11px] font-bold uppercase tracking-[0.3em] transition-colors duration-500 rounded-sm group/btn flex items-center justify-center gap-4 cursor-pointer shadow-xl"
                         >
                             <span className="absolute inset-0 bg-white -z-10 translate-y-full group-hover/btn:translate-y-0 transition-transform duration-500 ease-[cubic-bezier(0.16,1,0.3,1)]" />
-                            <span className="relative z-10">Discuss Your Requirements</span>
+                            <span className="relative z-10">Discuss Enterprise Needs</span>
+                            <ArrowRight size={14} className="relative z-10 group-hover/btn:translate-x-1 transition-transform duration-500" />
+                        </button>
+                        <button
+                            onClick={() => setActiveForm("DEVELOPER")}
+                            className="relative overflow-hidden z-10 bg-[#1A1714] border border-[#1A1714] text-white hover:border-white px-12 py-5 text-[11px] font-bold uppercase tracking-[0.3em] transition-colors duration-500 rounded-sm group/btn flex items-center justify-center gap-4 cursor-pointer shadow-xl"
+                        >
+                            <span className="relative z-10">Developer Solutions</span>
                             <ArrowRight size={14} className="relative z-10 group-hover/btn:translate-x-1 transition-transform duration-500" />
                         </button>
                     </div>

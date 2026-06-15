@@ -134,9 +134,9 @@ export default function SolutionDetailPage({ params }: { params: Promise<{ id: s
         <main ref={mainRef} className="min-h-screen bg-bg text-ink overflow-x-hidden selection:bg-accent selection:text-white">
             <FormModal isOpen={activeForm} onClose={() => setActiveForm(false)}>
                 {solution.id === "e2" ? (
-                    <ProgramApplicationForm programName={solution.name} onSuccess={() => setActiveForm(false)} />
+                    <ProgramApplicationForm programName={solution.name} source="solutions_education" onSuccess={() => setActiveForm(false)} />
                 ) : (
-                    <LeadSalesForm source={`Solutions Detail Page: ${solution.name}`} onSuccess={() => setActiveForm(false)} />
+                    <LeadSalesForm source="solutions_enterprise" onSuccess={() => setActiveForm(false)} />
                 )}
             </FormModal>
 
