@@ -39,12 +39,12 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="en" suppressHydrationWarning className={cn(
-      "h-full",
+      "h-full overflow-x-hidden",
       inter.variable,
       libreBaskerville.variable,
       jetbrainsMono.variable
     )}>
-      <body className="antialiased font-sans h-full relative">
+      <body className="antialiased font-sans h-full relative overflow-x-hidden">
         <AppShell>{children}</AppShell>
       </body>
     </html>

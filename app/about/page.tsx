@@ -292,12 +292,12 @@ export default function AboutPage() {
                             Whether you are an institution, a startup, a partner, or an early supporter, there&apos;s an opportunity to build together.
                         </p>
                         <div className="flex flex-wrap justify-center gap-6 pt-8">
-                            <Link href="/collaborate">
+                            <Link href="/solutions">
                                 <button className="bg-[#F27D26] text-white px-8 py-4 text-sm font-bold uppercase tracking-widest hover:bg-[#d9631a] transition-all rounded-sm shadow-xl active:scale-95">
                                     Build With Us
                                 </button>
                             </Link>
-                            <Link href="/collaborate">
+                            <Link href="/solutions">
                                 <button className="bg-[#141414] text-white border border-[#141414] px-8 py-4 text-sm font-bold uppercase tracking-widest hover:bg-black/90 transition-all rounded-sm shadow-xl active:scale-95">
                                     Partner With Us
                                 </button>

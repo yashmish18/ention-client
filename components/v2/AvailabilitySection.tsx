@@ -1,139 +1,113 @@
 "use client";
 
-import React, { useEffect, useRef } from "react";
-import { Globe, ShoppingCart, GraduationCap } from "lucide-react";
-import { gsap } from "gsap";
-import { ScrollTrigger } from "gsap/ScrollTrigger";
+import React from "react";
+import Image from "next/image";
+import { Globe, ShoppingCart, GraduationCap, ArrowUpRight } from "lucide-react";
+import { motion } from "framer-motion";
 
-if (typeof window !== "undefined") {
-  gsap.registerPlugin(ScrollTrigger);
-}
-
-const CARDS = [
+const CHANNELS = [
   {
     title: "Website",
-    desc: "Browse our full catalog and configure your custom machine online.",
+    desc: "Browse our catalog and configure your custom machine online with worldwide shipping.",
     icon: Globe,
+    image: "https://images.unsplash.com/photo-1498050108023-c5249f4df085?q=80&w=600&auto=format&fit=crop",
+    href: "/products",
+    linkText: "Configure Now",
+    yOffset: "translate-y-0",
   },
   {
     title: "E-commerce",
-    desc: "Available through select premium retail partners across the globe.",
+    desc: "Available through premium authorized online retailers and regional e-com hubs.",
     icon: ShoppingCart,
+    image: "/assets/landing_page/slide-3.png", // Using high-quality local slide asset
+    href: "#",
+    linkText: "Find Retailer",
+    yOffset: "md:translate-y-12",
   },
   {
     title: "Campus",
-    desc: "Special education pricing and workshops for students and faculty.",
+    desc: "Access student discounts, developer grants, and direct institutional sales.",
     icon: GraduationCap,
+    image: "/assets/landing_page/stud.png", // Using student photo local asset
+    href: "#",
+    linkText: "Apply Pricing",
+    yOffset: "md:translate-y-24",
   },
 ];
 
 export default function AvailabilitySection() {
-  const sectionRef = useRef<HTMLDivElement>(null);
-
-  useEffect(() => {
-    if (!sectionRef.current) return;
-
-    const ctx = gsap.context(() => {
-      // ── Heading clip reveal
-      const heading = sectionRef.current!.querySelector(".av-heading") as HTMLElement;
-      const rule = sectionRef.current!.querySelector(".av-rule") as HTMLElement;
-      const floods = sectionRef.current!.querySelectorAll(".av-flood");
-      const inners = sectionRef.current!.querySelectorAll(".av-inner");
-
-      if (!heading || !rule || !floods || !inners) return;
-
-      gsap.set(heading, { yPercent: 105 });
-      gsap.set(rule, { scaleX: 0, transformOrigin: "center center" });
-      gsap.set(floods, { scaleY: 0, transformOrigin: "bottom center" });
-      gsap.set(inners, { opacity: 0, y: 20 });
-
-      const tl = gsap.timeline({
-        scrollTrigger: {
-          trigger: sectionRef.current,
-          start: "top 78%",
-          toggleActions: "play none none none",
-        },
-      });
-
-      tl.to(heading, {
-        yPercent: 0,
-        duration: 1,
-        ease: "power4.out",
-      });
-
-      tl.to(rule, {
-        scaleX: 1,
-        duration: 0.8,
-        ease: "power3.inOut",
-      }, "-=0.7");
-
-      // Card Background Flood Fill (rising liquid effect)
-      tl.to(floods, {
-        scaleY: 1,
-        stagger: 0.15,
-        duration: 1.0,
-        ease: "power2.out",
-      }, "-=0.4");
-
-      // Content fades up
-      tl.to(inners, {
-        opacity: 1,
-        y: 0,
-        stagger: 0.15,
-        duration: 0.7,
-        ease: "power3.out",
-      }, "-=0.7");
-    }, sectionRef);
-
-    return () => ctx.revert();
-  }, []);
-
   return (
     <section
-      ref={sectionRef}
       id="order"
-      className="px-8 py-24 lg:py-36 bg-ink text-bg border-t border-white/5 relative overflow-hidden"
+      className="px-6 md:px-12 lg:px-20 py-24 lg:py-40 bg-ink text-bg border-t border-white/5 relative overflow-hidden"
     >
-      <div className="max-w-[1200px] mx-auto space-y-16">
-        {/* Centered Heading */}
-        <div className="pb-6 text-center">
-          <div className="overflow-hidden">
-            <h2 className="av-heading text-4xl md:text-5xl lg:text-7xl font-serif font-black italic tracking-tighter text-bg select-none">
-              Availability
-            </h2>
-          </div>
-          <div className="av-rule mt-4 h-[1px] w-32 bg-white/10 mx-auto" />
+      {/* Decorative vertical grid lines */}
+      <div className="absolute inset-y-0 left-1/4 w-[1px] bg-white/[0.03] pointer-events-none" />
+      <div className="absolute inset-y-0 left-1/2 w-[1px] bg-white/[0.03] pointer-events-none" />
+      <div className="absolute inset-y-0 left-3/4 w-[1px] bg-white/[0.03] pointer-events-none" />
+
+      <div className="max-w-7xl mx-auto flex flex-col lg:flex-row gap-16 items-start">
+        {/* Left Side: Typography Intro */}
+        <div className="w-full lg:w-[28%] flex flex-col justify-start text-left space-y-6 lg:sticky lg:top-32">
+          <h2 className="text-4xl md:text-5xl lg:text-6xl font-serif font-black italic tracking-tighter text-white leading-tight">
+            Availability
+          </h2>
+          <p className="text-white/50 font-sans leading-relaxed text-sm max-w-sm">
+            Ention systems are distributed through official channels, select regional e-commerce partners, and specialized campus ambassador networks.
+          </p>
+          <div className="h-[2px] w-16 bg-accent/50 pt-0.5" />
         </div>
 
-        {/* 3 cards with Flood Fill animation */}
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-          {CARDS.map((card, i) => {
-            const Icon = card.icon;
+        {/* Right Side: Staggered Full-Opacity Image Cards */}
+        <div className="w-full lg:w-[72%] grid grid-cols-1 md:grid-cols-3 gap-8 items-start pt-6 md:pb-28">
+          {CHANNELS.map((channel, i) => {
+            const Icon = channel.icon;
             return (
-              <div
+              <motion.div
                 key={i}
-                className="av-card group relative bg-white/[0.02] border border-white/5 hover:border-accent/40 transition-all duration-500 overflow-hidden"
+                initial={{ opacity: 0, y: 40 }}
+                whileInView={{ opacity: 1, y: 0 }}
+                viewport={{ once: true }}
+                transition={{ duration: 0.8, delay: i * 0.15, ease: "easeOut" }}
+                className={`flex flex-col bg-neutral-900/60 border border-white/5 hover:border-accent/30 transition-all duration-700 group overflow-hidden ${channel.yOffset}`}
               >
-                {/* Flood Fill Layer */}
-                <div className="av-flood absolute inset-0 bg-accent/15 -z-10" />
+                {/* 1. Full-Opacity Crisp Image on Top */}
+                <div className="relative w-full aspect-[4/5] overflow-hidden bg-neutral-950">
+                  <Image
+                    src={channel.image}
+                    alt={channel.title}
+                    fill
+                    className="object-cover transition-transform duration-1000 ease-[cubic-bezier(0.16,1,0.3,1)] group-hover:scale-105"
+                    unoptimized
+                  />
+                  {/* Subtle top/bottom shadow for visual balance */}
+                  <div className="absolute inset-0 bg-gradient-to-b from-black/25 via-transparent to-black/40 pointer-events-none" />
+                </div>
 
-                <div className="av-inner p-10 lg:p-12 flex flex-col items-start gap-6 min-h-[260px] relative z-10">
-                  {/* Icon */}
-                  <div className="text-accent">
-                    <Icon size={28} strokeWidth={1.2} />
+                {/* 2. Clean Detailed Text Content Below */}
+                <div className="p-6 md:p-8 flex flex-col justify-between flex-1 space-y-6 text-left">
+                  <div className="space-y-3">
+                    <div className="flex items-center gap-3">
+                      <Icon size={16} className="text-accent shrink-0" />
+                      <h3 className="text-lg md:text-xl font-serif font-bold italic text-white tracking-tight leading-none">
+                        {channel.title}
+                      </h3>
+                    </div>
+                    
+                    <p className="text-xs text-white/60 font-sans leading-relaxed min-h-[48px]">
+                      {channel.desc}
+                    </p>
                   </div>
 
-                  {/* Title */}
-                  <h3 className="text-2xl md:text-3xl font-serif font-bold italic text-white tracking-tight leading-snug">
-                    {card.title}
-                  </h3>
-
-                  {/* Desc */}
-                  <p className="text-[11px] font-sans font-medium tracking-[0.12em] text-white/40 leading-loose">
-                    {card.desc.toUpperCase()}
-                  </p>
+                  <a
+                    href={channel.href}
+                    className="group/btn flex items-center justify-between text-[10px] font-mono tracking-widest font-black uppercase text-accent border-t border-white/5 pt-4 hover:text-white transition-colors duration-300"
+                  >
+                    <span>{channel.linkText}</span>
+                    <ArrowUpRight size={14} className="group-hover/btn:translate-x-0.5 group-hover/btn:-translate-y-0.5 transition-transform duration-300" />
+                  </a>
                 </div>
-              </div>
+              </motion.div>
             );
           })}
         </div>

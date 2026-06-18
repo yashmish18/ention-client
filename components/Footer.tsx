@@ -72,7 +72,7 @@ export default function Footer() {
                             <li><Link href="/" className="hover:text-white transition-colors block">Home</Link></li>
                             <li><Link href="/products" className="hover:text-white transition-colors block">Products</Link></li>
                             <li><Link href="/solutions" className="hover:text-white transition-colors block">Solutions</Link></li>
-                            <li><Link href="/collaborate" className="hover:text-white transition-colors block">Programs & Ecosystem</Link></li>
+                            <li><Link href="/ention-os" className="hover:text-white transition-colors block">Ention OS</Link></li>
                             <li><Link href="/about" className="hover:text-white transition-colors block">About Us</Link></li>
                             <li><button onClick={() => setIsSupportOpen(true)} className="hover:text-[#F27D26] transition-colors block text-left uppercase">Contact Support</button></li>
                         </ul>
@@ -90,25 +90,23 @@ export default function Footer() {
                         </ul>
                     </div>
 
-                    {/* 4. Solutions */}
+                    {/* 4. Enterprise Solutions */}
                     <div className="lg:col-span-2 space-y-8">
-                        <h4 className="font-mono text-[10px] uppercase tracking-[0.5em] text-[#F27D26] font-black underline underline-offset-8 decoration-[#F27D26]/30">Solutions</h4>
+                        <h4 className="font-mono text-[10px] uppercase tracking-[0.5em] text-[#F27D26] font-black underline underline-offset-8 decoration-[#F27D26]/30">Enterprise Solutions</h4>
                         <ul className="space-y-4 font-mono text-[10px] uppercase tracking-[0.2em] text-white/60">
-                            <li><Link href="/solutions" className="hover:text-white transition-colors block">For Developers</Link></li>
-                            <li><Link href="/solutions" className="hover:text-white transition-colors block">For Students</Link></li>
-                            <li><Link href="/solutions" className="hover:text-white transition-colors block">For Startups</Link></li>
-                            <li><Link href="/solutions" className="hover:text-white transition-colors block">For Enterprises</Link></li>
+                            <li><Link href="/solutions" className="hover:text-white transition-colors block">Institutional Labs</Link></li>
+                            <li><Link href="/solutions" className="hover:text-white transition-colors block">Education Solutions</Link></li>
+                            <li><Link href="/solutions" className="hover:text-white transition-colors block">Enterprise Deployments</Link></li>
                         </ul>
                     </div>
 
-                    {/* 5. Programs */}
+                    {/* 5. Specialized Solutions */}
                     <div className="lg:col-span-2 space-y-8">
-                        <h4 className="font-mono text-[10px] uppercase tracking-[0.5em] text-[#F27D26] font-black underline underline-offset-8 decoration-[#F27D26]/30">Programs</h4>
+                        <h4 className="font-mono text-[10px] uppercase tracking-[0.5em] text-[#F27D26] font-black underline underline-offset-8 decoration-[#F27D26]/30">Specialized Solutions</h4>
                         <ul className="space-y-4 font-mono text-[10px] uppercase tracking-[0.2em] text-white/60">
-                            <li><Link href="/collaborate" className="hover:text-white transition-colors block">Innovation Labs</Link></li>
-                            <li><Link href="/collaborate" className="hover:text-white transition-colors block">Startup Ecosystem</Link></li>
-                            <li><Link href="/collaborate" className="hover:text-white transition-colors block">Campus Program</Link></li>
-                            <li><Link href="/collaborate" className="hover:text-white transition-colors block">Co-Creation</Link></li>
+                            <li><Link href="/solutions" className="hover:text-white transition-colors block">White-Label / OEM</Link></li>
+                            <li><Link href="/solutions" className="hover:text-white transition-colors block">Startup Partnerships</Link></li>
+                            <li><Link href="/solutions" className="hover:text-white transition-colors block">Campus Ambassador</Link></li>
                         </ul>
                     </div>
 
@@ -118,7 +116,7 @@ export default function Footer() {
                             <h4 className="font-mono text-[10px] uppercase tracking-[0.5em] text-[#F27D26] font-black">Support</h4>
                             <ul className="space-y-3 font-mono text-[9px] uppercase tracking-widest text-white/50">
                                 <li><Link href="/support" className="hover:text-white">FAQs</Link></li>
-                                <li><Link href="/support" className="hover:text-white">Contact</Link></li>
+                                <li><Link href="/contact" className="hover:text-white">Contact</Link></li>
                                 <li><Link href="/support" className="hover:text-white">Service</Link></li>
                             </ul>
                         </div>

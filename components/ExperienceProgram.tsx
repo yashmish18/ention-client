@@ -1,7 +1,6 @@
 "use client";
 
 import React from "react";
-import Image from "next/image";
 import { motion, AnimatePresence } from "framer-motion";
 import { ArrowRight } from "lucide-react";
 
@@ -11,27 +10,36 @@ export interface ExperienceProgramProps {
 
 export const ExperienceProgram = ({ onProgramClick }: ExperienceProgramProps) => {
   const [hovered, setHovered] = React.useState<number | null>(null);
+  const [activeIndex, setActiveIndex] = React.useState(0);
 
-  const products = [
+  const slides = [
     {
       id: 1,
-      name: "MODEL 03",
-      edition: "SILVER EDITION",
-      image: "/assets/images/s1/S1 gaming laptop transparent background png/1.png"
+      num: "01",
+      title: "Experience Before You Decide",
+      desc: "Try Ention laptops in real world use before making a decision."
     },
     {
       id: 2,
-      name: "MODEL 02",
-      edition: "CARBON NOIR",
-      image: "/assets/images/e4/E4 laptop photo transparent background png/1.png"
+      num: "02",
+      title: "Not Just a Demo A Real Experience",
+      desc: "Use the device in your actual workflow work, build, test, and evaluate performance."
     },
     {
       id: 3,
-      name: "MODEL 01",
-      edition: "GRAPHITE GREY",
-      image: "/assets/images/e1/E1 laptop photo transparent background png/1.png"
+      num: "03",
+      title: "Built for Confidence, Not Just Sales",
+      desc: "Use the device in your actual workflow work, build, test, and evaluate performance."
     }
   ];
+
+  const handlePrev = () => {
+    setActiveIndex((prev) => (prev - 1 + slides.length) % slides.length);
+  };
+
+  const handleNext = () => {
+    setActiveIndex((prev) => (prev + 1) % slides.length);
+  };
 
   return (
     <section className="px-6 md:px-12 lg:px-20 xl:px-32 py-20 lg:py-32 bg-bg text-ink relative border-t border-ink/5 overflow-hidden">
@@ -95,108 +103,126 @@ export const ExperienceProgram = ({ onProgramClick }: ExperienceProgramProps) =>
         </div>
 
         {/* Right Column: Interactive Accordion Carousel */}
-        <div className="flex flex-col gap-6 w-full max-w-[500px] lg:ml-auto lg:pr-6 xl:pr-8">
+        <div className="flex flex-col gap-6 w-full max-w-[620px] lg:ml-auto lg:pr-6 xl:pr-8">
           <div
-            className="flex gap-3 h-[320px] md:h-[360px] overflow-hidden w-full"
+            className="flex gap-4 h-[480px] md:h-[540px] overflow-hidden w-full"
             onMouseLeave={() => setHovered(null)}
           >
-            {products.map((product, i) => {
+            {slides.map((slide, i) => {
               const isHovered = hovered === i;
               const isSomethingHovered = hovered !== null;
-              const isActive = isHovered || (!isSomethingHovered && i === 0);
+              const isActive = isHovered || (!isSomethingHovered && activeIndex === i);
 
               return (
                 <motion.div
-                  key={product.id}
+                  key={slide.id}
                   initial={false}
                   animate={{
-                    width: isActive ? "64%" : "14%",
-                    opacity: isActive ? 1 : 0.5,
+                    width: isActive ? "68%" : "16%",
+                    opacity: isActive ? 1 : 0.6,
                   }}
                   onMouseEnter={() => setHovered(i)}
                   transition={{ duration: 0.6, ease: [0.22, 1, 0.36, 1] }}
-                  className={`relative h-full overflow-hidden cursor-pointer rounded-lg flex flex-col justify-between p-4 md:p-5 transition-colors duration-300 border ${isActive
-                      ? "bg-white border-ink/20 shadow-lg"
-                      : "bg-ink/5 border-ink/5 hover:bg-ink/10"
+                  className={`relative h-full overflow-hidden cursor-pointer rounded-2xl flex flex-col transition-colors duration-500 border ${isActive
+                      ? "bg-[#fcfbf9] border-ink/15 shadow-md"
+                      : "bg-[#f4f3ef] border-ink/5 hover:bg-[#eae9e5]"
                     }`}
                 >
-                  {/* Laptop Image Area - Only visible when active to prevent squishing (hyphen bug) */}
-                  <div className="flex-1 w-full relative flex items-center justify-center p-2 min-h-[160px]">
-                    <AnimatePresence>
-                      {isActive && (
-                        <motion.div
-                          initial={{ opacity: 0, scale: 0.9 }}
-                          animate={{ opacity: 1, scale: 1 }}
-                          exit={{ opacity: 0, scale: 0.9 }}
-                          transition={{ duration: 0.4 }}
-                          className="relative w-full h-[130px] md:h-[150px]"
-                        >
-                          <Image
-                            src={product.image}
-                            alt={product.edition}
-                            fill
-                            className="object-contain"
-                            unoptimized
-                          />
-                        </motion.div>
-                      )}
-                    </AnimatePresence>
-                  </div>
+                  <AnimatePresence mode="wait">
+                    {isActive ? (
+                      <motion.div
+                        key={`active-${slide.id}`}
+                        initial={{ opacity: 0, y: 10 }}
+                        animate={{ opacity: 1, y: 0 }}
+                        exit={{ opacity: 0, y: -10 }}
+                        transition={{ duration: 0.4 }}
+                        className="flex flex-col justify-between h-full w-full p-8 md:p-10 select-none text-left"
+                      >
+                        <div className="space-y-6">
+                          {/* Top Index indicator */}
+                          <div className="space-y-1">
+                            <span className="text-accent text-sm md:text-base font-sans font-bold tracking-wider block">{slide.num}</span>
+                            <div className="w-8 h-[1.5px] bg-accent" />
+                          </div>
 
-                  {/* Text Label for Card at the bottom */}
-                  <div className="w-full relative min-h-[50px] flex items-end">
-                    <AnimatePresence mode="wait">
-                      {isActive ? (
-                        <motion.div
-                          key={`label-active-${product.id}`}
-                          initial={{ opacity: 0, y: 10 }}
-                          animate={{ opacity: 1, y: 0 }}
-                          exit={{ opacity: 0, y: 10 }}
-                          transition={{ duration: 0.4 }}
-                          className="flex flex-col"
-                        >
-                          <span className="font-sans text-[9px] tracking-[0.35em] uppercase font-black block text-accent">
-                            {product.name}
-                          </span>
-                          <h3 className="text-lg font-serif text-ink italic font-black uppercase tracking-tight mt-1 leading-none">
-                            {product.edition}
+                          {/* Title */}
+                          <h3 className="text-xl md:text-2xl lg:text-3xl font-serif font-black text-ink leading-tight tracking-tight">
+                            {slide.title}
                           </h3>
-                        </motion.div>
-                      ) : (
-                        <motion.div
-                          key={`label-inactive-${product.id}`}
-                          initial={{ opacity: 0 }}
-                          animate={{ opacity: 1 }}
-                          exit={{ opacity: 0 }}
-                          className="absolute inset-0 flex items-center justify-center"
-                        >
-                          {/* Vertical Rotated Text for inactive columns */}
-                          <span className="font-sans text-[9px] tracking-[0.4em] uppercase text-ink/30 rotate-90 whitespace-nowrap">
-                            {product.edition}
+
+                          {/* Description */}
+                          <p className="text-xs md:text-sm font-sans font-medium text-ink/65 leading-relaxed max-w-[280px]">
+                            {slide.desc}
+                          </p>
+                        </div>
+
+                        {/* Bottom Circle Arrow Button */}
+                        <div className="w-10 h-10 rounded-full border border-accent/30 hover:border-accent hover:bg-accent/5 flex items-center justify-center text-accent transition-colors duration-300">
+                          <ArrowRight size={16} />
+                        </div>
+                      </motion.div>
+                    ) : (
+                      <motion.div
+                        key={`inactive-${slide.id}`}
+                        initial={{ opacity: 0 }}
+                        animate={{ opacity: 1 }}
+                        exit={{ opacity: 0 }}
+                        className="absolute inset-0 flex flex-col justify-start items-center py-8 select-none"
+                      >
+                        {/* Top index for inactive */}
+                        <div className="flex flex-col items-center gap-1.5 mb-8">
+                          <span className="text-ink/30 text-xs font-sans font-bold tracking-wider">{slide.num}</span>
+                          <div className="w-4 h-[1px] bg-ink/15" />
+                        </div>
+
+                        {/* Vertical Rotated Text for inactive columns */}
+                        <div className="flex-1 flex items-center justify-center w-full">
+                          <span className="font-sans text-[10px] md:text-[11px] tracking-[0.25em] font-bold text-ink/40 rotate-90 whitespace-nowrap">
+                            {slide.title}
                           </span>
-                        </motion.div>
-                      )}
-                    </AnimatePresence>
-                  </div>
+                        </div>
+                      </motion.div>
+                    )}
+                  </AnimatePresence>
                 </motion.div>
               );
             })}
           </div>
 
-          {/* Indicators & Interactive Showcase Label */}
-          <div className="flex items-center justify-between px-1">
-            <div className="flex gap-3">
-              {products.map((_, i) => (
-                <div
-                  key={i}
-                  className={`h-[2px] transition-all duration-700 ${(hovered === i || (hovered === null && i === 0)) ? "w-16 bg-accent" : "w-6 bg-ink/10"}`}
-                />
-              ))}
+          {/* Indicators & Arrow controls */}
+          <div className="flex items-center justify-between mt-4 w-full">
+            {/* Prev Arrow */}
+            <button
+              onClick={handlePrev}
+              className="w-10 h-10 rounded-full border border-ink/10 bg-[#fcfbf9] hover:bg-ink/5 flex items-center justify-center text-ink/70 hover:text-ink transition-colors duration-300 shadow-sm cursor-pointer"
+            >
+              <svg className="w-4.5 h-4.5" fill="none" stroke="currentColor" strokeWidth="2.5" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" d="M15.75 19.5L8.25 12l7.5-7.5" />
+              </svg>
+            </button>
+
+            {/* Indicators */}
+            <div className="flex gap-2">
+              {slides.map((_, i) => {
+                const isCurrent = hovered === i || (hovered === null && activeIndex === i);
+                return (
+                  <div
+                    key={i}
+                    className={`h-[3px] rounded-full transition-all duration-500 ${isCurrent ? "w-10 bg-accent" : "w-6 bg-ink/10"}`}
+                  />
+                );
+              })}
             </div>
-            <div className="text-accent hover:text-ink font-sans text-[9px] tracking-[0.3em] uppercase flex items-center gap-2 select-none transition-colors duration-300">
-              <span className="tracking-widest">INTERACTIVE SHOWCASE</span>
-              <span className="text-xs font-bold font-sans">&gt;</span>
-            </div>
+
+            {/* Next Arrow */}
+            <button
+              onClick={handleNext}
+              className="w-10 h-10 rounded-full border border-ink/10 bg-[#fcfbf9] hover:bg-ink/5 flex items-center justify-center text-ink/70 hover:text-ink transition-colors duration-300 shadow-sm cursor-pointer"
+            >
+              <svg className="w-4.5 h-4.5" fill="none" stroke="currentColor" strokeWidth="2.5" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" d="M8.25 4.5l7.5 7.5-7.5 7.5" />
+              </svg>
+            </button>
           </div>
         </div>
       </div>

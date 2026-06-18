@@ -3,6 +3,7 @@ import { notFound } from "next/navigation";
 
 
 import WorkbookPDP from "@/components/products/pdp/WorkbookPDP";
+import SwapbookPDP from "@/components/products/pdp/SwapbookPDP";
 import CartDrawer from "@/components/products/CartDrawer";
 import { fetchProductById, fetchProducts } from "@/lib/api";
 import type { Metadata } from 'next';
@@ -64,9 +65,15 @@ export default async function ProductPage({ params }: { params: Promise<{ id: st
         "/assets/0N1A1389.png"
     ];
 
+    const isSwapbook = product.name?.toLowerCase().includes("swapbook") || product.id === "s1";
+
     return (
         <main className="bg-[#FAF7F2] min-h-screen pt-0">
-            <WorkbookPDP product={product} images={images} />
+            {isSwapbook ? (
+                <SwapbookPDP product={product} images={images} />
+            ) : (
+                <WorkbookPDP product={product} images={images} />
+            )}
             <CartDrawer />
         </main>
     );

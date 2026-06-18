@@ -32,12 +32,19 @@
     <priority>0.8</priority>
   </url>
   
-  <!-- Collaborate Page -->
+  <!-- Solutions Page -->
   <url>
-    <loc>https://ention.in/collaborate</loc>
-    <lastmod>2024-01-01</lastmod>
+    <loc>https://ention.in/solutions</loc>
+    <lastmod>2026-06-18</lastmod>
     <changefreq>monthly</changefreq>
-    <priority>0.7</priority>
+    <priority>0.8</priority>
   </url>
-  
+
+  <!-- Ention OS Page -->
+  <url>
+    <loc>https://ention.in/ention-os</loc>
+    <lastmod>2026-06-18</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.8</priority>
+  </url>
 </urlset>
