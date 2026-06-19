@@ -11,6 +11,8 @@ import { ArrowRight, ArrowLeft, Heart, Cpu } from "lucide-react";
 import { useCart } from "@/store/useCart";
 import type { Product } from "@/lib/products-data";
 import { motion } from "framer-motion";
+import FormModal from "@/components/FormModal";
+import LeadSalesForm from "@/components/forms/LeadSalesForm";
 
 interface SwapbookPDPProps {
   product: Product;
@@ -23,9 +25,9 @@ export default function SwapbookPDP({ product, images }: SwapbookPDPProps) {
   const { addItem } = useCart();
 
   /* ── State ── */
-  const [headerScrolled, setHeaderScrolled] = useState(false);
   const [activeTab, setActiveTab] = useState("overview");
   const [added, setAdded] = useState(false);
+  const [activeForm, setActiveForm] = useState<"ENQUIRE" | null>(null);
 
 
 
@@ -77,10 +79,6 @@ export default function SwapbookPDP({ product, images }: SwapbookPDPProps) {
     gsap.ticker.add(tickerFn);
     gsap.ticker.lagSmoothing(0);
 
-    lenis.on("scroll", ({ scroll }: { scroll: number }) => {
-      setHeaderScrolled(scroll > 60);
-    });
-
     const root = rootRef.current;
     if (!root) return;
 
@@ -122,16 +120,26 @@ export default function SwapbookPDP({ product, images }: SwapbookPDPProps) {
       window.removeEventListener("scroll", updateActiveTab);
       ScrollTrigger.getAll().forEach((t) => t.kill());
     };
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   return (
     <div ref={rootRef} className="swapbook-pdp bg-[#080606] text-white select-none pb-20 md:pb-24">
-      <style jsx global>{`
+      <FormModal isOpen={activeForm !== null} onClose={() => setActiveForm(null)}>
+          {activeForm === "ENQUIRE" && (
+              <LeadSalesForm 
+                  source="product_detail_buy" 
+                  initialDescription={`I am interested in the ${product?.name || 'product'}. Please provide more details on bulk purchase or B2B pricing.`} 
+                  initialUseCase="Enterprise"
+                  onSuccess={() => setActiveForm(null)} 
+              />
+          )}
+      </FormModal>
+
+      <style dangerouslySetInnerHTML={{ __html: `
         @import url('https://fonts.googleapis.com/css2?family=Orbitron:wght@900&family=Inter:wght@300;400;500;600;700&display=swap');
         .swapbook-pdp { font-family: 'Inter', sans-serif; cursor: default; }
         .font-orbitron { font-family: 'Orbitron', sans-serif; font-weight: 900; }
-      `}</style>
+      `}} />
 
       {/* 1. CINEMATIC HERO SECTION */}
       <section id="hero" className="relative min-h-[95vh] flex flex-col justify-between px-6 md:px-12 lg:px-20 pt-4 pb-16 overflow-hidden bg-black">
@@ -175,6 +183,12 @@ export default function SwapbookPDP({ product, images }: SwapbookPDPProps) {
                   {tab.label}
                 </button>
               ))}
+              <button
+                onClick={() => setActiveForm("ENQUIRE")}
+                className="border border-white/20 text-[#FAF7F2] px-5 py-2 text-[11px] uppercase tracking-[0.2em] hover:bg-white hover:text-black transition-all duration-300 font-medium rounded-none cursor-pointer mr-3"
+              >
+                Enquire
+              </button>
               <button
                 onClick={handleBuyNowRedirect}
                 className="border border-[#FF1E27]/80 hover:bg-[#FF1E27] text-white px-5 py-2 text-[11px] uppercase tracking-[0.2em] transition-all duration-300 font-medium rounded-none hover:shadow-[0_0_15px_rgba(255,30,39,0.4)] cursor-pointer"
@@ -444,8 +458,11 @@ export default function SwapbookPDP({ product, images }: SwapbookPDPProps) {
               In Stock &bull; Ships in 24&ndash;48 hrs &bull; COD available
             </div>
           </div>
-          <button className="border border-white/10 rounded-none px-3 py-1.5 text-[10px] uppercase tracking-wider text-white font-medium hover:bg-white/5 transition-colors cursor-pointer">
-            Catalogue
+          <button
+            onClick={() => setActiveForm("ENQUIRE")}
+            className="bg-[#C5A059] border border-[#C5A059] text-white rounded-none px-4 py-2.5 text-[10px] uppercase tracking-wider font-bold hover:bg-[#a68444] hover:border-[#a68444] transition-all cursor-pointer whitespace-nowrap shadow-sm"
+          >
+            Enquire Now
           </button>
         </div>
 

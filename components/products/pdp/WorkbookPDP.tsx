@@ -10,7 +10,7 @@ import Lenis from "lenis";
 import { ArrowRight, ArrowLeft, Play, Pause, Volume2, VolumeX, Heart, Cpu } from "lucide-react";
 import { useCart } from "@/store/useCart";
 import type { Product } from "@/lib/products-data";
-import { motion, useScroll, useTransform, LayoutGroup, useMotionValueEvent } from "framer-motion";
+import { motion, useScroll, useTransform } from "framer-motion";
 import FormModal from "@/components/FormModal";
 import LeadSalesForm from "@/components/forms/LeadSalesForm";
 import ProgramApplicationForm from "@/components/forms/ProgramApplicationForm";
@@ -131,7 +131,6 @@ export default function WorkbookPDP({ product, images }: WorkbookPDPProps) {
   const { addItem } = useCart();
 
   /* ── State ── */
-  const [headerScrolled, setHeaderScrolled] = useState(false);
   const [activeTab, setActiveTab] = useState("overview");
 
   // Hero Carousel/Gallery state
@@ -148,10 +147,6 @@ export default function WorkbookPDP({ product, images }: WorkbookPDPProps) {
 
 
   const [added, setAdded] = useState(false);
-  const [benchmarkTab, setBenchmarkTab] = useState(0);
-
-  /* ── Image Access ── */
-  const img = (i: number) => images[i] || images[0] || "/assets/images/classroom-laptop.png";
 
   const carouselSlides = [
     {
@@ -274,10 +269,6 @@ export default function WorkbookPDP({ product, images }: WorkbookPDPProps) {
     gsap.ticker.add(tickerFn);
     gsap.ticker.lagSmoothing(0);
 
-    lenis.on("scroll", ({ scroll }: { scroll: number }) => {
-      setHeaderScrolled(scroll > 60);
-    });
-
     const root = rootRef.current;
     if (!root) return;
 
@@ -371,7 +362,6 @@ export default function WorkbookPDP({ product, images }: WorkbookPDPProps) {
       window.removeEventListener("scroll", updateActiveTab);
       ScrollTrigger.getAll().forEach((t) => t.kill());
     };
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   // Calculate battery timeline 3-bar values
@@ -414,11 +404,11 @@ export default function WorkbookPDP({ product, images }: WorkbookPDPProps) {
           )}
       </FormModal>
 
-      <style jsx global>{`
+      <style dangerouslySetInnerHTML={{ __html: `
         @import url('https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,500;0,600;0,700;1,300;1,400;1,500;1,600;1,700&family=Outfit:wght@300;400;500;600;700&display=swap');
         .workbook-pdp { font-family: 'Outfit', sans-serif; cursor: default; }
         .workbook-pdp .f-serif { font-family: 'Cormorant Garamond', serif; }
-      `}</style>
+      `}} />
 
       {/* 2. SPLIT CINEMATIC HERO SECTION */}
       <section id="hero" className="relative min-h-[90vh] flex flex-col justify-between px-6 md:px-12 lg:px-20 pt-4 pb-20 overflow-hidden bg-[#FAF7F2]">
@@ -1042,7 +1032,7 @@ export default function WorkbookPDP({ product, images }: WorkbookPDPProps) {
               Performance evolved
             </h2>
             <p className="text-sm text-[#6B6258] font-light max-w-2xl mx-auto leading-relaxed">
-              With the latest Snapdragon® X2 Elite processor, the Workbook A14 scales your productivity further than ever. We've pushed every benchmark beyond the previous generation to ensure even your heaviest workloads feel light.
+              {"With the latest Snapdragon® X2 Elite processor, the Workbook A14 scales your productivity further than ever. We've pushed every benchmark beyond the previous generation to ensure even your heaviest workloads feel light."}
             </p>
           </div>
 
@@ -1280,7 +1270,7 @@ export default function WorkbookPDP({ product, images }: WorkbookPDPProps) {
               Power that <span className="text-[#C5A059] font-normal italic f-serif">keeps up</span> with you.
             </h2>
             <p className="text-xs text-[#6B6258] font-light max-w-md leading-relaxed">
-              A high-capacity battery engineered for creators who move. More uptime, less downtime. We've optimized every layer of the architecture to deliver all-day endurance under demanding compile workloads.
+              {"A high-capacity battery engineered for creators who move. More uptime, less downtime. We've optimized every layer of the architecture to deliver all-day endurance under demanding compile workloads."}
             </p>
           </div>
 
@@ -1902,13 +1892,19 @@ export default function WorkbookPDP({ product, images }: WorkbookPDPProps) {
 
           <motion.div
             style={{ opacity: buyNowOpacity }}
-            className="z-10 flex items-center justify-center pointer-events-auto"
+            className="z-10 flex flex-col sm:flex-row items-center justify-center gap-6 pointer-events-auto"
           >
             <button
               onClick={handleBuyNowRedirect}
-              className="px-16 py-8 f-serif italic text-4xl md:text-5xl border-2 border-[#1A1714] bg-[#FAF7F2] hover:bg-[#1A1714] hover:text-[#FAF7F2] text-[#1A1714] transition-all duration-300 cursor-pointer rounded-sm shadow-lg"
+              className="px-16 py-8 f-serif italic text-4xl md:text-5xl border-2 border-[#1A1714] bg-[#FAF7F2] hover:bg-[#1A1714] hover:text-[#FAF7F2] text-[#1A1714] transition-all duration-300 cursor-pointer rounded-sm shadow-lg w-full sm:w-auto text-center"
             >
               Buy Now
+            </button>
+            <button
+              onClick={() => setActiveForm("ENQUIRE")}
+              className="px-16 py-8 f-serif italic text-4xl md:text-5xl border-2 border-[#C5A059] bg-[#C5A059] hover:bg-[#1A1714] hover:text-[#C5A059] text-[#FAF7F2] transition-all duration-300 cursor-pointer rounded-sm shadow-lg w-full sm:w-auto text-center"
+            >
+              Enquire Now
             </button>
           </motion.div>
         </div>
@@ -1958,8 +1954,11 @@ export default function WorkbookPDP({ product, images }: WorkbookPDPProps) {
               In Stock &bull; Ships in 24&ndash;48 hrs &bull; COD available
             </div>
           </div>
-          <button className="border border-[#C8BFB0] rounded px-3 py-1.5 text-[10px] uppercase tracking-wider text-[#1A1714] font-medium hover:bg-[#FAF7F2] transition-colors cursor-pointer">
-            Catalogue
+          <button
+            onClick={() => setActiveForm("ENQUIRE")}
+            className="bg-[#C5A059] border border-[#C5A059] text-white rounded px-4 py-2.5 text-[10px] uppercase tracking-wider font-bold hover:bg-[#a68444] hover:border-[#a68444] transition-all cursor-pointer whitespace-nowrap shadow-sm"
+          >
+            Enquire Now
           </button>
         </div>
 
@@ -2001,13 +2000,7 @@ export default function WorkbookPDP({ product, images }: WorkbookPDPProps) {
               Buy Now
             </button>
 
-            {/* Enquire Button */}
-            <button
-              onClick={() => setActiveForm("ENQUIRE")}
-              className="bg-[#C5A059] border border-[#C5A059] text-white rounded px-4 md:px-6 py-2.5 text-[10px] uppercase tracking-wider font-bold hover:bg-[#a68444] transition-all cursor-pointer whitespace-nowrap"
-            >
-              Enquire
-            </button>
+
           </div>
         </div>
       </div>

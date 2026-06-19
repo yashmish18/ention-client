@@ -57,25 +57,14 @@ export default function ContactPage() {
                         </BlurFadeIn>
 
                         <BlurFadeIn delay={0.2}>
-                            <div className="bg-white p-8 border border-ink/10 rounded-sm shadow-sm">
-                                <h3 className="text-lg font-serif font-bold italic mb-6">Request a Callback</h3>
-                                <p className="font-sans text-xs opacity-70 mb-6">Leave your number and we'll call you back shortly.</p>
-                                <QuickCallbackForm source="contact_page" />
-                            </div>
+                            <QuickCallbackForm source="contact_page" />
                         </BlurFadeIn>
                     </div>
-
+ 
                     {/* Right Column: Lead / Inquiry Form */}
                     <div className="lg:col-span-8">
-                        <BlurFadeIn delay={0.3} className="bg-white p-8 md:p-12 border border-ink/10 rounded-sm shadow-xl">
-                            <div className="mb-10">
-                                <h2 className="text-3xl font-serif font-black italic tracking-tighter mb-3">Send an Inquiry</h2>
-                                <p className="font-sans text-sm opacity-70">
-                                    Fill out the form below and our sales or support team will get back to you within 24 hours.
-                                </p>
-                            </div>
-                            
-                            <LeadSalesForm source="contact_page" onSuccess={() => {}} />
+                        <BlurFadeIn delay={0.3}>
+                            <LeadSalesForm source="contact_page" />
                         </BlurFadeIn>
                     </div>
                 </div>

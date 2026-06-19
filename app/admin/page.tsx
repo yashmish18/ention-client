@@ -1,17 +1,18 @@
 "use client";
 
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import AuthGuard from "@/components/auth/AuthGuard";
 import { BlurFadeIn } from "@/components/BlurFadeIn";
 import {
     LayoutDashboard, TrendingUp, Package, Boxes, ShoppingBag,
     CreditCard, Ticket, Users, MessageSquare, Tag, Settings,
     Search, RefreshCw, CheckCircle2, Clock, AlertCircle, XCircle,
-    ChevronRight, UserCircle, FileText, UserPlus
+    ChevronRight, UserCircle, FileText, UserPlus, Phone, Calendar, Mail,
+    Paperclip, ExternalLink, ShieldAlert, Award, MessageCircle, PlusCircle
 } from "lucide-react";
 
 import {
-    useTickets, useOrders, useUsers,
+    useTickets, useOrders, useUsers, useInquiries,
     TICKET_STATUS, PRIORITY_COLOR, ORDER_STATUS_COLOR,
     apiFetch, AdminSpinner, AdminEmpty, AdminError,
 } from "@/components/admin/shared";
@@ -57,12 +58,43 @@ const PANEL_TITLES: Record<string, string> = {
     settings:     "Store Settings",
 };
 
-// ── Tickets Panel (inline — kept from original) ─────────────────────
-function TicketsPanel() {
+// ── Tickets Panel (CRM Upgrade) ────────────────────────────────────
+interface TicketsPanelProps {
+    onViewUser: (email: string) => void;
+}
+
+function TicketsPanel({ onViewUser }: TicketsPanelProps) {
     const { tickets, loading, error, reload } = useTickets();
     const [filter, setFilter] = useState("all");
     const [search, setSearch] = useState("");
     const [updating, setUpdating] = useState<string | null>(null);
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    const [selectedTicket, setSelectedTicket] = useState<any | null>(null);
+    const [noteInput, setNoteInput] = useState("");
+
+    // Timeline notes loader
+    const getTimeline = (ticketId: string, initialStatus: string, createdAt: string) => {
+        if (typeof window === "undefined") return [];
+        const local = localStorage.getItem(`ention_crm_ticket_timeline_${ticketId}`);
+        if (local) return JSON.parse(local);
+
+        const defaultTimeline = [
+            { 
+                timestamp: new Date(createdAt).toISOString(), 
+                author: "System", 
+                text: `Ticket opened via client forms. Initial Status: ${initialStatus}` 
+            }
+        ];
+        localStorage.setItem(`ention_crm_ticket_timeline_${ticketId}`, JSON.stringify(defaultTimeline));
+        return defaultTimeline;
+    };
+
+    const addTimelineEvent = (ticketId: string, author: string, text: string) => {
+        if (typeof window === "undefined") return;
+        const current = getTimeline(ticketId, "OPEN", new Date().toISOString());
+        const updated = [...current, { timestamp: new Date().toISOString(), author, text }];
+        localStorage.setItem(`ention_crm_ticket_timeline_${ticketId}`, JSON.stringify(updated));
+    };
 
     const filtered = tickets.filter(t => {
         const matchStatus = filter === "all" || t.status === filter;
@@ -81,31 +113,189 @@ function TicketsPanel() {
                 method: 'PATCH',
                 body: JSON.stringify({ status }),
             });
+            addTimelineEvent(ticketId, "System", `Status updated to: ${status}`);
             reload();
+            if (selectedTicket && selectedTicket.id === ticketId) {
+                setSelectedTicket({ ...selectedTicket, status });
+            }
         } catch { /* ignore */ }
         finally { setUpdating(null); }
     };
 
+    const handleAddComment = (e: React.FormEvent) => {
+        e.preventDefault();
+        if (!noteInput.trim() || !selectedTicket) return;
+        addTimelineEvent(selectedTicket.id, "Admin Agent", noteInput.trim());
+        setNoteInput("");
+    };
+
+    if (selectedTicket) {
+        const timeline = getTimeline(selectedTicket.id, selectedTicket.status, selectedTicket.createdAt);
+        const statusCfg = TICKET_STATUS[selectedTicket.status] || TICKET_STATUS.OPEN;
+        const StatusIcon = statusCfg.icon;
+
+        return (
+            <div className="space-y-6 pb-20 text-white">
+                <button 
+                    onClick={() => setSelectedTicket(null)}
+                    className="flex items-center gap-2 text-white/50 hover:text-white text-xs font-mono uppercase tracking-widest transition-colors"
+                >
+                    <ChevronRight className="rotate-180" size={14} /> Back to tickets list
+                </button>
+
+                <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 items-start">
+                    {/* Left: Main Details */}
+                    <div className="lg:col-span-8 space-y-6">
+                        <div className="bg-[#18181b] border border-white/5 rounded-xl p-8 space-y-6">
+                            <div className="flex justify-between items-start">
+                                <div className="space-y-1">
+                                    <span className="text-[10px] text-[#F27D26] font-mono tracking-widest uppercase">
+                                        Support Request
+                                    </span>
+                                    <h2 className="text-2xl font-bold tracking-tight mt-1">{selectedTicket.subject}</h2>
+                                    <p className="text-xs text-white/40">Category: {selectedTicket.category || "General Inquiry"}</p>
+                                </div>
+                                <div className="flex gap-2">
+                                    <span className={`text-[10px] font-mono uppercase tracking-widest px-3 py-1 border rounded-md ${statusCfg.color}`}>
+                                        {statusCfg.label}
+                                    </span>
+                                    <span className={`text-[10px] font-mono uppercase tracking-widest px-3 py-1 rounded-md ${PRIORITY_COLOR[selectedTicket.priority] || PRIORITY_COLOR.MEDIUM}`}>
+                                        {selectedTicket.priority} Priority
+                                    </span>
+                                </div>
+                            </div>
+
+                            {/* Ticket Description */}
+                            <div className="border-t border-white/5 pt-6 space-y-2">
+                                <p className="text-[8px] font-black uppercase tracking-[0.3em] text-white/20">Description</p>
+                                <p className="text-sm text-white/80 leading-relaxed whitespace-pre-line font-sans">
+                                    {selectedTicket.description}
+                                </p>
+                            </div>
+                        </div>
+
+                        {/* CRM Timeline logs */}
+                        <div className="bg-[#18181b] border border-white/5 rounded-xl p-8 space-y-6">
+                            <h3 className="text-sm font-semibold uppercase tracking-wider text-[#F27D26]">CRM Interaction Logs</h3>
+                            
+                            <div className="space-y-4">
+                                {/* eslint-disable-next-line @typescript-eslint/no-explicit-any */}
+                                {timeline.map((log: any, idx: number) => (
+                                    <div key={idx} className="flex gap-4 border-l-2 border-white/5 pl-6 pb-2 relative">
+                                        <span className={`absolute -left-1.5 top-1.5 w-3 h-3 rounded-full ${
+                                            log.author === 'System' ? 'bg-[#F27D26]/60' : 'bg-green-500'
+                                        }`} />
+                                        <div className="space-y-1">
+                                            <div className="flex items-center gap-3">
+                                                <span className="text-xs font-bold text-white/90">{log.author}</span>
+                                                <span className="text-[9px] text-white/20">
+                                                    {new Date(log.timestamp).toLocaleString("en-IN")}
+                                                </span>
+                                            </div>
+                                            <p className="text-sm text-white/60 font-sans leading-relaxed">{log.text}</p>
+                                        </div>
+                                    </div>
+                                ))}
+                            </div>
+
+                            {/* Add Note Form */}
+                            <form onSubmit={handleAddComment} className="border-t border-white/5 pt-6 space-y-4">
+                                <textarea
+                                    value={noteInput}
+                                    onChange={(e) => setNoteInput(e.target.value)}
+                                    placeholder="Log new interaction notes or update details..."
+                                    rows={3}
+                                    className="w-full bg-[#1c1c1e] border border-white/5 rounded-lg px-4 py-3 text-sm focus:outline-none focus:border-[#F27D26] resize-none text-white font-sans"
+                                />
+                                <button
+                                    type="submit"
+                                    className="px-6 py-2.5 bg-[#F27D26] text-white text-[10px] font-mono font-bold uppercase tracking-widest hover:bg-[#F27D26]/80 transition-all flex items-center gap-2"
+                                >
+                                    <PlusCircle size={14} /> Add CRM Note
+                                </button>
+                            </form>
+                        </div>
+                    </div>
+
+                    {/* Right: Quick actions & Customer info */}
+                    <div className="lg:col-span-4 space-y-6">
+                        {/* Customer Info Card */}
+                        <div className="bg-[#18181b] border border-white/5 rounded-xl p-6 space-y-6">
+                            <h3 className="text-xs font-semibold uppercase tracking-wider text-white/40">Customer Details</h3>
+                            <div className="flex items-center gap-4">
+                                <UserCircle size={36} className="text-white/20" />
+                                <div>
+                                    <p className="text-sm font-semibold text-white/80">
+                                        {selectedTicket.user ? `${selectedTicket.user.firstName} ${selectedTicket.user.lastName}` : "Guest User"}
+                                    </p>
+                                    <p className="text-xs text-white/40">{selectedTicket.user?.email || "No email"}</p>
+                                </div>
+                            </div>
+                            {selectedTicket.user && (
+                                <button
+                                    onClick={() => onViewUser(selectedTicket.user.email)}
+                                    className="w-full bg-white/5 border border-white/10 hover:bg-[#F27D26]/10 hover:border-[#F27D26] text-white py-2.5 text-[10px] font-mono font-bold uppercase tracking-widest transition-all flex items-center justify-center gap-2"
+                                >
+                                    <Users size={12} /> View Customer CRM
+                                </button>
+                            )}
+                        </div>
+
+                        {/* Status update Actions */}
+                        <div className="bg-[#18181b] border border-white/5 rounded-xl p-6 space-y-4">
+                            <h3 className="text-xs font-semibold uppercase tracking-wider text-white/40">Workflow Control</h3>
+                            <div className="space-y-3">
+                                <div className="space-y-1">
+                                    <label className="text-[8px] font-mono uppercase text-white/30 tracking-widest">Update Ticket Status</label>
+                                    <select
+                                        disabled={updating === selectedTicket.id}
+                                        value={selectedTicket.status}
+                                        onChange={e => updateStatus(selectedTicket.id, e.target.value)}
+                                        className="w-full bg-[#1c1c1e] border border-white/5 rounded-lg px-4 py-3 text-xs focus:outline-none focus:border-[#F27D26] text-white/80 font-sans cursor-pointer uppercase"
+                                    >
+                                        {Object.keys(TICKET_STATUS).map(s => (
+                                            <option key={s} value={s}>{TICKET_STATUS[s].label}</option>
+                                        ))}
+                                    </select>
+                                </div>
+
+                                <div className="pt-2 border-t border-white/5 flex gap-2">
+                                    <button
+                                        disabled={updating === selectedTicket.id || selectedTicket.status === "COMPLETED"}
+                                        onClick={() => updateStatus(selectedTicket.id, "COMPLETED")}
+                                        className="flex-1 py-2 bg-green-600/20 hover:bg-green-600 border border-green-600/30 text-green-400 hover:text-white text-[9px] font-mono font-bold uppercase tracking-widest transition-all text-center"
+                                    >
+                                        Resolve ticket
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        );
+    }
+
     return (
-        <div className="space-y-6">
+        <div className="space-y-6 text-white">
             <div className="flex flex-col sm:flex-row gap-4">
                 <div className="relative flex-1 max-w-sm">
                     <Search size={13} className="absolute left-4 top-1/2 -translate-y-1/2 text-white/30" />
                     <input
                         value={search} onChange={e => setSearch(e.target.value)}
-                        placeholder="Search tickets..."
+                        placeholder="Search tickets by subject, #..."
                         className="w-full bg-[#18181b] rounded-xl border border-white/10 pl-10 pr-4 py-3 text-sm uppercase tracking-widest focus:outline-none focus:border-[#F27D26] transition-colors text-white placeholder-white/30"
                     />
                 </div>
                 <div className="flex gap-2 flex-wrap">
                     {["all", "OPEN", "IN_PROGRESS", "ESCALATED", "COMPLETED", "CLOSED"].map(s => (
                         <button key={s} onClick={() => setFilter(s)}
-                            className={`px-3 py-2 text-xs font-medium px-2.5 py-1 rounded-md tracking-widest transition-all ${filter === s ? "bg-white text-black" : "border border-white/10 hover:border-white/30 text-white/50"}`}>
+                            className={`px-3 py-2 text-[9px] font-black uppercase tracking-widest rounded-md transition-all ${filter === s ? "bg-white text-black" : "border border-white/10 hover:border-white/35 text-white/50"}`}>
                             {s === "all" ? "All" : s}
                         </button>
                     ))}
-                    <button onClick={reload} className="px-3 py-2 border border-white/10 hover:border-[#F27D26] text-white/50 hover:text-[#F27D26] transition-all">
-                        <RefreshCw size={12} />
+                    <button onClick={reload} className="px-3 py-2 border border-white/10 hover:border-[#F27D26] text-white/50 hover:text-[#F27D26] transition-all rounded-md">
+                        <RefreshCw size={12} className={loading ? "animate-spin" : ""} />
                     </button>
                 </div>
             </div>
@@ -113,12 +303,14 @@ function TicketsPanel() {
             {error && <AdminError message={error} />}
 
             {loading ? <AdminSpinner /> : filtered.length === 0 ? (
-                <AdminEmpty icon={Ticket} message="No tickets found." />
+                <AdminEmpty icon={Ticket} message="No support tickets logged." />
             ) : (
-                <div className="space-y-2">
-                    <div className="grid grid-cols-12 gap-3 px-5 py-3 bg-[#27272a] rounded-t-xl border border-white/5 text-white/30">
-                        {["Ticket #", "User", "Subject", "Priority", "Status", "Date", "Action"].map((h, i) => (
-                            <span key={i} className={`text-xs font-semibold text-white/50 uppercase tracking-wider ${i === 1 ? "col-span-2" : i === 2 ? "col-span-3" : i === 4 ? "col-span-2" : "col-span-1"}`}>{h}</span>
+                <div className="space-y-3">
+                    <div className="grid grid-cols-12 gap-3 px-5 py-3 bg-[#27272a]/30 rounded-xl border border-white/5 text-white/30">
+                        {["Ticket ID", "User", "Subject", "Priority", "Status", "Created", "Action"].map((h, i) => (
+                            <span key={i} className={`text-xs font-semibold text-white/40 uppercase tracking-wider ${
+                                i === 1 ? "col-span-2" : i === 2 ? "col-span-4" : i === 4 ? "col-span-2" : "col-span-1"
+                            }`}>{h}</span>
                         ))}
                     </div>
 
@@ -126,31 +318,34 @@ function TicketsPanel() {
                         const cfg = TICKET_STATUS[ticket.status] || TICKET_STATUS.OPEN;
                         const StatusIcon = cfg.icon;
                         return (
-                            <div key={ticket.id} className="grid grid-cols-12 gap-3 px-5 py-4 bg-[#18181b] rounded-xl border border-white/5 hover:border-[#F27D26]/40 transition-all group items-center">
+                            <div 
+                                key={ticket.id} 
+                                onClick={() => setSelectedTicket(ticket)}
+                                className="grid grid-cols-12 gap-3 px-5 py-4 bg-[#18181b] rounded-xl border border-white/5 hover:border-[#F27D26]/40 hover:bg-white/[0.01] transition-all group items-center cursor-pointer"
+                            >
                                 <span className="col-span-1 text-sm text-[#F27D26] font-black truncate">{ticket.ticketNumber}</span>
-                                <span className="col-span-2 text-sm truncate opacity-50">{ticket.user?.email || '—'}</span>
-                                <span className="col-span-3 font-medium text-sm text-white/90 truncate text-sm">{ticket.subject}</span>
+                                <span className="col-span-2 text-sm truncate opacity-50 font-sans">{ticket.user?.email || 'Guest'}</span>
+                                <span className="col-span-4 font-semibold text-sm text-white/90 truncate group-hover:text-[#F27D26] transition-colors">{ticket.subject}</span>
                                 <div className="col-span-1">
-                                    <span className={`text-[11px] font-medium px-2.5 py-0.5 rounded-md ${PRIORITY_COLOR[ticket.priority] || PRIORITY_COLOR.MEDIUM}`}>
+                                    <span className={`text-[10px] font-mono px-2 py-0.5 rounded-md ${PRIORITY_COLOR[ticket.priority] || PRIORITY_COLOR.MEDIUM}`}>
                                         {ticket.priority}
                                     </span>
                                 </div>
                                 <div className="col-span-2">
-                                    <span className={`flex items-center gap-1 text-[11px] font-medium px-2.5 py-0.5 border rounded-md w-max ${cfg.color}`}>
+                                    <span className={`flex items-center gap-1 text-[10px] font-mono px-2 py-0.5 border rounded-md w-max ${cfg.color}`}>
                                         <StatusIcon size={9} /> {cfg.label}
                                     </span>
                                 </div>
-                                <span className="col-span-1 text-xs opacity-30">
+                                <span className="col-span-1 text-xs opacity-30 font-sans">
                                     {ticket.createdAt ? new Date(ticket.createdAt).toLocaleDateString('en-IN') : '—'}
                                 </span>
-                                <div className="col-span-1">
+                                <div className="col-span-1" onClick={e => e.stopPropagation()}>
                                     <select
                                         disabled={updating === ticket.id}
+                                        value={ticket.status}
                                         onChange={e => updateStatus(ticket.id, e.target.value)}
-                                        defaultValue=""
-                                        className="bg-[#1C1C1C] border border-white/10 text-white/60 text-[8px] font-sans uppercase px-2 py-1 focus:outline-none focus:border-[#F27D26] w-full"
+                                        className="bg-[#1C1C1C] border border-white/10 text-white/60 text-[9px] font-mono uppercase px-2 py-1 focus:outline-none focus:border-[#F27D26] w-full"
                                     >
-                                        <option value="" disabled>Update</option>
                                         {Object.keys(TICKET_STATUS).map(s => (
                                             <option key={s} value={s}>{TICKET_STATUS[s].label}</option>
                                         ))}
@@ -165,11 +360,12 @@ function TicketsPanel() {
     );
 }
 
-// ── Orders Panel (inline — kept from original with invoice link) ────
+// ── Orders Panel (Premium Invoice Layout) ───────────────────────────
 function OrdersPanel() {
     const { orders, loading, error, reload } = useOrders();
     const [updating, setUpdating] = useState<string | null>(null);
     const [query, setQuery] = useState("");
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     const [selectedOrder, setSelectedOrder] = useState<any>(null);
     const [invoiceLoading, setInvoiceLoading] = useState(false);
 
@@ -196,106 +392,109 @@ function OrdersPanel() {
         try {
             const data = await apiFetch(`/orders/admin/${orderId}`);
             setSelectedOrder(data.order || data);
-        } catch (e: any) { alert(`Failed: ${e.message}`); }
+        } catch (e: unknown) {
+            const msg = e instanceof Error ? e.message : String(e);
+            alert(`Failed: ${msg}`);
+        }
         finally { setInvoiceLoading(false); }
     };
 
-    // Invoice detail view
     if (selectedOrder) {
         const inv = selectedOrder.invoice;
         return (
-            <div className="space-y-8">
+            <div className="space-y-6 text-white pb-20">
                 <button onClick={() => setSelectedOrder(null)}
-                    className="flex items-center gap-2 text-[#F27D26] text-sm uppercase tracking-widest hover:underline">
+                    className="flex items-center gap-2 text-white/50 hover:text-white text-xs font-mono uppercase tracking-widest transition-colors mb-4">
                     <ChevronRight className="rotate-180" size={14} /> Back to Orders
                 </button>
 
                 <div className="bg-[#18181b] border border-white/5 rounded-xl shadow-sm p-10 space-y-8">
                     <div className="flex justify-between items-start border-b border-white/5 pb-8">
                         <div className="space-y-2">
-                            <h2 className="text-2xl font-semibold tracking-tight">Invoice</h2>
-                            <p className="text-sm text-[#F27D26] font-bold">{inv?.invoiceNumber || 'N/A'}</p>
-                            <p className="text-sm opacity-40">Order: {selectedOrder.orderNumber}</p>
+                            <h2 className="text-2xl font-serif font-black italic tracking-wider text-[#F27D26]">TAX INVOICE</h2>
+                            <p className="text-sm font-mono text-white/50">Invoice No: {inv?.invoiceNumber || 'N/A'}</p>
+                            <p className="text-xs opacity-40">Order Ref: {selectedOrder.orderNumber}</p>
                         </div>
-                        <div className="text-right space-y-1">
-                            <p className="text-xs uppercase text-white/30">Date</p>
+                        <div className="text-right space-y-1 font-sans">
+                            <p className="text-xs uppercase text-white/30">Invoice Date</p>
                             <p className="text-sm">{inv?.invoiceDate ? new Date(inv.invoiceDate).toLocaleDateString() : new Date(selectedOrder.createdAt).toLocaleDateString()}</p>
                         </div>
                     </div>
 
                     {/* Customer Info */}
-                    <div className="grid grid-cols-2 gap-8 border-b border-white/5 pb-8">
+                    <div className="grid grid-cols-2 gap-8 border-b border-white/5 pb-8 font-sans">
                         <div className="space-y-2">
                             <p className="text-xs uppercase text-white/30">Billed To</p>
-                            <p className="font-sans text-sm">{selectedOrder.user?.firstName} {selectedOrder.user?.lastName}</p>
-                            <p className="text-sm opacity-40">{selectedOrder.user?.email}</p>
+                            <p className="font-semibold text-sm">{selectedOrder.user?.firstName} {selectedOrder.user?.lastName}</p>
+                            <p className="text-xs opacity-50">{selectedOrder.user?.email}</p>
                         </div>
                         <div className="space-y-2">
-                            <p className="text-xs uppercase text-white/30">Ship To</p>
-                            <p className="text-sm opacity-60 leading-relaxed">
+                            <p className="text-xs uppercase text-white/30">Shipping Address</p>
+                            <p className="text-xs opacity-65 leading-relaxed">
                                 {selectedOrder.address?.line1}{selectedOrder.address?.line2 ? `, ${selectedOrder.address.line2}` : ''}<br />
-                                {selectedOrder.address?.city}, {selectedOrder.address?.state} {selectedOrder.address?.pincode}
+                                {selectedOrder.address?.city}, {selectedOrder.address?.state} - {selectedOrder.address?.pincode}
                             </p>
                         </div>
                     </div>
 
                     {/* Line Items */}
-                    <div className="space-y-3">
-                        <div className="grid grid-cols-12 gap-3 py-2 text-white/30">
-                            <span className="col-span-5 text-xs uppercase tracking-widest font-black">Item</span>
-                            <span className="col-span-2 text-xs uppercase tracking-widest font-black">SKU</span>
-                            <span className="col-span-1 text-xs uppercase tracking-widest font-black">Qty</span>
-                            <span className="col-span-2 text-xs uppercase tracking-widest font-black">Unit Price</span>
-                            <span className="col-span-2 text-xs uppercase tracking-widest font-black text-right">Total</span>
+                    <div className="space-y-3 font-sans">
+                        <div className="grid grid-cols-12 gap-3 py-2 text-white/30 border-b border-white/5">
+                            <span className="col-span-5 text-[10px] uppercase tracking-wider font-bold">Item Description</span>
+                            <span className="col-span-2 text-[10px] uppercase tracking-wider font-bold">SKU</span>
+                            <span className="col-span-1 text-[10px] uppercase tracking-wider font-bold">Qty</span>
+                            <span className="col-span-2 text-[10px] uppercase tracking-wider font-bold">Unit Price</span>
+                            <span className="col-span-2 text-[10px] uppercase tracking-wider font-bold text-right">Total</span>
                         </div>
+                        {/* eslint-disable-next-line @typescript-eslint/no-explicit-any */}
                         {(selectedOrder.items || []).map((item: any) => (
-                            <div key={item.id} className="grid grid-cols-12 gap-3 py-3 border-t border-white/5 items-center">
+                            <div key={item.id} className="grid grid-cols-12 gap-3 py-3 items-center">
                                 <div className="col-span-5 space-y-0.5">
-                                    <p className="font-semibold text-sm text-sm">{item.productName}</p>
-                                    {item.variantName && <p className="text-xs opacity-40">{item.variantName}</p>}
+                                    <p className="font-semibold text-sm text-white/95">{item.productName}</p>
+                                    {item.variantName && <p className="text-xs text-[#F27D26]">{item.variantName}</p>}
                                 </div>
-                                <span className="col-span-2 text-sm opacity-40">{item.sku}</span>
-                                <span className="col-span-1 text-sm">{item.quantity}</span>
-                                <span className="col-span-2 text-sm">₹{Number(item.unitPrice).toLocaleString()}</span>
-                                <span className="col-span-2 text-sm font-bold text-right">₹{Number(item.totalPrice).toLocaleString()}</span>
+                                <span className="col-span-2 text-xs opacity-40 font-mono">{item.sku}</span>
+                                <span className="col-span-1 text-xs">{item.quantity}</span>
+                                <span className="col-span-2 text-xs">₹{Number(item.unitPrice).toLocaleString()}</span>
+                                <span className="col-span-2 text-xs font-bold text-white text-right">₹{Number(item.totalPrice).toLocaleString()}</span>
                             </div>
                         ))}
                     </div>
 
                     {/* Totals */}
-                    <div className="border-t-2 border-white/10 pt-6 space-y-3 max-w-xs ml-auto">
-                        <div className="flex justify-between text-sm">
+                    <div className="border-t border-white/5 pt-6 space-y-3 max-w-xs ml-auto font-sans">
+                        <div className="flex justify-between text-xs">
                             <span className="opacity-40">Subtotal</span>
                             <span>₹{Number(selectedOrder.subtotal).toLocaleString()}</span>
                         </div>
                         {Number(selectedOrder.discount) > 0 && (
-                            <div className="flex justify-between text-sm">
-                                <span className="opacity-40">Discount{selectedOrder.couponCode ? ` (${selectedOrder.couponCode})` : ''}</span>
+                            <div className="flex justify-between text-xs">
+                                <span className="opacity-40">Discount {selectedOrder.couponCode ? `(${selectedOrder.couponCode})` : ''}</span>
                                 <span className="text-green-400">-₹{Number(selectedOrder.discount).toLocaleString()}</span>
                             </div>
                         )}
-                        <div className="flex justify-between text-sm">
+                        <div className="flex justify-between text-xs">
                             <span className="opacity-40">Tax (GST)</span>
                             <span>₹{Number(selectedOrder.tax).toLocaleString()}</span>
                         </div>
-                        <div className="flex justify-between text-sm">
-                            <span className="opacity-40">Shipping</span>
+                        <div className="flex justify-between text-xs">
+                            <span className="opacity-40">Shipping Charge</span>
                             <span>{Number(selectedOrder.shippingCharge) > 0 ? `₹${Number(selectedOrder.shippingCharge).toLocaleString()}` : 'Free'}</span>
                         </div>
-                        <div className="flex justify-between font-sans text-sm font-black border-t border-white/10 pt-3">
-                            <span>Total</span>
+                        <div className="flex justify-between text-sm font-bold border-t border-white/10 pt-3">
+                            <span className="text-white/80">Net Total</span>
                             <span className="text-[#F27D26]">₹{Number(selectedOrder.total).toLocaleString()}</span>
                         </div>
                     </div>
 
                     {/* Payment Info */}
                     {selectedOrder.payment && (
-                        <div className="border-t border-white/5 pt-6 space-y-2">
-                            <p className="text-xs uppercase text-white/30">Payment</p>
-                            <div className="flex gap-6 text-sm">
+                        <div className="border-t border-white/5 pt-6 space-y-2 text-xs opacity-75 font-sans">
+                            <p className="text-[10px] uppercase text-white/30 font-bold">Payment Transaction Details</p>
+                            <div className="flex gap-6">
                                 <span>Method: {selectedOrder.payment.method}</span>
-                                <span>Status: <span className={selectedOrder.payment.status === 'PAID' ? 'text-green-400' : 'text-amber-400'}>{selectedOrder.payment.status}</span></span>
-                                {selectedOrder.payment.razorpayPaymentId && <span className="opacity-40">ID: {selectedOrder.payment.razorpayPaymentId}</span>}
+                                <span>Status: <span className={selectedOrder.payment.status === 'PAID' ? 'text-green-400 font-bold' : 'text-amber-400'}>{selectedOrder.payment.status}</span></span>
+                                {selectedOrder.payment.razorpayPaymentId && <span className="opacity-40 font-mono">Gateway ID: {selectedOrder.payment.razorpayPaymentId}</span>}
                             </div>
                         </div>
                     )}
@@ -305,12 +504,12 @@ function OrdersPanel() {
     }
 
     return (
-        <div className="space-y-6">
+        <div className="space-y-6 text-white">
             <div className="flex justify-between items-center bg-[#18181b] border border-white/5 rounded-xl shadow-sm p-4">
                 <div className="relative w-96">
                     <Search size={14} className="absolute left-4 top-1/2 -translate-y-1/2 text-white/20" />
                     <input
-                        type="text" placeholder="Search orders by number, email or name..."
+                        type="text" placeholder="Search orders..."
                         value={query} onChange={e => setQuery(e.target.value)}
                         className="w-full bg-[#27272a] border border-white/5 rounded-lg pl-12 pr-4 py-3 text-sm uppercase tracking-widest focus:outline-none focus:border-[#F27D26] transition-all"
                     />
@@ -324,9 +523,9 @@ function OrdersPanel() {
 
             {loading ? <AdminSpinner /> : (
                 <div className="space-y-2">
-                    <div className="grid grid-cols-12 gap-3 px-5 py-3 bg-[#27272a] rounded-t-xl border border-white/5 text-white/30">
-                        {["Order #", "Customer", "Date", "Items", "Total", "Status", "Action", "Invoice"].map((h, i) => (
-                            <span key={i} className={`text-xs font-semibold text-white/50 uppercase tracking-wider ${
+                    <div className="grid grid-cols-12 gap-3 px-5 py-3 bg-[#27272a]/30 rounded-t-xl border border-white/5 text-white/30">
+                        {["Order No", "Customer", "Date", "Items", "Total", "Status", "Action", "Invoice"].map((h, i) => (
+                            <span key={i} className={`text-xs font-semibold text-white/40 uppercase tracking-wider ${
                                 i === 1 ? "col-span-2" : i === 3 ? "col-span-2" : i === 5 ? "col-span-1" : i === 6 ? "col-span-2" : "col-span-1"
                             }`}>{h}</span>
                         ))}
@@ -334,22 +533,22 @@ function OrdersPanel() {
                     {filtered.map(order => (
                         <div key={order.id} className="grid grid-cols-12 gap-3 px-5 py-4 bg-[#18181b] rounded-xl border border-white/5 hover:border-[#F27D26]/40 transition-all group items-center">
                             <span className="col-span-1 text-sm text-[#F27D26] font-black">{order.orderNumber?.slice(-8)}</span>
-                            <span className="col-span-2 text-sm truncate opacity-50">{order.user?.email || '—'}</span>
-                            <span className="col-span-1 text-xs opacity-30">{new Date(order.createdAt).toLocaleDateString()}</span>
-                            <span className="col-span-2 text-sm opacity-50">{order.items?.length || 0} Items</span>
+                            <span className="col-span-2 text-sm truncate opacity-50 font-sans">{order.user?.email || '—'}</span>
+                            <span className="col-span-1 text-xs opacity-30 font-sans">{new Date(order.createdAt).toLocaleDateString()}</span>
+                            <span className="col-span-2 text-sm opacity-50 font-sans">{order.items?.length || 0} Items</span>
                             <span className="col-span-1 text-sm font-bold">₹{Number(order.total).toLocaleString()}</span>
                             <span className="col-span-1">
-                                <span className={`text-[7px] font-black uppercase tracking-widest ${ORDER_STATUS_COLOR[order.status] || 'text-white'}`}>
+                                <span className={`text-[8px] font-black uppercase tracking-widest ${ORDER_STATUS_COLOR[order.status] || 'text-white'}`}>
                                     {order.status}
                                 </span>
                             </span>
-                            <div className="col-span-2">
+                            <div className="col-span-2" onClick={e => e.stopPropagation()}>
                                 <select
                                     disabled={updating === order.id}
                                     onChange={e => updateStatus(order.id, e.target.value)}
-                                    className="bg-[#1C1C1C] border border-white/10 text-white/40 text-[7px] font-sans uppercase px-2 py-1 focus:outline-none focus:border-[#F27D26] w-full"
+                                    value={order.status}
+                                    className="bg-[#1C1C1C] border border-white/10 text-white/40 text-[9px] font-mono uppercase px-2 py-1 focus:outline-none focus:border-[#F27D26] w-full"
                                 >
-                                    <option value="" disabled selected>Set Status</option>
                                     {Object.keys(ORDER_STATUS_COLOR).map(s => (
                                         <option key={s} value={s}>{s}</option>
                                     ))}
@@ -358,7 +557,7 @@ function OrdersPanel() {
                             <div className="col-span-1">
                                 <button
                                     onClick={() => viewInvoice(order.id)}
-                                    className="flex items-center gap-1 text-[8px] font-sans font-black uppercase tracking-widest text-[#F27D26] hover:text-white transition-colors"
+                                    className="flex items-center gap-1 text-[9px] font-mono font-black uppercase tracking-widest text-[#F27D26] hover:text-white transition-colors"
                                 >
                                     <FileText size={10} /> View
                                 </button>
@@ -371,18 +570,33 @@ function OrdersPanel() {
     );
 }
 
-// ── Users Panel (inline — kept from original) ───────────────────────
-function UsersPanel() {
+// ── Users Panel (Customer Profile CRM) ─────────────────────────────
+interface UsersPanelProps {
+    selectedUserEmail: string | null;
+    clearSelectedEmail: () => void;
+}
+
+function UsersPanel({ selectedUserEmail, clearSelectedEmail }: UsersPanelProps) {
     const { users, loading, reload } = useUsers();
     const [query, setQuery] = useState("");
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     const [selectedUser, setSelectedUser] = useState<any>(null);
     const [detailsLoading, setDetailsLoading] = useState(false);
+    const [crmNoteInput, setCrmNoteInput] = useState("");
 
-    const filtered = users.filter(u =>
-        u.email?.toLowerCase().includes(query.toLowerCase()) ||
-        u.firstName?.toLowerCase().includes(query.toLowerCase()) ||
-        u.lastName?.toLowerCase().includes(query.toLowerCase())
-    );
+    // CRM notes helper
+    const getCustomerNotes = (userId: string) => {
+        if (typeof window === "undefined") return [];
+        const local = localStorage.getItem(`ention_crm_user_notes_${userId}`);
+        return local ? JSON.parse(local) : [];
+    };
+
+    const addCustomerNote = (userId: string, text: string) => {
+        if (typeof window === "undefined") return;
+        const current = getCustomerNotes(userId);
+        const updated = [...current, { timestamp: new Date().toISOString(), text }];
+        localStorage.setItem(`ention_crm_user_notes_${userId}`, JSON.stringify(updated));
+    };
 
     const fetchUserDetails = async (userId: string) => {
         setDetailsLoading(true);
@@ -395,117 +609,190 @@ function UsersPanel() {
         } finally { setDetailsLoading(false); }
     };
 
+    // Auto load user when selectedUserEmail changes
+    useEffect(() => {
+        if (selectedUserEmail && users.length > 0) {
+            const found = users.find(u => u.email.toLowerCase() === selectedUserEmail.toLowerCase());
+            if (found) {
+                Promise.resolve().then(() => {
+                    fetchUserDetails(found.id);
+                });
+            }
+            clearSelectedEmail();
+        }
+        // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, [selectedUserEmail, users]);
+
+    const filtered = users.filter(u =>
+        u.email?.toLowerCase().includes(query.toLowerCase()) ||
+        u.firstName?.toLowerCase().includes(query.toLowerCase()) ||
+        u.lastName?.toLowerCase().includes(query.toLowerCase())
+    );
+
+    const handleSaveNote = (e: React.FormEvent) => {
+        e.preventDefault();
+        if (!crmNoteInput.trim() || !selectedUser) return;
+        addCustomerNote(selectedUser.id, crmNoteInput.trim());
+        setCrmNoteInput("");
+    };
+
+    // Compute stats
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    const totalSpentForUser = (user: any) => {
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        return (user.orders || []).reduce((sum: number, o: any) => sum + Number(o.total || 0), 0);
+    };
+
     if (selectedUser) {
+        const spent = totalSpentForUser(selectedUser);
+        const crmNotes = getCustomerNotes(selectedUser.id);
+        const isVIP = spent > 50000;
+
         return (
-            <div className="space-y-8 pb-20">
+            <div className="space-y-6 pb-20 text-white font-sans">
                 <button onClick={() => setSelectedUser(null)}
-                    className="flex items-center gap-2 text-[#F27D26] text-sm uppercase tracking-widest hover:underline mb-4">
+                    className="flex items-center gap-2 text-white/50 hover:text-white text-xs font-mono uppercase tracking-widest transition-colors mb-4">
                     <ChevronRight className="rotate-180" size={14} /> Back to Directory
                 </button>
+
                 <div className="flex flex-col lg:flex-row gap-8">
+                    {/* Left side: profile details */}
                     <div className="lg:w-1/3 space-y-6">
-                        <div className="bg-[#18181b] border border-white/5 rounded-xl shadow-sm p-8 space-y-6">
+                        <div className="bg-[#18181b] border border-white/5 rounded-xl p-8 space-y-6 relative overflow-hidden">
+                            {isVIP && (
+                                <div className="absolute top-0 right-0 bg-[#F27D26] text-white px-3 py-1 text-[8px] font-mono uppercase tracking-widest font-black rounded-bl-lg">
+                                    VIP Client
+                                </div>
+                            )}
+
                             <div className="flex items-center gap-4">
-                                <div className="w-16 h-16 bg-[#27272a] border border-white/5 rounded-lg flex items-center justify-center rounded-md">
+                                <div className="w-16 h-16 bg-[#27272a] rounded-lg flex items-center justify-center border border-white/5">
                                     <UserCircle size={32} className="text-white/20" />
                                 </div>
                                 <div className="space-y-1">
-                                    <h2 className="text-xl font-semibold tracking-tight">{selectedUser.firstName} {selectedUser.lastName}</h2>
-                                    <span className={`text-[7px] font-black px-2 py-1 rounded-md uppercase tracking-widest ${selectedUser.role?.name === 'super_admin' ? 'bg-red-500/20 text-red-500' : 'bg-[#F27D26] text-white'}`}>
+                                    <h2 className="text-xl font-bold tracking-tight text-white/95">{selectedUser.firstName} {selectedUser.lastName}</h2>
+                                    <span className={`inline-block text-[8px] font-black px-2 py-0.5 rounded-md uppercase tracking-widest ${selectedUser.role?.name === 'super_admin' ? 'bg-red-500/20 text-red-500 border border-red-500/30' : 'bg-[#F27D26]/20 text-[#F27D26] border border-[#F27D26]/30'}`}>
                                         {selectedUser.role?.name || 'Customer'}
                                     </span>
                                 </div>
                             </div>
-                            <div className="space-y-4 pt-4 border-t border-white/5">
+
+                            <div className="space-y-4 pt-6 border-t border-white/5">
                                 <div className="space-y-1">
-                                    <p className="text-[8px] font-sans uppercase text-white/30 tracking-widest">Email</p>
-                                    <p className="text-sm font-sans">{selectedUser.email}</p>
+                                    <p className="text-[8px] font-mono uppercase text-white/30 tracking-widest">Email Address</p>
+                                    <p className="text-sm text-white/80 font-mono select-all">{selectedUser.email}</p>
                                 </div>
                                 <div className="space-y-1">
-                                    <p className="text-[8px] font-sans uppercase text-white/30 tracking-widest">Phone</p>
-                                    <p className="text-sm font-sans">{selectedUser.phone || 'Not Provided'}</p>
+                                    <p className="text-[8px] font-mono uppercase text-white/30 tracking-widest">Phone</p>
+                                    <p className="text-sm text-white/80 font-mono">{selectedUser.phone || 'Not Provided'}</p>
                                 </div>
                                 <div className="flex justify-between items-center pt-2">
                                     <div className="space-y-1">
-                                        <p className="text-[8px] font-sans uppercase text-white/30 tracking-widest">Status</p>
-                                        <p className={`text-xs font-sans font-bold ${selectedUser.status === 'ACTIVE' ? 'text-green-400' : 'text-red-400'}`}>{selectedUser.status}</p>
+                                        <p className="text-[8px] font-mono uppercase text-white/30 tracking-widest">Status</p>
+                                        <p className={`text-xs font-bold ${selectedUser.status === 'ACTIVE' ? 'text-green-400' : 'text-red-400'}`}>{selectedUser.status}</p>
                                     </div>
                                     <div className="text-right space-y-1">
-                                        <p className="text-[8px] font-sans uppercase text-white/30 tracking-widest">Member Since</p>
-                                        <p className="text-xs font-sans">{new Date(selectedUser.createdAt).toLocaleDateString()}</p>
+                                        <p className="text-[8px] font-mono uppercase text-white/30 tracking-widest">Customer LTV</p>
+                                        <p className="text-sm font-black text-[#F27D26]">₹{spent.toLocaleString()}</p>
                                     </div>
                                 </div>
                             </div>
                         </div>
-                        <div className="bg-[#18181b] border border-white/5 rounded-xl shadow-sm p-8 space-y-6">
-                            <h3 className="text-sm font-semibold text-white/40">Saved Addresses</h3>
+
+                        {/* Customer Addresses */}
+                        <div className="bg-[#18181b] border border-white/5 rounded-xl p-8 space-y-6">
+                            <h3 className="text-xs font-semibold uppercase tracking-wider text-white/40">Saved Addresses</h3>
                             <div className="space-y-4">
+                                {/* eslint-disable-next-line @typescript-eslint/no-explicit-any */}
                                 {selectedUser.addresses?.map((addr: any) => (
-                                    <div key={addr.id} className="text-[11px] space-y-1 p-3 bg-white/5 border border-white/5 rounded-md">
+                                    <div key={addr.id} className="text-xs space-y-1 p-3 bg-white/5 border border-white/5 rounded-md">
                                         <div className="flex justify-between items-center mb-1">
-                                            <span className="font-black uppercase tracking-widest text-[8px] py-0.5 px-1 bg-white/10">{addr.label}</span>
-                                            {addr.isDefault && <span className="text-[7px] text-[#F27D26] font-black uppercase tracking-tighter">Default</span>}
+                                            <span className="font-black uppercase tracking-widest text-[8px] py-0.5 px-1 bg-white/10 text-white/60">{addr.label}</span>
+                                            {addr.isDefault && <span className="text-[8px] text-[#F27D26] font-black uppercase tracking-widest">Default</span>}
                                         </div>
                                         <p className="opacity-80 leading-relaxed font-sans">{addr.line1}, {addr.line2 && addr.line2 + ","} {addr.city}, {addr.state} {addr.pincode}</p>
                                     </div>
                                 ))}
-                                {(!selectedUser.addresses || selectedUser.addresses.length === 0) && <p className="text-[10px] font-sans opacity-20 italic">No addresses saved.</p>}
+                                {(!selectedUser.addresses || selectedUser.addresses.length === 0) && <p className="text-xs opacity-30 italic">No addresses saved.</p>}
                             </div>
                         </div>
                     </div>
+
+                    {/* Right side: Orders, tickets, reviews & notes */}
                     <div className="flex-1 space-y-8">
-                        <div className="bg-[#18181b] border border-white/5 rounded-xl shadow-sm p-8 space-y-6">
-                            <h3 className="text-sm font-semibold text-blue-400">Order History</h3>
+                        {/* CRM Customer Interactions notes */}
+                        <div className="bg-[#18181b] border border-white/5 rounded-xl p-8 space-y-6">
+                            <h3 className="text-sm font-semibold uppercase tracking-wider text-[#F27D26]">CRM Client Activity Log</h3>
+                            
                             <div className="space-y-3">
+                                {/* eslint-disable-next-line @typescript-eslint/no-explicit-any */}
+                                {crmNotes.map((note: any, idx: number) => (
+                                    <div key={idx} className="p-4 bg-white/5 rounded-xl border border-white/5 space-y-1">
+                                        <p className="text-[9px] text-white/30 font-mono">Logged: {new Date(note.timestamp).toLocaleString("en-IN")}</p>
+                                        <p className="text-sm text-white/80 leading-relaxed font-sans">{note.text}</p>
+                                    </div>
+                                ))}
+                                {crmNotes.length === 0 && (
+                                    <p className="text-xs text-white/20 italic text-center py-4">No custom CRM logs written yet.</p>
+                                )}
+                            </div>
+
+                            <form onSubmit={handleSaveNote} className="border-t border-white/5 pt-4 space-y-4">
+                                <textarea
+                                    value={crmNoteInput}
+                                    onChange={(e) => setCrmNoteInput(e.target.value)}
+                                    placeholder="Add notes about bulk requests, support calls, or negotiations..."
+                                    rows={2}
+                                    className="w-full bg-[#1c1c1e] border border-white/5 rounded-lg px-4 py-3 text-sm focus:outline-none focus:border-[#F27D26] resize-none text-white font-sans"
+                                />
+                                <button
+                                    type="submit"
+                                    className="px-6 py-2 bg-white/5 border border-white/10 hover:border-[#F27D26] hover:bg-[#F27D26]/10 text-white text-[9px] font-mono font-bold uppercase tracking-widest transition-all"
+                                >
+                                    Log Notes
+                                </button>
+                            </form>
+                        </div>
+
+                        {/* Order History */}
+                        <div className="bg-[#18181b] border border-white/5 rounded-xl p-8 space-y-6">
+                            <h3 className="text-sm font-semibold text-blue-400 uppercase tracking-wider">Purchase History</h3>
+                            <div className="space-y-3">
+                                {/* eslint-disable-next-line @typescript-eslint/no-explicit-any */}
                                 {selectedUser.orders?.map((order: any) => (
-                                    <div key={order.id} className="flex items-center justify-between p-4 bg-[#27272a] rounded-t-xl border border-white/5 hover:border-blue-500/30 transition-all text-sm">
+                                    <div key={order.id} className="flex items-center justify-between p-4 bg-white/5 border border-white/5 rounded-lg text-sm">
                                         <div className="space-y-1">
-                                            <p className="font-black text-[#F27D26]">{order.orderNumber}</p>
-                                            <p className="opacity-40">{new Date(order.createdAt).toLocaleDateString()} — {order.items?.length} items</p>
+                                            <p className="font-bold text-[#F27D26]">{order.orderNumber}</p>
+                                            <p className="opacity-40 text-xs">{new Date(order.createdAt).toLocaleDateString()} — {order.items?.length || 0} items</p>
                                         </div>
                                         <div className="text-right space-y-1">
-                                            <p className="font-black">₹{Number(order.total).toLocaleString()}</p>
-                                            <p className={`text-xs font-medium px-2.5 py-1 rounded-md ${ORDER_STATUS_COLOR[order.status] || 'text-white'}`}>{order.status}</p>
+                                            <p className="font-bold">₹{Number(order.total).toLocaleString()}</p>
+                                            <span className={`inline-block text-[8px] font-black uppercase tracking-wider px-2 py-0.5 rounded bg-white/5 border border-white/10 text-white/50`}>
+                                                {order.status}
+                                            </span>
                                         </div>
                                     </div>
                                 ))}
-                                {(!selectedUser.orders || selectedUser.orders.length === 0) && <div className="py-10 text-center opacity-20 font-sans text-xs">No order history found.</div>}
+                                {(!selectedUser.orders || selectedUser.orders.length === 0) && <div className="py-8 text-center opacity-30 italic text-xs">No orders placed yet.</div>}
                             </div>
                         </div>
-                        <div className="bg-[#18181b] border border-white/5 rounded-xl shadow-sm p-8 space-y-6">
-                            <h3 className="text-sm font-semibold text-amber-400">Help Tickets</h3>
+
+                        {/* Support Tickets */}
+                        <div className="bg-[#18181b] border border-white/5 rounded-xl p-8 space-y-6">
+                            <h3 className="text-sm font-semibold text-amber-400 uppercase tracking-wider">Help Tickets Log</h3>
                             <div className="space-y-3">
+                                {/* eslint-disable-next-line @typescript-eslint/no-explicit-any */}
                                 {selectedUser.tickets?.map((ticket: any) => {
                                     const cfg = TICKET_STATUS[ticket.status] || TICKET_STATUS.OPEN;
                                     return (
-                                        <div key={ticket.id} className="flex items-center gap-4 p-4 bg-[#27272a] rounded-t-xl border border-white/5 text-sm">
-                                            <span className={`px-2 py-0.5 border rounded-md ${cfg.color} text-xs font-medium px-2.5 py-1 rounded-md whitespace-nowrap`}>{cfg.label}</span>
+                                        <div key={ticket.id} className="flex items-center gap-4 p-4 bg-white/5 border border-white/5 rounded-lg text-sm">
+                                            <span className={`px-2 py-0.5 border rounded-md ${cfg.color} text-[8px] font-mono uppercase tracking-widest shrink-0`}>{cfg.label}</span>
                                             <span className="opacity-80 flex-1 truncate">{ticket.subject}</span>
-                                            <span className="opacity-30">{new Date(ticket.createdAt).toLocaleDateString()}</span>
+                                            <span className="opacity-30 text-xs font-mono">{new Date(ticket.createdAt).toLocaleDateString()}</span>
                                         </div>
                                     );
                                 })}
-                                {(!selectedUser.tickets || selectedUser.tickets.length === 0) && <div className="py-10 text-center opacity-20 font-sans text-xs">No support tickets found.</div>}
-                            </div>
-                        </div>
-                        <div className="bg-[#18181b] border border-white/5 rounded-xl shadow-sm p-8 space-y-6">
-                            <h3 className="text-sm font-semibold text-green-400">Reviews</h3>
-                            <div className="space-y-4">
-                                {selectedUser.reviews?.map((review: any) => (
-                                    <div key={review.id} className="p-4 bg-[#27272a] rounded-t-xl border border-white/5 space-y-2">
-                                        <div className="flex justify-between items-center">
-                                            <p className="font-semibold text-sm opacity-80">{review.product?.name}</p>
-                                            <div className="flex gap-1">
-                                                {[...Array(5)].map((_, i) => (
-                                                    <div key={i} className={`w-1.5 h-1.5 rounded-full ${i < review.rating ? 'bg-[#F27D26]' : 'bg-white/10'}`} />
-                                                ))}
-                                            </div>
-                                        </div>
-                                        {review.body && <p className="text-xs font-sans opacity-60 leading-relaxed">"{review.body}"</p>}
-                                        <p className="text-[8px] font-sans opacity-20 uppercase tracking-widest">{new Date(review.createdAt).toLocaleDateString()}</p>
-                                    </div>
-                                ))}
-                                {(!selectedUser.reviews || selectedUser.reviews.length === 0) && <div className="py-10 text-center opacity-20 font-sans text-xs">No reviews given.</div>}
+                                {(!selectedUser.tickets || selectedUser.tickets.length === 0) && <div className="py-8 text-center opacity-30 italic text-xs">No tickets logged.</div>}
                             </div>
                         </div>
                     </div>
@@ -514,13 +801,35 @@ function UsersPanel() {
         );
     }
 
+    // Stats variables
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    const activeTicketCount = users.reduce((sum, u) => sum + (u.tickets?.filter((t: any) => !['CLOSED', 'COMPLETED'].includes(t.status)).length || 0), 0);
+
     return (
-        <div className="space-y-6">
+        <div className="space-y-6 text-white font-sans">
+            {/* Stat bar */}
+            <div className="grid grid-cols-3 gap-4">
+                <div className="bg-[#18181b] border border-white/5 rounded-xl p-6">
+                    <p className="text-xs text-white/40 uppercase tracking-wider">Customers Registered</p>
+                    <p className="text-2xl font-semibold mt-1">{users.length}</p>
+                </div>
+                <div className="bg-[#18181b] border border-white/5 rounded-xl p-6">
+                    <p className="text-xs text-white/40 uppercase tracking-wider">High LTV VIPs (₹50k+)</p>
+                    <p className="text-2xl font-semibold mt-1 text-green-400">
+                        {users.filter(u => totalSpentForUser(u) > 50000).length}
+                    </p>
+                </div>
+                <div className="bg-[#18181b] border border-white/5 rounded-xl p-6">
+                    <p className="text-xs text-white/40 uppercase tracking-wider">Active Support Cases</p>
+                    <p className="text-2xl font-semibold mt-1 text-amber-400">{activeTicketCount}</p>
+                </div>
+            </div>
+
             <div className="flex justify-between items-center bg-[#18181b] border border-white/5 rounded-xl shadow-sm p-4">
                 <div className="relative w-96">
                     <Search size={14} className="absolute left-4 top-1/2 -translate-y-1/2 text-white/20" />
                     <input
-                        type="text" placeholder="Search users by name or email..."
+                        type="text" placeholder="Search directory..."
                         value={query} onChange={e => setQuery(e.target.value)}
                         className="w-full bg-[#27272a] border border-white/5 rounded-lg pl-12 pr-4 py-3 text-sm uppercase tracking-widest focus:outline-none focus:border-[#F27D26] transition-all"
                     />
@@ -529,36 +838,44 @@ function UsersPanel() {
                     <RefreshCw size={14} className={loading ? "animate-spin" : ""} />
                 </button>
             </div>
+
             {loading ? <AdminSpinner /> : (
                 <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-                    {filtered.map((u: any) => (
-                        <div key={u.id} onClick={() => fetchUserDetails(u.id)}
-                            className="bg-[#18181b] border border-white/5 rounded-xl shadow-sm p-6 space-y-4 hover:border-[#F27D26]/40 transition-all relative group cursor-pointer active:scale-95">
-                            {detailsLoading && <div className="absolute inset-0 bg-black/40 flex items-center justify-center z-10"><RefreshCw size={16} className="animate-spin" /></div>}
-                            <div className="flex justify-between items-start">
-                                <div className="w-10 h-10 bg-[#27272a] border border-white/5 rounded-lg flex items-center justify-center rounded-md group-hover:bg-[#F27D26]/10 group-hover:border-[#F27D26]/40 transition-all">
-                                    <UserCircle size={20} className="text-white/20 group-hover:text-[#F27D26]" />
+                    {/* eslint-disable-next-line @typescript-eslint/no-explicit-any */}
+                    {filtered.map((u: any) => {
+                        const userSpent = totalSpentForUser(u);
+                        return (
+                            <div key={u.id} onClick={() => fetchUserDetails(u.id)}
+                                className="bg-[#18181b] border border-white/5 rounded-xl shadow-sm p-6 space-y-4 hover:border-[#F27D26]/40 transition-all relative group cursor-pointer active:scale-95">
+                                {detailsLoading && <div className="absolute inset-0 bg-black/40 flex items-center justify-center z-10"><RefreshCw size={16} className="animate-spin" /></div>}
+                                <div className="flex justify-between items-start">
+                                    <div className="w-10 h-10 bg-[#27272a] border border-white/5 rounded-lg flex items-center justify-center rounded-md group-hover:bg-[#F27D26]/10 group-hover:border-[#F27D26]/40 transition-all">
+                                        <UserCircle size={20} className="text-white/20 group-hover:text-[#F27D26]" />
+                                    </div>
+                                    <span className={`text-[8px] font-black px-2 py-0.5 border rounded-md uppercase tracking-widest ${
+                                        u.role?.name === 'super_admin' ? 'bg-red-500/10 text-red-400 border border-red-500/25' : 
+                                        userSpent > 50000 ? 'bg-green-500/10 text-green-400 border border-green-500/25' : 'bg-white/5 text-white/40'
+                                    }`}>
+                                        {userSpent > 50000 ? 'VIP Client' : u.role?.name || 'Customer'}
+                                    </span>
                                 </div>
-                                <span className={`text-[7px] font-black px-2 py-1 rounded-md uppercase tracking-widest ${u.role?.name === 'super_admin' ? 'bg-red-500/20 text-red-500' : 'bg-white/5 text-white/40'}`}>
-                                    {u.role?.name || 'Customer'}
-                                </span>
-                            </div>
-                            <div className="space-y-1">
-                                <h3 className="font-medium text-sm text-white/90 font-black text-lg">{u.firstName} {u.lastName}</h3>
-                                <p className="text-sm text-white/30 uppercase tracking-widest truncate">{u.email}</p>
-                            </div>
-                            <div className="flex items-center gap-4 pt-4 border-t border-white/5">
-                                <div className="flex flex-col">
-                                    <span className="text-[6px] font-sans uppercase text-white/20">Joined</span>
-                                    <span className="text-[8px] font-sans">{new Date(u.createdAt).toLocaleDateString()}</span>
+                                <div className="space-y-1">
+                                    <h3 className="font-semibold text-sm text-white/90 truncate">{u.firstName} {u.lastName}</h3>
+                                    <p className="text-xs text-white/30 uppercase tracking-widest truncate">{u.email}</p>
                                 </div>
-                                <div className="flex flex-col ml-auto">
-                                    <span className="text-[6px] font-sans uppercase text-white/20 text-right">Status</span>
-                                    <span className={`text-[8px] font-sans text-right ${u.status === 'ACTIVE' ? 'text-green-400' : 'text-red-400'}`}>{u.status}</span>
+                                <div className="flex items-center gap-4 pt-4 border-t border-white/5">
+                                    <div className="flex flex-col">
+                                        <span className="text-[8px] text-white/20 uppercase">Lifetime Value</span>
+                                        <span className="text-xs font-bold text-[#F27D26]">₹{userSpent.toLocaleString()}</span>
+                                    </div>
+                                    <div className="flex flex-col ml-auto">
+                                        <span className="text-[8px] text-white/20 uppercase text-right">Joined</span>
+                                        <span className="text-xs font-sans text-right">{new Date(u.createdAt).toLocaleDateString()}</span>
+                                    </div>
                                 </div>
                             </div>
-                        </div>
-                    ))}
+                        );
+                    })}
                 </div>
             )}
         </div>
@@ -568,9 +885,17 @@ function UsersPanel() {
 // ── Main Admin Page ──────────────────────────────────────────────────
 function AdminContent() {
     const [active, setActive] = useState("overview");
+    const [selectedUserEmail, setSelectedUserEmail] = useState<string | null>(null);
+
     const { tickets } = useTickets();
     const { orders } = useOrders();
     const { users } = useUsers();
+    const { inquiries } = useInquiries();
+
+    const handleViewUserInCRM = (email: string) => {
+        setSelectedUserEmail(email);
+        setActive("users");
+    };
 
     return (
         <div className="min-h-screen bg-[#09090b] text-bg flex overflow-hidden">
@@ -605,15 +930,15 @@ function AdminContent() {
                         </h1>
                     </div>
 
-                    {active === "overview"     && <OverviewPanel tickets={tickets} orders={orders} users={users} />}
-                    {active === "analytics"    && <AnalyticsPanel tickets={tickets} orders={orders} users={users} />}
+                    {active === "overview"     && <OverviewPanel tickets={tickets} orders={orders} inquiries={inquiries} />}
+                    {active === "analytics"    && <AnalyticsPanel tickets={tickets} orders={orders} inquiries={inquiries} />}
                     {active === "products"     && <ProductsPanel />}
                     {active === "inventory"    && <InventoryPanel />}
                     {active === "orders"       && <OrdersPanel />}
                     {active === "transactions" && <TransactionsPanel />}
-                    {active === "tickets"      && <TicketsPanel />}
+                    {active === "tickets"      && <TicketsPanel onViewUser={handleViewUserInCRM} />}
                     {active === "leads"        && <LeadsPanel />}
-                    {active === "users"        && <UsersPanel />}
+                    {active === "users"        && <UsersPanel selectedUserEmail={selectedUserEmail} clearSelectedEmail={() => setSelectedUserEmail(null)} />}
                     {active === "reviews"      && <ReviewsPanel />}
                     {active === "coupons"      && <CouponsPanel />}
                     {active === "settings"     && <SettingsPanel />}

@@ -1,7 +1,7 @@
 "use client";
 
 import React, { useEffect } from "react";
-import { UserCircle, LayoutDashboard, LogOut, Shield, ShoppingBag, ChevronDown } from "lucide-react";
+import { UserCircle, LayoutDashboard, LogOut, Shield, ShoppingBag, ChevronDown, HelpCircle } from "lucide-react";
 import Image from "next/image";
 import Link from "next/link";
 import { useAuth, getUserDisplayName, isAdmin, getUserRoleName } from "@/store/useAuth";
@@ -266,6 +266,14 @@ export default function Navbar() {
 
             {/* Right side Cluster: Cart & Auth */}
             <div className="flex-none flex items-center justify-end gap-6">
+                <Link
+                    href="/support"
+                    className="bg-white/5 p-2 rounded-full hover:bg-white/10 hover:text-accent transition-all relative group text-white"
+                    title="Support & Assistance"
+                >
+                    <HelpCircle size={15} />
+                </Link>
+
                 <button
                     onClick={() => toggleCart(true)}
                     className="bg-white/5 p-2 rounded-full hover:bg-white/10 transition-all relative group"

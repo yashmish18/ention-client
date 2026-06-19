@@ -1,7 +1,7 @@
 "use client";
 
 import React from "react";
-import { ArrowRight, CheckCircle2, Brain, Cpu, Layers, Monitor, Battery, Wind, Shield, ShieldCheck, Globe, Activity, Leaf, ShoppingCart, GraduationCap, Terminal, Settings } from "lucide-react";
+import { ArrowRight, CheckCircle2, Brain, Cpu, GraduationCap, Terminal } from "lucide-react";
 import Image from "next/image";
 import Link from "next/link";
 import { motion, AnimatePresence, useScroll, useTransform, useMotionValueEvent } from "framer-motion";
@@ -15,6 +15,7 @@ import WhyChooseSection from "@/components/v2/WhyChooseSection";
 import ShowcaseSection from "@/components/v2/ShowcaseSection";
 import { ExperienceProgram } from "@/components/ExperienceProgram";
 import { InquirySource } from "@/lib/inquiry-sources";
+import FAQSection from "@/components/v2/FAQSection";
 
 // ─────────────────────────────────────────────
 // HERO
@@ -24,7 +25,7 @@ const Hero = () => <MainHeroCarousel />;
 // ─────────────────────────────────────────────
 // LAPTOP SOLUTIONS — Sleek Typographic Icon Cards
 // ─────────────────────────────────────────────
-const LaptopSolutions = ({ onLeadClick }: { onLeadClick?: () => void }) => {
+const LaptopSolutions = () => {
   const cards = [
     {
       title: "High Performance Solutions",
@@ -819,7 +820,7 @@ const FinalCTA = () => {
           transition={{ duration: 0.8, delay: 0.2, ease: "easeOut" }}
           className="text-bg/60 mb-20 text-xl md:text-2xl font-sans max-w-3xl mx-auto leading-relaxed text-center"
         >
-          Whether you need laptops, labs, or ecosystem partnerships—we're ready to work with you.
+          Whether you need laptops, labs, or ecosystem partnerships—we&apos;re ready to work with you.
         </motion.p>
         <div className="flex flex-col sm:flex-row items-center justify-center gap-8">
           <Link
@@ -864,7 +865,7 @@ export default function HomePage() {
       <main>
         <Ticker />
         <Hero />
-        <LaptopSolutions onLeadClick={() => setActiveForm("LEAD")} />
+        <LaptopSolutions />
         <ChooseLaptop />
         <ProgramsEcosystem onProgramClick={openProgramForm} />
         <CustomOEM onLeadClick={() => setActiveForm("LEAD")} />
@@ -874,6 +875,7 @@ export default function HomePage() {
         <AvailabilitySection />
         <ExperienceProgram onProgramClick={openProgramForm} />
         <EcosystemGallery />
+        <FAQSection />
         <FinalCTA />
       </main>
     </div>

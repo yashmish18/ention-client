@@ -7,62 +7,16 @@ import {
     FileText, HelpCircle, MessageSquare, Mail, Phone, 
     ArrowRight, Loader2, CheckCircle2, AlertCircle, ChevronRight 
 } from "lucide-react";
-import { createSupportTicket } from "@/lib/api";
+import SmartSupportForm from "@/components/forms/SmartSupportForm";
+import QuickCallbackForm from "@/components/forms/QuickCallbackForm";
 
 export default function SupportPage() {
     const [searchQuery, setSearchQuery] = useState("");
-    const [isSubmitting, setIsSubmitting] = useState(false);
-    const [isSuccess, setIsSuccess] = useState(false);
-    const [error, setError] = useState<string | null>(null);
-
-    const [form, setForm] = useState({
-        name: "",
-        email: "",
-        phone: "",
-        orderId: "",
-        category: "Product Support",
-        message: ""
-    });
-
-    const categories = [
-        "Product Support",
-        "Enterprise Support",
-        "Service / Warranty",
-        "General Inquiry"
-    ];
+    const [showCallbackForm, setShowCallbackForm] = useState(false);
 
     const handleSearchSubmit = (e: React.FormEvent) => {
         e.preventDefault();
         alert(`Searching support articles for: "${searchQuery}"`);
-    };
-
-    const handleFormSubmit = async (e: React.FormEvent) => {
-        e.preventDefault();
-        setError(null);
-        setIsSubmitting(true);
-        try {
-            const productInfo = form.orderId ? `Order/Model: ${form.orderId}` : "N/A";
-            await createSupportTicket({
-                subject: `[${form.category}] Support Request from ${form.name}`,
-                description: `Product/Order info: ${productInfo}\n\nMessage:\n${form.message}`,
-                category: form.category,
-                priority: "MEDIUM",
-                orderId: form.orderId || undefined
-            });
-            setIsSuccess(true);
-            setForm({
-                name: "",
-                email: "",
-                phone: "",
-                orderId: "",
-                category: "Product Support",
-                message: ""
-            });
-        } catch (err: any) {
-            setError(err.message || "Request failed. Please try again.");
-        } finally {
-            setIsSubmitting(false);
-        }
     };
 
     const assistCards = [
@@ -304,189 +258,92 @@ export default function SupportPage() {
                             </span>
                             
                             <div className="space-y-3">
-                                {[
-                                    { name: "Live Chat", info: "Avg. 2 min response", icon: MessageSquare },
-                                    { name: "Email Support", info: "support@ention.in", icon: Mail },
-                                    { name: "Request Callback", info: "Talk to an expert", icon: Phone }
-                                ].map((channel, idx) => {
-                                    const Icon = channel.icon;
-                                    return (
-                                        <div
-                                            key={idx}
-                                            className="p-4 border border-ink/5 bg-white/40 flex items-center justify-between rounded-sm shadow-sm hover:border-ink/10 transition-colors duration-300"
-                                        >
-                                            <div className="flex items-center gap-3">
-                                                <Icon size={16} className="text-accent shrink-0" strokeWidth={1.5} />
-                                                <div>
-                                                    <h5 className="font-sans font-bold text-xs text-ink leading-tight">
-                                                        {channel.name}
-                                                    </h5>
-                                                    <p className="text-[10px] text-ink/60 font-sans leading-tight mt-0.5">
-                                                        {channel.info}
-                                                    </p>
-                                                </div>
+                                {/* Live Chat */}
+                                <div className="p-4 border border-ink/5 bg-white/40 flex items-center justify-between rounded-sm shadow-sm hover:border-ink/10 transition-colors duration-300">
+                                    <div className="flex items-center gap-3">
+                                        <MessageSquare size={16} className="text-accent shrink-0" strokeWidth={1.5} />
+                                        <div>
+                                            <h5 className="font-sans font-bold text-xs text-ink leading-tight">
+                                                Live Chat
+                                            </h5>
+                                            <p className="text-[10px] text-ink/60 font-sans leading-tight mt-0.5">
+                                                Avg. 2 min response
+                                            </p>
+                                        </div>
+                                    </div>
+                                    <div className="flex items-center gap-2 font-mono text-[8px] uppercase tracking-wider text-green-600 bg-green-50 px-2 py-1 rounded-full border border-green-100">
+                                        <span className="w-1.5 h-1.5 rounded-full bg-green-500 animate-pulse" />
+                                        <span>Online</span>
+                                    </div>
+                                </div>
+
+                                {/* Email Support */}
+                                <div className="p-4 border border-ink/5 bg-white/40 flex items-center justify-between rounded-sm shadow-sm hover:border-ink/10 transition-colors duration-300">
+                                    <div className="flex items-center gap-3">
+                                        <Mail size={16} className="text-accent shrink-0" strokeWidth={1.5} />
+                                        <div>
+                                            <h5 className="font-sans font-bold text-xs text-ink leading-tight">
+                                                Email Support
+                                            </h5>
+                                            <p className="text-[10px] text-ink/60 font-sans leading-tight mt-0.5">
+                                                support@ention.in
+                                            </p>
+                                        </div>
+                                    </div>
+                                    <div className="flex items-center gap-2 font-mono text-[8px] uppercase tracking-wider text-green-600 bg-green-50 px-2 py-1 rounded-full border border-green-100">
+                                        <span className="w-1.5 h-1.5 rounded-full bg-green-500 animate-pulse" />
+                                        <span>Online</span>
+                                    </div>
+                                </div>
+
+                                {/* Request Callback with Accordion */}
+                                <div className="space-y-4">
+                                    <div
+                                        onClick={() => setShowCallbackForm(!showCallbackForm)}
+                                        className="p-4 border border-ink/5 bg-white/40 flex items-center justify-between rounded-sm shadow-sm hover:border-ink/10 hover:border-accent/25 transition-all duration-300 cursor-pointer select-none"
+                                    >
+                                        <div className="flex items-center gap-3">
+                                            <Phone size={16} className="text-accent shrink-0" strokeWidth={1.5} />
+                                            <div>
+                                                <h5 className="font-sans font-bold text-xs text-ink leading-tight">
+                                                    Request Callback
+                                                </h5>
+                                                <p className="text-[10px] text-ink/60 font-sans leading-tight mt-0.5">
+                                                    Talk to an expert
+                                                </p>
                                             </div>
+                                        </div>
+                                        <div className="flex items-center gap-3">
                                             <div className="flex items-center gap-2 font-mono text-[8px] uppercase tracking-wider text-green-600 bg-green-50 px-2 py-1 rounded-full border border-green-100">
                                                 <span className="w-1.5 h-1.5 rounded-full bg-green-500 animate-pulse" />
                                                 <span>Online</span>
                                             </div>
+                                            <ChevronRight size={12} className={`text-ink/35 transition-transform duration-300 ${showCallbackForm ? 'rotate-95' : ''}`} />
                                         </div>
-                                    );
-                                })}
+                                    </div>
+                                    
+                                    <AnimatePresence>
+                                        {showCallbackForm && (
+                                            <motion.div
+                                                initial={{ height: 0, opacity: 0 }}
+                                                animate={{ height: "auto", opacity: 1 }}
+                                                exit={{ height: 0, opacity: 0 }}
+                                                className="overflow-hidden"
+                                            >
+                                                <div className="pt-2">
+                                                    <QuickCallbackForm source="support_page_callback" onSuccess={() => setShowCallbackForm(false)} />
+                                                </div>
+                                            </motion.div>
+                                        )}
+                                    </AnimatePresence>
+                                </div>
                             </div>
                         </div>
                     </div>
 
                     {/* Right Column: Ticket Form */}
                     <div className="lg:col-span-7 border-t lg:border-t-0 lg:border-l border-ink/10 pt-12 lg:pt-0 lg:pl-16 relative overflow-hidden text-left">
-                        {isSuccess ? (
-                            <div className="text-center py-20 space-y-6">
-                                <div className="w-16 h-16 bg-[#FAF7F2] text-accent rounded-full border border-accent/25 flex items-center justify-center mx-auto shadow-sm">
-                                    <CheckCircle2 size={32} strokeWidth={1.5} />
-                                </div>
-                                <h3 className="text-2xl font-serif font-black italic text-ink tracking-tight">Support Request Submitted</h3>
-                                <p className="text-xs text-ink/60 max-w-md mx-auto leading-relaxed font-sans font-normal">
-                                    Thank you. Your support ticket has been logged. Our engineering support team will analyze the details and contact you shortly.
-                                </p>
-                            </div>
-                        ) : (
-                            <div className="space-y-8">
-                                <div className="space-y-2">
-                                    <h3 className="text-2xl font-serif font-black italic tracking-tight text-ink uppercase">
-                                        Submit a ticket
-                                    </h3>
-                                    <p className="text-xs text-ink/60 leading-relaxed font-sans">
-                                        Fill in the details below and our team will get back within 24 hours.
-                                    </p>
-                                </div>
-
-                                <form onSubmit={handleFormSubmit} className="space-y-6">
-                                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
-                                        <div className="space-y-2">
-                                            <label className="text-[10px] font-sans font-bold text-ink/50 uppercase tracking-widest">
-                                                Full Name <span className="text-accent">*</span>
-                                            </label>
-                                            <input
-                                                required
-                                                type="text"
-                                                value={form.name}
-                                                onChange={(e) => setForm({ ...form, name: e.target.value })}
-                                                placeholder="John Doe"
-                                                className="w-full bg-[#FAF9F6] border border-ink/10 rounded-sm p-4 text-xs outline-none focus:border-accent focus:bg-white transition-all font-sans"
-                                            />
-                                        </div>
-                                        <div className="space-y-2">
-                                            <label className="text-[10px] font-sans font-bold text-ink/50 uppercase tracking-widest">
-                                                Email Address <span className="text-accent">*</span>
-                                            </label>
-                                            <input
-                                                required
-                                                type="email"
-                                                value={form.email}
-                                                onChange={(e) => setForm({ ...form, email: e.target.value })}
-                                                placeholder="john@example.com"
-                                                className="w-full bg-[#FAF9F6] border border-ink/10 rounded-sm p-4 text-xs outline-none focus:border-accent focus:bg-white transition-all font-sans"
-                                            />
-                                        </div>
-                                    </div>
-
-                                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
-                                        <div className="space-y-2">
-                                            <label className="text-[10px] font-sans font-bold text-ink/50 uppercase tracking-widest">
-                                                Phone Number <span className="text-accent">*</span>
-                                            </label>
-                                            <input
-                                                required
-                                                type="text"
-                                                value={form.phone}
-                                                onChange={(e) => setForm({ ...form, phone: e.target.value })}
-                                                placeholder="+91 00000 00000"
-                                                className="w-full bg-[#FAF9F6] border border-ink/10 rounded-sm p-4 text-xs outline-none focus:border-accent focus:bg-white transition-all font-sans"
-                                            />
-                                        </div>
-                                        <div className="space-y-2">
-                                            <label className="text-[10px] font-sans font-bold text-ink/50 uppercase tracking-widest">
-                                                Order ID / Model
-                                            </label>
-                                            <input
-                                                type="text"
-                                                value={form.orderId}
-                                                onChange={(e) => setForm({ ...form, orderId: e.target.value })}
-                                                placeholder="#ORD-12345"
-                                                className="w-full bg-[#FAF9F6] border border-ink/10 rounded-sm p-4 text-xs outline-none focus:border-accent focus:bg-white transition-all font-sans"
-                                            />
-                                        </div>
-                                    </div>
-
-                                    <div className="space-y-2">
-                                        <label className="text-[10px] font-sans font-bold text-ink/50 uppercase tracking-widest">
-                                            Issue Category <span className="text-accent">*</span>
-                                        </label>
-                                        <div className="relative">
-                                            <select
-                                                value={form.category}
-                                                onChange={(e) => setForm({ ...form, category: e.target.value })}
-                                                className="w-full bg-[#FAF9F6] border border-ink/10 rounded-sm p-4 text-xs outline-none focus:border-accent focus:bg-white appearance-none transition-all font-sans cursor-pointer"
-                                            >
-                                                {categories.map((cat) => (
-                                                    <option key={cat} value={cat}>
-                                                        {cat}
-                                                    </option>
-                                                ))}
-                                            </select>
-                                            <div className="absolute right-4 top-1/2 -translate-y-1/2 pointer-events-none text-ink/40">
-                                                ▼
-                                            </div>
-                                        </div>
-                                    </div>
-
-                                    <div className="space-y-2">
-                                        <label className="text-[10px] font-sans font-bold text-ink/50 uppercase tracking-widest">
-                                            Message <span className="text-accent">*</span>
-                                        </label>
-                                        <textarea
-                                            required
-                                            value={form.message}
-                                            onChange={(e) => setForm({ ...form, message: e.target.value })}
-                                            placeholder="Describe the issue you're facing..."
-                                            rows={5}
-                                            className="w-full bg-[#FAF9F6] border border-ink/10 rounded-sm p-4 text-xs outline-none focus:border-accent focus:bg-white resize-none transition-all font-sans"
-                                        />
-                                    </div>
-
-                                    {error && (
-                                        <div className="flex items-start gap-3 bg-red-50 border border-red-200 p-4 rounded-sm">
-                                            <AlertCircle size={16} className="text-red-500 shrink-0 mt-0.5" />
-                                            <p className="text-xs text-red-700 font-sans">{error}</p>
-                                        </div>
-                                    )}
-
-                                    <div className="flex flex-col sm:flex-row items-center justify-between gap-6 pt-4 border-t border-ink/5">
-                                        <button
-                                            disabled={isSubmitting}
-                                            type="submit"
-                                            className="w-full sm:w-auto bg-ink text-bg hover:bg-accent hover:text-white px-8 py-4.5 text-[10px] font-bold uppercase tracking-[0.25em] flex items-center justify-center gap-3 rounded-sm cursor-pointer transition-all duration-500 shadow-sm disabled:opacity-60 shrink-0 group/btn relative overflow-hidden"
-                                        >
-                                            <span className="absolute inset-0 bg-accent -z-10 translate-y-full group-hover/btn:translate-y-0 transition-transform duration-500 ease-[cubic-bezier(0.16,1,0.3,1)]" />
-                                            {isSubmitting ? (
-                                                <>
-                                                    <Loader2 size={14} className="animate-spin" />
-                                                    <span className="relative z-10">Submitting...</span>
-                                                </>
-                                            ) : (
-                                                <>
-                                                    <span className="relative z-10">Submit Request</span>
-                                                    <ArrowRight size={12} className="relative z-10 group-hover/btn:translate-x-0.5 transition-transform duration-500" />
-                                                </>
-                                            )}
-                                        </button>
-                                        <span className="text-[10px] text-ink/50 text-left font-sans leading-relaxed max-w-[340px]">
-                                            Typical response within 24–48 hours.
-                                        </span>
-                                    </div>
-                                </form>
-                            </div>
-                        )}
+                        <SmartSupportForm source="support_page" />
                     </div>
 
                 </div>

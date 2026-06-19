@@ -9,46 +9,35 @@ type SlideData = {
   name: string;
   description: string;
   bgImage: string;
-  btnText?: string;
-  btnLink?: string;
 };
 
 const SLIDES: SlideData[] = [
   {
     id: "workbook",
-    name: "Workbook Series",
+    name: "Building India's Computing Ecosystem",
     description:
-      "Designed for daily productivity, coding, and learning. Power meets exceptional reliability.",
+      "From devices today to OS, and indigenous components tomorrow — we're building long-term capability, not just products.",
     bgImage: "/assets/landing_page/1.png",
-    btnText: "Explore Series",
-    btnLink: "/products",
   },
   {
     id: "swapbook",
-    name: "Swapbook Series",
+    name: "More Than Devices — A Long-term Computing Platform",
     description:
-      "CNC machined aluminum chassis, dedicated graphics, and brilliant displays built for creators and power users.",
+      "Hardware, operating systems, ecosystem programs & intelligent infrastructure designed to support the next generation of computing.",
     bgImage: "/assets/landing_page/2.png",
-    btnText: "Explore Series",
-    btnLink: "/products/s1",
   },
   {
     id: "ention-os",
-    name: "Ention OS",
+    name: "Two sides. One vision.",
     description:
-      "Experience a fast, secure, and lightweight ecosystem tailored specifically to enhance your workflow.",
+      "We look at technology differently. One side improves what exists. The other reimagines what's possible. Together, they create one vision for the future.",
     bgImage: "/assets/landing_page/3.png",
-    btnText: "Learn More",
-    btnLink: "/ention-os",
   },
   {
     id: "experience",
-    name: "Experience Program",
-    description:
-      "Try the device in your actual workflow to work, build, test, and evaluate performance before deciding.",
+    name: "",
+    description: "",
     bgImage: "/assets/landing_page/4.png",
-    btnText: "Try Ention",
-    btnLink: "#experience",
   },
 ];
 
@@ -207,16 +196,11 @@ export function MainHeroCarousel() {
           pointer-events: none;
         }
 
-        /* Content overlay styling */
         .carousel-content {
           position: absolute;
-          top: 50%;
+          bottom: 30px;
           left: 20px;
           right: 20px;
-          max-width: 90%;
-          text-align: left;
-          color: #eee;
-          transform: translateY(-50%);
           z-index: 10;
           pointer-events: auto;
         }
@@ -224,39 +208,38 @@ export function MainHeroCarousel() {
         @media (min-width: 640px) {
           .carousel-content {
             left: 40px;
-            max-width: 450px;
+            bottom: 40px;
           }
         }
 
         @media (min-width: 1024px) {
           .carousel-content {
             left: 100px;
-            max-width: 500px;
+            bottom: 50px;
           }
         }
 
         .carousel-name {
-          font-family: var(--font-serif), "Libre Baskerville", serif;
-          font-style: italic;
-          font-weight: 900;
-          letter-spacing: -0.03em;
-          text-transform: uppercase;
-          font-size: 36px;
-          line-height: 1.1;
+          font-family: var(--font-sans), "Inter", sans-serif;
+          font-weight: 800;
+          letter-spacing: -0.02em;
+          font-size: 32px;
+          line-height: 1.15;
           opacity: 0;
           animation: heroCardSlideIn 1.2s cubic-bezier(0.25, 1, 0.5, 1) forwards;
           text-shadow: 0 4px 12px rgba(0, 0, 0, 0.5);
+          color: white;
         }
 
         @media (min-width: 768px) {
           .carousel-name {
-            font-size: 64px;
+            font-size: 48px;
           }
         }
 
-        @media (min-width: 1280px) {
+        @media (min-width: 1024px) {
           .carousel-name {
-            font-size: 72px;
+            font-size: 56px;
           }
         }
 
@@ -270,7 +253,8 @@ export function MainHeroCarousel() {
           animation: heroCardSlideIn 1.2s cubic-bezier(0.25, 1, 0.5, 1) 0.2s forwards;
           text-shadow: 0 2px 8px rgba(0, 0, 0, 0.6);
           font-weight: 400;
-          color: rgba(255, 255, 255, 0.85);
+          color: rgba(255, 255, 255, 0.95);
+          max-width: 600px;
         }
 
         @media (min-width: 768px) {
@@ -281,14 +265,67 @@ export function MainHeroCarousel() {
           }
         }
 
-        .carousel-btn {
-          font-family: var(--font-sans), "Inter", sans-serif;
-          font-weight: 700;
-          text-transform: uppercase;
-          letter-spacing: 0.15em;
-          font-size: 10px;
+        .carousel-btns-wrap {
+          display: flex;
+          flex-wrap: wrap;
+          gap: 16px;
           opacity: 0;
           animation: heroCardSlideIn 1.2s cubic-bezier(0.25, 1, 0.5, 1) 0.4s forwards;
+        }
+
+        .cta-btn-solid {
+          background-color: white;
+          color: black;
+          padding: 12px 28px;
+          font-family: var(--font-sans), "Inter", sans-serif;
+          font-weight: 700;
+          font-size: 14px;
+          border-radius: 4px;
+          transition: all 0.3s ease;
+          display: inline-flex;
+          align-items: center;
+          justify-content: center;
+          cursor: pointer;
+          user-select: none;
+          text-decoration: none;
+        }
+
+        .cta-btn-solid:hover {
+          background-color: #f3f3f3;
+          transform: translateY(-1px);
+        }
+
+        .cta-btn-solid:active {
+          transform: translateY(0);
+        }
+
+        .cta-btn-outline {
+          background-color: rgba(255, 255, 255, 0.08);
+          border: 1px solid rgba(255, 255, 255, 0.4);
+          color: white;
+          padding: 12px 28px;
+          font-family: var(--font-sans), "Inter", sans-serif;
+          font-weight: 700;
+          font-size: 14px;
+          border-radius: 4px;
+          transition: all 0.3s ease;
+          display: inline-flex;
+          align-items: center;
+          justify-content: center;
+          cursor: pointer;
+          user-select: none;
+          backdrop-filter: blur(4px);
+          text-decoration: none;
+        }
+
+        .cta-btn-outline:hover {
+          background-color: rgba(255, 255, 255, 0.16);
+          border-color: rgba(255, 255, 255, 0.8);
+          transform: translateY(-1px);
+        }
+
+        .cta-btn-outline:active {
+          transform: translateY(0);
         }
 
         /* Background overlay gradient */
@@ -319,25 +356,14 @@ export function MainHeroCarousel() {
         /* Buttons container */
         .carousel-buttons {
           position: absolute;
-          bottom: 30px;
+          top: 50%;
           left: 20px;
+          right: 20px;
           display: flex;
-          gap: 16px;
+          justify-content: space-between;
+          transform: translateY(-50%);
           z-index: 20;
-        }
-
-        @media (min-width: 640px) {
-          .carousel-buttons {
-            left: 40px;
-            bottom: 40px;
-          }
-        }
-
-        @media (min-width: 1024px) {
-          .carousel-buttons {
-            left: 100px;
-            bottom: 50px;
-          }
+          pointer-events: none;
         }
 
         /* Nav button glassmorphism styles */
@@ -357,6 +383,7 @@ export function MainHeroCarousel() {
           transition: all 0.3s cubic-bezier(0.25, 1, 0.5, 1);
           font-size: 16px;
           user-select: none;
+          pointer-events: auto;
         }
 
         .carousel-nav-btn:hover {
@@ -392,7 +419,20 @@ export function MainHeroCarousel() {
                 style={{
                   backgroundImage: `url('${slide.bgImage}')`,
                 }}
-              />
+              >
+                {position === 1 && (
+                  <div className="carousel-content">
+                    <div key={`btns-${contentKey}`} className="carousel-btns-wrap">
+                      <Link href="/products" className="cta-btn-solid">
+                        Explore Laptops
+                      </Link>
+                      <a href="#why-choose" className="cta-btn-outline">
+                        Partner with Ention
+                      </a>
+                    </div>
+                  </div>
+                )}
+              </div>
             );
           })}
         </div>

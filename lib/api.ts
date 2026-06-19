@@ -442,9 +442,12 @@ export async function createSupportTicket(ticket: {
     orderId?: string;
     category?: string;
 }) {
-    console.log("MOCK POST /support", { ticket });
-    await new Promise(r => setTimeout(r, 500));
-    return { success: true, data: { ticket: { id: "mock-ticket-1", ticketNumber: "TKT-001" } } };
+    const res = await fetch(`${API_URL}/support`, {
+        method: 'POST',
+        headers: authHeaders(),
+        body: JSON.stringify(ticket),
+    });
+    return handleResponse<{ success: boolean; data: any }>(res);
 }
 
 /**
@@ -512,23 +515,6 @@ export async function submitCallback(data: {
     return handleResponse(res);
 }
 
-// ─── Legacy aliases (kept for backward compat with existing pages) ─
-
-/** @deprecated Use fetchUserOrders() */
-export async function fetchUserOrdersLegacy(_userId: string) {
-    return fetchUserOrders();
-}
-
-/** @deprecated Use fetchOrderById() */
-export async function trackOrder(orderId: string) {
-    return fetchOrderById(orderId);
-}
-
-/** @deprecated Use fetchProductById() */
-export async function fetchProductReviews(_productId: string): Promise<any[]> {
-    return [];
-}
-
 // ─── Inquiry System (new unified /inquiries routes) ───────────────
 
 /**
@@ -546,9 +532,26 @@ export async function submitLeadInquiry(data: {
     source: string;
     attachment?: File | null;
 }) {
-    console.log("MOCK POST /inquiries/lead", { data });
-    await new Promise(r => setTimeout(r, 500));
-    return { success: true, data: { inquiry: { id: "mock-1" } } };
+    const form = new FormData();
+    form.append('name', data.name);
+    form.append('email', data.email);
+    form.append('phone', data.phone);
+    form.append('requirementDescription', data.description);
+    form.append('source', data.source);
+    if (data.useCase) form.append('useCase', data.useCase);
+    if (data.budget) form.append('budget', data.budget);
+    if (data.attachment) form.append('attachment', data.attachment);
+
+    const token = getAuthToken();
+    const headers: HeadersInit = {};
+    if (token) headers['Authorization'] = `Bearer ${token}`;
+
+    const res = await fetch(`${API_URL}/inquiries/lead`, {
+        method: 'POST',
+        headers,
+        body: form,
+    });
+    return handleResponse(res);
 }
 
 /**
@@ -601,23 +604,12 @@ export async function submitCallbackInquiry(data: {
     preferredTime?: string;
     source: string;
 }) {
-    console.log("MOCK POST /inquiries/callback", { data });
-    await new Promise(r => setTimeout(r, 500));
-    return { success: true, data: { inquiry: { id: "mock-3" } } };
-}
-
-/**
- * POST /support
- * Alias that maps to createSupportTicket — provided for naming consistency.
- */
-export async function submitSupportRequest(ticket: {
-    subject: string;
-    description: string;
-    priority?: 'LOW' | 'MEDIUM' | 'HIGH' | 'CRITICAL';
-    orderId?: string;
-    category?: string;
-}) {
-    return createSupportTicket(ticket);
+    const res = await fetch(`${API_URL}/inquiries/callback`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(data),
+    });
+    return handleResponse(res);
 }
 
 // ─── Admin: Inquiry Management ────────────────────────────────────

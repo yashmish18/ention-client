@@ -27,6 +27,10 @@
 .ticker-wrap {
   overflow: hidden;
   white-space: nowrap;
+  height: auto;
+  min-height: 2.5rem;
+  display: flex;
+  align-items: center;
 }
 
 .ticker {
@@ -48,24 +52,13 @@
   @apply transition-all duration-300 hover:bg-ink hover:text-bg cursor-pointer;
 }
 
-/* Fix for marquee height */
-.ticker-wrap {
-  height: auto;
-  min-height: 2.5rem;
-  display: flex;
-  align-items: center;
-}
-
 /* Swapbook film */
 .swapbook-film-active {
   overflow: hidden;
+  -ms-overflow-style: none;
+  scrollbar-width: none;
 }
 
 .swapbook-film-active::-webkit-scrollbar {
   display: none;
-}
-
-.swapbook-film-active {
-  -ms-overflow-style: none;
-  scrollbar-width: none;
 }

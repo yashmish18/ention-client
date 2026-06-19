@@ -39,3 +39,14 @@ yarn-error.log*
 # typescript
 *.tsbuildinfo
 next-env.d.ts
+
+# AI tool directories
+.opencode/
+.qoder/
+AGENTS.md
+CLAUDE.md
+
+# temp/backup files
+temp_*.tsx
+original_page.txt
+last_commit_page.txt

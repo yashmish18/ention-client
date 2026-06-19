@@ -3,7 +3,7 @@
 import React, { useState, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { Star, ShieldCheck, User, Send, Loader2, Plus } from "lucide-react";
-import { fetchProductReviews, submitReview } from "@/lib/api";
+import { submitReview } from "@/lib/api";
 
 interface Review {
     id?: string;
@@ -31,13 +31,17 @@ export default function ReviewSection({ product }: { product: any }) {
 
     useEffect(() => {
         if (!product?.id) return;
-        fetchProductReviews(product.id)
-            .then(data => {
-                if (Array.isArray(data)) setReviews(data);
+        const API_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:4000/api/v1';
+        fetch(`${API_URL}/reviews?productId=${product.id}`)
+            .then(res => res.ok ? res.json() : Promise.reject())
+            .then(body => {
+                const data = body.data?.reviews || (Array.isArray(body.data) ? body.data : []);
+                setReviews(data);
             })
             .catch(() => setReviews([]))
             .finally(() => setLoading(false));
     }, [product?.id]);
+
 
     const averageRating = reviews.length > 0 
         ? (reviews.reduce((acc, r) => acc + r.rating, 0) / reviews.length).toFixed(1)

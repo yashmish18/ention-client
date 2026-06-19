@@ -27,6 +27,7 @@ export type InquirySource =
     | "footer_support"
     // Support hub
     | "support_page"
+    | "support_page_callback"
     // Generic fallback
     | "general"
     | "floating_talk_to_us"
@@ -49,6 +50,7 @@ export const SOURCE_LABELS: Record<InquirySource, string> = {
     footer_contact:            "Footer — Contact",
     footer_support:            "Footer — Support",
     support_page:              "Support Hub",
+    support_page_callback:     "Support Hub — Quick Callback",
     general:                   "General",
     floating_talk_to_us:       "Floating CTA — Talk To Us",
     program_page:              "Programs Page",

@@ -5,12 +5,9 @@ import Image from "next/image";
 import Link from "next/link";
 import { gsap } from "gsap";
 import { ScrollTrigger } from "gsap/ScrollTrigger";
-import { ArrowRight, ChevronLeft, ChevronRight, Cpu, HardDrive, Monitor, Settings2, MessageSquare } from "lucide-react";
+import { ArrowRight, ChevronLeft, ChevronRight } from "lucide-react";
 import { fetchProducts } from "@/lib/api";
-import { useCart } from "@/store/useCart";
-import FormModal from "@/components/FormModal";
-import LeadSalesForm from "@/components/forms/LeadSalesForm";
-import SmartSupportForm from "@/components/forms/SmartSupportForm";
+import type { Product } from "@/lib/products-data";
 
 if (typeof window !== "undefined") {
     gsap.registerPlugin(ScrollTrigger);
@@ -32,7 +29,7 @@ const CATALOG_IMAGES: Record<string, string> = {
     e1: "/assets/all_product_page/e1-cat.png",
 };
 
-function getProductImage(product: any): string {
+function getProductImage(product: Product): string {
     const slug = product.slug || product.id || "";
     return CATALOG_IMAGES[slug] || product.images?.[0] || "/assets/all_product_page/e4-cat.png";
 }
@@ -237,12 +234,9 @@ const HeroCarousel = () => {
    ═══════════════════════════════════════════════════════════════════ */
 
 const ProductShowcase = () => {
-    const [products, setProducts] = useState<any[]>([]);
+    const [products, setProducts] = useState<Product[]>([]);
     const [loading, setLoading] = useState(true);
     const [activeTab, setActiveTab] = useState<"all" | "swapbook" | "workbook">("all");
-    const [activeForm, setActiveForm] = useState<"ENQUIRE" | "CUSTOMIZE" | "SUPPORT" | null>(null);
-    const [selectedProduct, setSelectedProduct] = useState<any>(null);
-    const { addItem } = useCart();
     const sectionRef = useRef<HTMLElement>(null);
 
     useEffect(() => {
@@ -250,7 +244,7 @@ const ProductShowcase = () => {
             try {
                 const data = await fetchProducts();
                 const filtered = (Array.isArray(data) ? data : []).filter(
-                    (p: any) => !p.name?.toLowerCase().includes("e3") && !p.name?.toLowerCase().includes("entity")
+                    (p: Product) => !p.name?.toLowerCase().includes("e3") && !p.name?.toLowerCase().includes("entity")
                 );
                 setProducts(filtered);
             } finally {
@@ -284,27 +278,6 @@ const ProductShowcase = () => {
         return () => ctx.revert();
     }, [loading, products, activeTab]);
 
-    const handleAddToCart = (product: any) => {
-        addItem({
-            id: product.id,
-            name: product.name,
-            price: product.basePrice,
-            image: getProductImage(product),
-            quantity: 1,
-            configuration: { processor: "Standard", ram: "Standard", storage: "Standard" },
-        });
-    };
-
-    const handleEnquire = (product: any) => {
-        setSelectedProduct(product);
-        setActiveForm("ENQUIRE");
-    };
-
-    const handleCustomize = (product: any) => {
-        setSelectedProduct(product);
-        setActiveForm("CUSTOMIZE");
-    };
-
     if (loading) {
         return (
             <section className="min-h-[50vh] flex flex-col items-center justify-center bg-bg space-y-5">
@@ -319,30 +292,6 @@ const ProductShowcase = () => {
 
     return (
         <section ref={sectionRef} id="lineup" className="bg-bg py-20 md:py-28 px-5 md:px-10 lg:px-16">
-            <FormModal isOpen={activeForm !== null} onClose={() => setActiveForm(null)}>
-                {activeForm === "ENQUIRE" && (
-                    <LeadSalesForm 
-                        source="product_enquire" 
-                        initialDescription={`I am interested in bulk/B2B purchasing for the ${selectedProduct?.name} (${selectedProduct?.id}).`} 
-                        onSuccess={() => setActiveForm(null)} 
-                    />
-                )}
-                {activeForm === "CUSTOMIZE" && (
-                    <LeadSalesForm 
-                        source="product_customize" 
-                        initialDescription={`I would like to request a custom configuration for the ${selectedProduct?.name}. Please contact me to discuss RAM, SSD, and Processor options.`} 
-                        initialUseCase="Enterprise"
-                        onSuccess={() => setActiveForm(null)} 
-                    />
-                )}
-                {activeForm === "SUPPORT" && (
-                    <SmartSupportForm 
-                        source="product_need_help" 
-                        initialCategory="Product Support"
-                        onSuccess={() => setActiveForm(null)} 
-                    />
-                )}
-            </FormModal>
             <div className="max-w-[82rem] mx-auto">
                 {/* Main Section Heading */}
                 <div className="text-center mb-12 md:mb-16 space-y-4">
@@ -395,9 +344,6 @@ const ProductShowcase = () => {
                             <ProductCard
                                 key={product.id || i}
                                 product={product}
-                                onAddToCart={handleAddToCart}
-                                onEnquire={handleEnquire}
-                                onCustomize={handleCustomize}
                             />
                         ))}
                     </div>
@@ -422,9 +368,6 @@ const ProductShowcase = () => {
                                 <ProductCard
                                     key={product.id || i}
                                     product={product}
-                                    onAddToCart={handleAddToCart}
-                                    onEnquire={handleEnquire}
-                                    onCustomize={handleCustomize}
                                 />
                             ))}
                         </div>
@@ -450,9 +393,6 @@ const ProductShowcase = () => {
                                 <ProductCard
                                     key={product.id || i}
                                     product={product}
-                                    onAddToCart={handleAddToCart}
-                                    onEnquire={handleEnquire}
-                                    onCustomize={handleCustomize}
                                 />
                             ))}
                         </div>
@@ -466,21 +406,80 @@ const ProductShowcase = () => {
 
 /* ─── Product Card ───────────────────────────────────────────────── */
 
-const ProductCard = ({
-    product, onAddToCart, onEnquire, onCustomize
-}: {
-    product: any; onAddToCart: (p: any) => void; onEnquire: (p: any) => void; onCustomize: (p: any) => void;
-}) => {
-    const catName = typeof product.category === "object" ? product.category?.name : product.category;
+const ProductCard = ({ product }: { product: Product }) => {
+    const catName = product.category;
     const accentColor = CATEGORY_ACCENTS[catName] || "#F27D26";
     const displayImage = getProductImage(product);
+
+    const renderLogos = () => {
+        const nameLower = product.name?.toLowerCase() || "";
+        const cpuLower = product.specs?.cpu?.toLowerCase() || "";
+        const gpuLower = product.specs?.gpu?.toLowerCase() || "";
+
+        const hasRTX = nameLower.includes("s1") || cpuLower.includes("rtx") || gpuLower.includes("rtx") || nameLower.includes("swapbook");
+        
+        let intelType = "inside";
+        if (cpuLower.includes("i9") || nameLower.includes("i9")) {
+            intelType = "i9";
+        } else if (cpuLower.includes("i7") || nameLower.includes("i7")) {
+            intelType = "i7";
+        } else if (cpuLower.includes("i5") || nameLower.includes("i5")) {
+            intelType = "i5";
+        }
+
+        return (
+            <div className="flex items-center gap-2.5 my-4">
+                {/* Intel Logo */}
+                {intelType === "i9" && (
+                    <div className="w-8 h-8 shrink-0 select-none bg-gradient-to-br from-[#1e3c72] to-[#2a5298] flex flex-col justify-between p-1 text-white font-sans border border-yellow-500/30 rounded-sm">
+                        <span className="text-[5px] font-black tracking-tight leading-none uppercase">intel</span>
+                        <span className="text-[6.5px] font-black tracking-tighter leading-none text-right text-yellow-400">CORE i9</span>
+                    </div>
+                )}
+                {intelType === "i7" && (
+                    <div className="w-8 h-8 shrink-0 select-none bg-gradient-to-br from-[#00c6ff] to-[#0072ff] flex flex-col justify-between p-1 text-white font-sans rounded-sm">
+                        <span className="text-[5px] font-black tracking-tight leading-none uppercase">intel</span>
+                        <span className="text-[6.5px] font-black tracking-tighter leading-none text-right">CORE i7</span>
+                    </div>
+                )}
+                {intelType === "i5" && (
+                    <div className="w-8 h-8 shrink-0 select-none bg-gradient-to-br from-[#00c6ff] to-[#0072ff] flex flex-col justify-between p-1 text-white font-sans rounded-sm">
+                        <span className="text-[5px] font-black tracking-tight leading-none uppercase">intel</span>
+                        <span className="text-[6.5px] font-black tracking-tighter leading-none text-right">CORE i5</span>
+                    </div>
+                )}
+                {intelType === "inside" && (
+                    <div className="w-8 h-8 shrink-0 select-none bg-[#0071c5] flex flex-col items-center justify-center p-1 text-white font-sans relative overflow-hidden rounded-sm">
+                        <span className="text-[4px] font-medium opacity-80 leading-none lowercase">intel</span>
+                        <span className="text-[6px] font-bold leading-none uppercase tracking-wide">inside</span>
+                    </div>
+                )}
+
+                {/* Nvidia Logo */}
+                {hasRTX && (
+                    <div className="w-11 h-8 shrink-0 select-none bg-black flex flex-col justify-between p-1 text-white font-sans border-l-2 border-[#76b900] rounded-sm">
+                        <span className="text-[4px] font-medium text-[#76b900] leading-none uppercase tracking-wider">GEFORCE</span>
+                        <span className="text-[6.5px] font-black leading-none tracking-tighter text-right">RTX</span>
+                    </div>
+                )}
+
+                {/* Windows 11 */}
+                <div className="flex items-center gap-1.5 shrink-0 whitespace-nowrap bg-neutral-100 border border-neutral-200/50 px-2 h-8 rounded-sm">
+                    <svg className="w-3 h-3 text-[#0078d4] shrink-0" fill="currentColor" viewBox="0 0 24 24">
+                        <path d="M0 0h11.5v11.5H0zM12.5 0H24v11.5H12.5zM0 12.5h11.5V24H0zM12.5 12.5H24V24H12.5z" />
+                    </svg>
+                    <span className="text-[8px] font-sans font-bold tracking-wider text-ink/75 uppercase">Windows 11</span>
+                </div>
+            </div>
+        );
+    };
 
     return (
         <div className="product-card group">
             <div className="h-full bg-white border border-ink/8 overflow-hidden flex flex-col transition-all duration-500 hover:border-ink/20 hover:shadow-[0_4px_30px_rgba(0,0,0,0.06)]">
 
                 {/* Image area */}
-                <Link href={`/products/${product.slug || product.id}`} className="block relative bg-[#f7f7f6] overflow-hidden">
+                <Link href={`/products/${product.slug || product.id}`} className="block relative bg-white overflow-hidden">
                     <div className="relative w-full aspect-[4/3]">
                         <Image
                             src={displayImage}
@@ -516,17 +515,21 @@ const ProductCard = ({
                         </Link>
                     </div>
 
-                    {/* Tagline */}
-                    <p className="text-ink/45 font-sans text-[13px] leading-relaxed line-clamp-2 mb-5">
+                    {/* Tagline / Description */}
+                    <p className="text-ink/45 font-sans text-[13px] leading-relaxed line-clamp-2 mb-3">
                         {product.tagline || product.description}
                     </p>
 
-                    {/* Key specs pills */}
-                    <div className="flex flex-wrap gap-1.5 mb-6">
+                    {/* Specifications Logos */}
+                    {renderLogos()}
+
+                    {/* Key specs as plain flat text */}
+                    <div className="space-y-1.5 mb-6 font-mono text-[10px] text-ink font-semibold leading-relaxed text-left">
                         {[product.specs?.cpu, product.specs?.ram, product.specs?.display].filter(Boolean).map((spec, i) => (
-                            <span key={i} className="text-[8px] font-mono tracking-wider bg-ink/[0.04] text-ink/50 px-2 py-1">
-                                {spec}
-                            </span>
+                            <div key={i} className="flex items-center gap-2">
+                                <span className="w-1 h-1 rounded-full bg-accent/70 shrink-0" />
+                                <span>{spec}</span>
+                            </div>
                         ))}
                     </div>
 
@@ -534,47 +537,23 @@ const ProductCard = ({
                     <div className="mt-auto" />
 
                     {/* Price + CTA row */}
-                    <div className="flex flex-col gap-3 pt-5 border-t border-ink/8">
-                        <div className="flex items-center justify-between mb-1">
+                    <div className="flex flex-col gap-4 pt-5 border-t border-ink/8">
+                        <div className="flex items-center justify-between">
                             <div>
                                 <span className="text-[8px] font-mono uppercase tracking-wider text-ink/25 block">From</span>
                                 <span className="text-lg font-serif italic font-bold text-ink">
                                     ₹{product.basePrice?.toLocaleString("en-IN")}
                                 </span>
                             </div>
-                            <Link
-                                href={`/products/${product.slug || product.id}`}
-                                className="text-[9px] font-mono uppercase tracking-wider text-ink/30 hover:text-accent px-2 py-1 transition-colors"
-                            >
-                                Details
-                            </Link>
                         </div>
                         
-                        <div className="flex flex-col gap-2">
-                            <button
-                                onClick={() => onAddToCart(product)}
-                                className="w-full group/btn bg-ink text-bg px-4 py-2.5 text-[9px] uppercase tracking-[0.15em] font-bold hover:bg-accent transition-colors duration-400 flex items-center justify-center gap-1.5"
-                            >
-                                Add to Cart
-                                <ArrowRight size={11} className="group-hover/btn:translate-x-0.5 transition-transform duration-300" />
-                            </button>
-                            
-                            <div className="grid grid-cols-2 gap-2">
-                                <button
-                                    onClick={() => onEnquire(product)}
-                                    className="bg-ink/[0.03] hover:bg-ink/[0.08] text-ink border border-ink/10 px-3 py-2.5 text-[8px] font-mono uppercase tracking-widest font-bold transition-colors"
-                                >
-                                    Enquire Now
-                                </button>
-                                <button
-                                    onClick={() => onCustomize(product)}
-                                    className="bg-ink/[0.03] hover:bg-ink/[0.08] text-ink border border-ink/10 px-3 py-2.5 text-[8px] font-mono uppercase tracking-widest font-bold transition-colors flex items-center justify-center gap-1.5"
-                                >
-                                    <Settings2 size={10} className="text-accent" />
-                                    Customize
-                                </button>
-                            </div>
-                        </div>
+                        <Link
+                            href={`/products/${product.slug || product.id}`}
+                            className="w-full group/btn bg-ink text-bg px-4 py-3.5 text-[9px] uppercase tracking-[0.2em] font-bold hover:bg-accent hover:text-white transition-colors duration-500 flex items-center justify-center gap-1.5"
+                        >
+                            View Details
+                            <ArrowRight size={11} className="group-hover/btn:translate-x-0.5 transition-transform duration-300" />
+                        </Link>
                     </div>
                 </div>
             </div>

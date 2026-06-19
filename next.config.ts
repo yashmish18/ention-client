@@ -5,9 +5,13 @@ const nextConfig: NextConfig = {
     turbopack: {
         root: path.join(__dirname),
     },
+    reactStrictMode: true,
+    poweredByHeader: false,
+    compress: true,
     images: {
-        unoptimized: true,
+        formats: ['image/avif', 'image/webp'],
         qualities: [75, 100],
+        minimumCacheTTL: 31536000,
         remotePatterns: [
             {
                 protocol: 'https',

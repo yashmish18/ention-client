@@ -59,7 +59,6 @@ export default function WhyChooseSection() {
             alt="Ention Hardware Assembly and Craftsmanship"
             fill
             className="object-cover opacity-60 group-hover:scale-105 transition-transform duration-[1.5s] ease-[cubic-bezier(0.16,1,0.3,1)]"
-            unoptimized
           />
           <div className="absolute inset-0 bg-gradient-to-t from-black/95 via-black/40 to-transparent pointer-events-none" />
           
